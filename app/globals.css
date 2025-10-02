@@ -1,26 +1,196 @@
 @import "tailwindcss";
 
+/* Custom Font Loading */
+@font-face {
+  font-family: 'Gordita';
+  src: url('/assets/fonts/gordita/gordita_regular-webfont.woff2') format('woff2'),
+       url('/assets/fonts/gordita/gordita_regular-webfont.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gordita';
+  src: url('/assets/fonts/gordita/gordita_medium-webfont.woff2') format('woff2'),
+       url('/assets/fonts/gordita/gordita_medium-webfont.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: rgba(0, 0, 0, 0.7);
+  --primary: #244034;
+  --accent: #d2f34c;
+  --success: #00bf58;
+  --text-primary: rgba(0, 0, 0, 0.7);
+  --text-secondary: rgba(0, 0, 0, 0.5);
+  --text-inverse: #ffffff;
+  --surface: #f8fafc;
+  --border-light: #e5e7eb;
+  --border-medium: #d1d5db;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-inverse: var(--text-inverse);
+  --color-surface: var(--surface);
+  --color-border-light: var(--border-light);
+  --color-border-medium: var(--border-medium);
+  --font-sans: 'Gordita', 'EB Garamond', serif, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Gordita', 'EB Garamond', serif, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  line-height: 28px;
+  font-weight: 400;
+}
+
+/* Typography Scale */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Gordita', 'EB Garamond', serif;
+  color: var(--primary);
+  font-weight: 400;
+}
+
+h1 {
+  font-size: 32px;
+  line-height: 64px;
+}
+
+h2 {
+  font-size: 28px;
+  line-height: 56px;
+}
+
+h3 {
+  font-size: 24px;
+  line-height: 48px;
+}
+
+h4 {
+  font-size: 20px;
+  line-height: 40px;
+}
+
+h5 {
+  font-size: 18px;
+  line-height: 36px;
+}
+
+h6 {
+  font-size: 16px;
+  line-height: 32px;
+}
+
+/* Utility Classes */
+.text-primary {
+  color: var(--primary);
+}
+
+.text-accent {
+  color: var(--accent);
+}
+
+.text-success {
+  color: var(--success);
+}
+
+.text-primary-foreground {
+  color: var(--text-primary);
+}
+
+.text-secondary-foreground {
+  color: var(--text-secondary);
+}
+
+.bg-primary {
+  background-color: var(--primary);
+}
+
+.bg-accent {
+  background-color: var(--accent);
+}
+
+.bg-success {
+  background-color: var(--success);
+}
+
+.bg-surface {
+  background-color: var(--surface);
+}
+
+.border-primary {
+  border-color: var(--primary);
+}
+
+.border-accent {
+  border-color: var(--accent);
+}
+
+.border-success {
+  border-color: var(--success);
+}
+
+/* Focus Styles */
+.focus-ring {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Line Clamp Utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }

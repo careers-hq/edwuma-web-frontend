@@ -1,103 +1,221 @@
-import Image from "next/image";
+'use client';
+
+import React, { useState } from 'react';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import HeroSection from '@/components/home/HeroSection';
+import JobFilters from '@/components/job/JobFilters';
+import JobCard from '@/components/job/JobCard';
+import { JobFilters as JobFiltersType } from '@/components/job/JobFilters';
+
+interface Job {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  type: string;
+  experience: string;
+  postedAt: string;
+  category: string;
+  salary?: string;
+  description?: string;
+}
+
+const mockJobs: Job[] = [
+  {
+    id: '1',
+    title: 'Senior Software Engineer',
+    company: 'TechCorp Ghana',
+    location: 'Accra, Ghana',
+    type: 'Full-Time',
+    experience: 'Senior',
+    postedAt: '2024-01-15',
+    category: 'Information Technology',
+    description: 'We are looking for a senior software engineer to join our growing team...',
+  },
+  {
+    id: '2',
+    title: 'Marketing Manager',
+    company: 'Growth Solutions',
+    location: 'Washington DC',
+    type: 'Full-Time',
+    experience: 'Intermediate',
+    postedAt: '2024-01-14',
+    category: 'Sales and Marketing',
+    description: 'Lead our marketing initiatives and drive growth for our company...',
+  },
+  {
+    id: '3',
+    title: 'Data Analyst',
+    company: 'Analytics Pro',
+    location: 'California, CA',
+    type: 'Contract',
+    experience: 'Entry Level',
+    postedAt: '2024-01-13',
+    category: 'Information Technology',
+    description: 'Analyze data and provide insights to help drive business decisions...',
+  },
+  {
+    id: '4',
+    title: 'Healthcare Administrator',
+    company: 'MedCenter',
+    location: 'New York',
+    type: 'Full-Time',
+    experience: 'Experienced',
+    postedAt: '2024-01-12',
+    category: 'Healthcare',
+    description: 'Manage healthcare operations and ensure quality patient care...',
+  },
+  {
+    id: '5',
+    title: 'Financial Advisor',
+    company: 'Wealth Management Inc',
+    location: 'Miami',
+    type: 'Full-Time',
+    experience: 'Senior',
+    postedAt: '2024-01-11',
+    category: 'Finance and Accounting',
+    description: 'Provide financial advice and investment strategies to clients...',
+  },
+  {
+    id: '6',
+    title: 'UX Designer',
+    company: 'Design Studio',
+    location: 'Remote',
+    type: 'Part-Time',
+    experience: 'Intermediate',
+    postedAt: '2024-01-10',
+    category: 'Creative Arts and Design',
+    description: 'Create user-centered designs for our digital products...',
+  },
+];
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [jobs] = useState<Job[]>(mockJobs);
+  const [filteredJobs, setFilteredJobs] = useState<Job[]>(mockJobs);
+  const [filters, setFilters] = useState<JobFiltersType>({
+    search: '',
+    category: '',
+    location: '',
+    jobType: [],
+    experience: '',
+    workMode: '',
+  });
+  const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+  const handleFiltersChange = (newFilters: JobFiltersType) => {
+    setFilters(newFilters);
+    
+    let filtered = jobs;
+
+    if (newFilters.search) {
+      filtered = filtered.filter(job =>
+        job.title.toLowerCase().includes(newFilters.search.toLowerCase()) ||
+        job.company.toLowerCase().includes(newFilters.search.toLowerCase()) ||
+        job.description?.toLowerCase().includes(newFilters.search.toLowerCase())
+      );
+    }
+
+    if (newFilters.category) {
+      filtered = filtered.filter(job => job.category === newFilters.category);
+    }
+
+    if (newFilters.location) {
+      filtered = filtered.filter(job => job.location === newFilters.location);
+    }
+
+    if (newFilters.jobType && newFilters.jobType.length > 0) {
+      filtered = filtered.filter(job => newFilters.jobType.includes(job.type));
+    }
+
+    if (newFilters.experience) {
+      filtered = filtered.filter(job => job.experience === newFilters.experience);
+    }
+
+    setFilteredJobs(filtered);
+  };
+
+  const handleSaveJob = (jobId: string) => {
+    setSavedJobs(prev => {
+      const newSaved = new Set(prev);
+      if (newSaved.has(jobId)) {
+        newSaved.delete(jobId);
+      } else {
+        newSaved.add(jobId);
+      }
+      return newSaved;
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-white">
+      <Header />
+      <main>
+        <HeroSection />
+        
+        {/* Job Listings Section */}
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Section Header */}
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-[#244034] font-['Gordita'] mb-4">
+                Latest Job Opportunities
+              </h2>
+              <p className="text-lg text-[rgba(0,0,0,0.7)] max-w-2xl mx-auto">
+                Discover the latest job openings from top companies across various industries
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              {/* Filters Sidebar */}
+              <div className="lg:col-span-1">
+                <JobFilters
+                  onFiltersChange={handleFiltersChange}
+                  initialFilters={filters}
+                />
+              </div>
+
+              {/* Jobs List */}
+              <div className="lg:col-span-3">
+                {/* Results Count */}
+                <div className="mb-6">
+                  <p className="text-sm text-[rgba(0,0,0,0.7)]">
+                    Showing {filteredJobs.length} jobs
+                  </p>
+                </div>
+
+                {/* Jobs Grid */}
+                {filteredJobs.length > 0 ? (
+                  <div className="space-y-6">
+                    {filteredJobs.map((job) => (
+                      <JobCard
+                        key={job.id}
+                        job={job}
+                        showDescription={true}
+                        onSave={handleSaveJob}
+                        isSaved={savedJobs.has(job.id)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="text-gray-400 mb-4">
+                      <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-medium text-[#244034] mb-2">No jobs found</h3>
+                    <p className="text-[rgba(0,0,0,0.7)] mb-4">
+                      Try adjusting your search criteria or filters
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      <Footer />
     </div>
   );
 }
