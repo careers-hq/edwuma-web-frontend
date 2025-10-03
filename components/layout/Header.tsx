@@ -15,6 +15,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
 
   const navigation = [
     { name: 'Browse Jobs', href: '/jobs' },
+    { name: 'African Jobs', href: '/africa-jobs' },
     { name: 'Blog', href: '/blog' },
     { name: 'FAQ', href: '/faq' },
     { name: 'Contact', href: '/contact' },
