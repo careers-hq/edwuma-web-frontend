@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { formatRelativeTime } from '@/lib/utils';
+import { ProtectedRoute, useAuth } from '@/lib/auth';
 
 interface JobApplication {
   id: string;
@@ -95,7 +96,8 @@ const getStatusText = (status: string) => {
   }
 };
 
-export default function DashboardPage() {
+function DashboardContent() {
+  const { user, logout, getUserDisplayName } = useAuth();
   const [applications] = useState<JobApplication[]>(mockApplications);
   const [savedJobs] = useState<SavedJob[]>(mockSavedJobs);
   const [activeTab, setActiveTab] = useState<'overview' | 'applications' | 'saved' | 'profile'>('overview');
@@ -115,7 +117,7 @@ export default function DashboardPage() {
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[#244034] font-['Gordita'] mb-2">
-            Welcome back, John!
+            Welcome back, {getUserDisplayName()}!
           </h1>
           <p className="text-[rgba(0,0,0,0.7)]">
             Here&apos;s what&apos;s happening with your job search
@@ -167,6 +169,12 @@ export default function DashboardPage() {
                     }`}
                   >
                     Profile Settings
+                  </button>
+                  <button
+                    onClick={() => logout()}
+                    className="w-full text-left px-4 py-3 rounded-md transition-colors text-red-600 hover:bg-red-50"
+                  >
+                    Logout
                   </button>
                 </nav>
               </CardContent>
@@ -375,5 +383,13 @@ export default function DashboardPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
   );
 }

@@ -1,354 +1,439 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { formatRelativeTime } from '@/lib/utils';
+import { jobsApiService, type JobListing } from '@/lib/api/jobs';
 
-interface JobDetail {
-  id: string;
-  title: string;
-  company: string;
-  location: string;
-  type: string;
-  experience: string;
-  postedAt: string;
-  category: string;
-  salary?: string;
-  description: string;
-  requirements: string[];
-  responsibilities: string[];
-  benefits: string[];
-  companyInfo: {
-    name: string;
-    website: string;
-    description: string;
-    size: string;
-    industry: string;
-  };
-  applicationDeadline?: string;
-}
-
-const mockJobDetail: JobDetail = {
-  id: '1',
-  title: 'Senior Software Engineer',
-  company: 'TechCorp Ghana',
-  location: 'Accra, Ghana',
-  type: 'Full-Time',
-  experience: 'Senior',
-  postedAt: '2024-01-15',
-  category: 'Information Technology',
-  salary: '$80,000 - $120,000',
-  description: 'We are looking for a senior software engineer to join our growing team. You will be responsible for designing, developing, and maintaining high-quality software solutions that meet our business needs. This role offers the opportunity to work with cutting-edge technologies and collaborate with a talented team of developers.',
-  requirements: [
-    'Bachelor\'s degree in Computer Science or related field',
-    '5+ years of experience in software development',
-    'Proficiency in JavaScript, TypeScript, and React',
-    'Experience with Node.js and Express.js',
-    'Knowledge of database systems (PostgreSQL, MongoDB)',
-    'Experience with cloud platforms (AWS, Azure, or GCP)',
-    'Strong problem-solving and communication skills',
-    'Experience with Agile development methodologies'
-  ],
-  responsibilities: [
-    'Design and develop scalable web applications',
-    'Collaborate with cross-functional teams to define and implement new features',
-    'Write clean, maintainable, and efficient code',
-    'Participate in code reviews and technical discussions',
-    'Mentor junior developers and share knowledge',
-    'Troubleshoot and debug applications',
-    'Stay up-to-date with emerging technologies and best practices'
-  ],
-  benefits: [
-    'Competitive salary and performance bonuses',
-    'Health, dental, and vision insurance',
-    'Flexible working hours and remote work options',
-    'Professional development opportunities',
-    '401(k) retirement plan with company matching',
-    'Paid time off and sick leave',
-    'Team building events and activities',
-    'Modern office environment with latest equipment'
-  ],
-  companyInfo: {
-    name: 'TechCorp Ghana',
-    website: 'https://techcorp-ghana.com',
-    description: 'TechCorp Ghana is a leading technology company specializing in innovative software solutions for businesses across Africa. We are committed to delivering high-quality products and services while fostering a culture of innovation and growth.',
-    size: '50-200 employees',
-    industry: 'Information Technology'
-  },
-  applicationDeadline: '2024-02-15'
-};
-
-export default function JobDetailPage() {
-  const [job] = useState<JobDetail>(mockJobDetail);
+const JobDetailsPage: React.FC = () => {
+  const params = useParams();
+  const [job, setJob] = useState<JobListing | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
 
-  const handleSaveJob = () => {
-    setIsSaved(!isSaved);
-    // TODO: Implement actual save functionality
+  const jobId = params?.id as string;
+
+  useEffect(() => {
+    const loadJob = async () => {
+      if (!jobId) return;
+      
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await jobsApiService.getJob(jobId);
+        
+        if (response.success && response.data) {
+          setJob(response.data);
+        } else {
+          setError('Job not found');
+        }
+      } catch (err) {
+        console.error('Error loading job:', err);
+        setError('Failed to load job details');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadJob();
+  }, [jobId]);
+
+  const formatCurrency = (min: number | null, max: number | null, currency: string | null) => {
+    if (!min && !max) return null;
+    const currencySymbol = currency?.toUpperCase() || '';
+    if (min && max) {
+      return `${min.toLocaleString()} - ${max.toLocaleString()} ${currencySymbol}`;
+    } else if (min) {
+      return `${min.toLocaleString()}+ ${currencySymbol}`;
+    } else if (max) {
+      return `Up to ${max.toLocaleString()} ${currencySymbol}`;
+    }
+    return null;
   };
 
-  const handleApply = () => {
-    // TODO: Implement application form logic
-    console.log('Apply button clicked');
+  const getCompanyInitials = (companyName: string) => {
+    return companyName
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
+
+  const handleSaveJob = () => {
+    if (!job) return;
+    setIsSaved(!isSaved);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2 mb-6"></div>
+            <div className="space-y-3">
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+              <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !job) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <div className="text-red-400 mb-4">
+              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Job Not Found</h2>
+            <p className="text-gray-600 mb-6">{error || 'The job you are looking for does not exist.'}</p>
+            <Link href="/">
+              <Button variant="primary" className="bg-[#244034] hover:bg-[#1a2e26]">
+                Back to Jobs
+              </Button>
+            </Link>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
-        <nav className="mb-6">
-          <ol className="flex items-center space-x-2 text-sm text-[rgba(0,0,0,0.7)]">
-            <li><Link href="/" className="hover:text-[#244034] transition-colors">Home</Link></li>
-            <li><span>/</span></li>
-            <li><Link href="/jobs" className="hover:text-[#244034] transition-colors">Jobs</Link></li>
-            <li><span>/</span></li>
-            <li><span className="text-[#244034]">{job.title}</span></li>
-          </ol>
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <nav className="flex items-center space-x-2 text-sm text-gray-600">
+            <Link href="/" className="hover:text-[#244034] transition-colors">
+              Home
+            </Link>
+            <span>/</span>
+            <Link href="/" className="hover:text-[#244034] transition-colors">
+              Jobs
+            </Link>
+            <span>/</span>
+            <span className="text-gray-900 font-medium">{job.title}</span>
         </nav>
+        </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Job Header */}
-            <Card>
-              <CardHeader>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Job Header Card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8">
                 <div className="flex items-start justify-between">
+            <div className="flex items-start space-x-6 flex-1">
+              {/* Company Logo */}
+              <div className="flex-shrink-0">
+                {job.companies[0]?.logo_url ? (
+                  <Image
+                    src={job.companies[0].logo_url}
+                    alt={`${job.companies[0].name} logo`}
+                    width={80}
+                    height={80}
+                    className="w-20 h-20 rounded-2xl object-cover border border-gray-200 shadow-sm"
+                    onError={(e) => {
+                      // Fallback to initials if image fails to load
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <div className={`w-20 h-20 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-2xl flex items-center justify-center shadow-sm ${job.companies[0]?.logo_url ? 'hidden' : ''}`}>
+                  <span className="text-white font-bold text-xl">
+                    {getCompanyInitials(job.companies[0]?.name || 'Company')}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Job Info */}
                   <div className="flex-1">
-                    <h1 className="text-3xl font-bold text-[#244034] mb-2">
-                      {job.title}
-                    </h1>
-                    <div className="flex items-center space-x-4 mb-4">
-                      <p className="text-lg text-[rgba(0,0,0,0.7)]">{job.company}</p>
-                      <Badge variant="secondary">{job.type}</Badge>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-[rgba(0,0,0,0.7)]">
-                      <div className="flex items-center">
-                        <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h1 className="text-4xl font-bold text-gray-900 mb-3 leading-tight">{job.title}</h1>
+                <div className="flex items-center gap-6 text-lg text-gray-600 mb-4">
+                  <span className="font-semibold">{job.companies[0]?.name || 'Company'}</span>
+                  <span className="text-gray-400">•</span>
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        {job.location}
-                      </div>
-                      <div className="flex items-center">
-                        <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
-                        </svg>
-                        {job.experience} Level
-                      </div>
-                      <div className="flex items-center">
-                        <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 18 0z" />
-                        </svg>
-                        Posted {formatRelativeTime(job.postedAt)}
-                      </div>
-                    </div>
-                    {job.salary && (
-                      <div className="mt-4">
-                        <span className="text-lg font-semibold text-[#00bf58]">{job.salary}</span>
-                      </div>
+                    <span>{job.locations[0]?.name || 'Location'}</span>
+                    {job.locations[0]?.country && (
+                      <span className="text-gray-400">, {job.locations[0].country}</span>
                     )}
                   </div>
-                  <div className="flex flex-col space-y-2">
-                    <Button
-                      variant="outline"
-                      onClick={handleSaveJob}
-                      className={isSaved ? 'bg-[#d2f34c] text-[#244034]' : ''}
-                    >
-                      {isSaved ? 'Saved' : 'Save Job'}
-                    </Button>
+                </div>
+                
+                {/* Job Meta */}
+                <div className="flex items-center gap-8 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Posted {job.timing.posted_at_formatted}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
+                    </svg>
+                    <span>{job.job_type.label}</span>
+                </div>
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <span>{job.work_mode.label}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span>{job.experience_level.label}</span>
                   </div>
                 </div>
-              </CardHeader>
-            </Card>
+              </div>
+            </div>
 
-            {/* Job Description */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold text-[#244034]">Job Description</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-[rgba(0,0,0,0.7)] leading-relaxed mb-6">
-                  {job.description}
-                </p>
-              </CardContent>
-            </Card>
+            {/* Save Button */}
+            <button
+              onClick={handleSaveJob}
+              className="p-3 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0"
+              aria-label={isSaved ? 'Remove from saved' : 'Save job'}
+            >
+              <svg
+                className={`w-6 h-6 ${isSaved ? 'text-[#4ade80] fill-current' : 'text-gray-400 hover:text-gray-600'}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                />
+              </svg>
+            </button>
+          </div>
 
-            {/* Responsibilities */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold text-[#244034]">Key Responsibilities</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {job.responsibilities.map((responsibility, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="text-[#244034] mr-3 mt-1">•</span>
-                      <span className="text-[rgba(0,0,0,0.7)]">{responsibility}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+          {/* Salary */}
+          {job.salary && (job.salary.min || job.salary.max) && (
+            <div className="mt-6 bg-green-50 border border-green-200 rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+                <span className="text-green-800 font-bold text-xl">
+                  {formatCurrency(job.salary.min, job.salary.max, job.salary.currency)}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
 
-            {/* Requirements */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold text-[#244034]">Requirements</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {job.requirements.map((requirement, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="text-[#244034] mr-3 mt-1">•</span>
-                      <span className="text-[rgba(0,0,0,0.7)]">{requirement}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-3 space-y-8">
+            {/* Job Description - Render HTML */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">About the Role</h2>
+              <div className="prose prose-lg prose-gray max-w-none">
+                <div 
+                  dangerouslySetInnerHTML={{ __html: job.description }}
+                  className="text-gray-700 leading-relaxed"
+                />
+              </div>
+            </div>
 
-            {/* Benefits */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold text-[#244034]">Benefits & Perks</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {job.benefits.map((benefit, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="text-[#00bf58] mr-3 mt-1">✓</span>
-                      <span className="text-[rgba(0,0,0,0.7)]">{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Company Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold text-[#244034]">About {job.company}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-[rgba(0,0,0,0.7)] mb-4">{job.companyInfo.description}</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <span className="font-medium text-[#244034]">Company Size:</span>
-                    <span className="ml-2 text-[rgba(0,0,0,0.7)]">{job.companyInfo.size}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-[#244034]">Industry:</span>
-                    <span className="ml-2 text-[rgba(0,0,0,0.7)]">{job.companyInfo.industry}</span>
-                  </div>
+            {/* Requirements - Render HTML */}
+            {job.requirements && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Requirements</h2>
+                <div className="prose prose-lg prose-gray max-w-none">
+                  <div 
+                    dangerouslySetInnerHTML={{ __html: job.requirements }}
+                    className="text-gray-700 leading-relaxed"
+                  />
                 </div>
-                <div className="mt-4">
-                  <a
-                    href={job.companyInfo.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#244034] hover:text-[#1a2f26] transition-colors"
-                  >
-                    Visit Company Website →
-                  </a>
+              </div>
+            )}
+
+            {/* Benefits - Render HTML */}
+            {job.benefits && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Benefits</h2>
+                <div className="prose prose-lg prose-gray max-w-none">
+                  <div 
+                    dangerouslySetInnerHTML={{ __html: job.benefits }}
+                    className="text-gray-700 leading-relaxed"
+                  />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            )}
+
+            {/* Skills */}
+            {job.skills.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Required Skills</h2>
+                <div className="flex flex-wrap gap-3">
+                  {job.skills.map((skill) => (
+                    <span key={skill.id} className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg border border-gray-200 hover:bg-gray-200 transition-colors">
+                      {skill.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="sticky top-4 space-y-6">
-              {/* Apply Card */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold text-[#244034] mb-4">Ready to Apply?</h3>
-                    <Button
-                      variant="primary"
-                      size="lg"
-                      className="w-full mb-4"
-                      onClick={handleApply}
-                    >
-                      Apply Now
+            <div className="sticky top-8 space-y-6">
+              {/* Apply Button */}
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                {job.application.url ? (
+                  <Link href={job.application.url} target="_blank" rel="noopener noreferrer" className="block">
+                    <Button variant="primary" size="lg" className="w-full bg-[#244034] hover:bg-[#1a2e26] mb-4 py-4 text-lg font-semibold">
+                      Apply for this job
                     </Button>
-                    <p className="text-sm text-[rgba(0,0,0,0.7)] mb-4">
-                      This job has received {Math.floor(Math.random() * 50) + 10} applications
-                    </p>
-                    {job.applicationDeadline && (
-                      <p className="text-sm text-[rgba(0,0,0,0.7)]">
-                        Application deadline: {new Date(job.applicationDeadline).toLocaleDateString()}
-                      </p>
-                    )}
+                  </Link>
+                ) : (
+                  <Button variant="primary" size="lg" className="w-full bg-[#244034] hover:bg-[#1a2e26] mb-4 py-4 text-lg font-semibold" disabled>
+                    Apply for this job
+                  </Button>
+                )}
+                
+                <div className="text-center">
+                  <button
+                    onClick={handleSaveJob}
+                    className="text-sm text-gray-600 hover:text-[#244034] transition-colors font-medium"
+                  >
+                    {isSaved ? '✓ Saved to your jobs' : 'Save this job'}
+                  </button>
+                </div>
                   </div>
-                </CardContent>
-              </Card>
 
               {/* Job Details */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-[#244034]">Job Details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-[rgba(0,0,0,0.7)]">Job Type:</span>
-                    <span className="font-medium text-[#244034]">{job.type}</span>
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Job Details</h3>
+                <div className="space-y-4">
+                  <div>
+                    <span className="text-sm text-gray-600 font-medium">Experience Level</span>
+                    <p className="font-semibold text-gray-900">{job.experience_level.label}</p>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-[rgba(0,0,0,0.7)]">Experience:</span>
-                    <span className="font-medium text-[#244034]">{job.experience}</span>
+                  <div>
+                    <span className="text-sm text-gray-600 font-medium">Employment Type</span>
+                    <p className="font-semibold text-gray-900">{job.job_type.label}</p>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-[rgba(0,0,0,0.7)]">Category:</span>
-                    <span className="font-medium text-[#244034]">{job.category}</span>
+                  <div>
+                    <span className="text-sm text-gray-600 font-medium">Work Arrangement</span>
+                    <p className="font-semibold text-gray-900">{job.work_mode.label}</p>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-[rgba(0,0,0,0.7)]">Location:</span>
-                    <span className="font-medium text-[#244034]">{job.location}</span>
+                  {job.education_level && (
+                    <div>
+                      <span className="text-sm text-gray-600 font-medium">Education Level</span>
+                      <p className="font-semibold text-gray-900">{job.education_level.label}</p>
                   </div>
-                  {job.salary && (
-                    <div className="flex justify-between">
-                      <span className="text-[rgba(0,0,0,0.7)]">Salary:</span>
-                      <span className="font-medium text-[#00bf58]">{job.salary}</span>
+                  )}
+                  {job.salary && (job.salary.min || job.salary.max) && (
+                    <div>
+                      <span className="text-sm text-gray-600 font-medium">Salary Range</span>
+                      <p className="font-semibold text-[#4ade80] text-lg">
+                        {formatCurrency(job.salary.min, job.salary.max, job.salary.currency)}
+                      </p>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              {/* Share Job */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-[#244034]">Share This Job</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
-                      </svg>
-                      Twitter
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
-                      </svg>
-                      LinkedIn
-                    </Button>
+              {/* Company Info */}
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">About the Company</h3>
+                <div className="flex items-center space-x-4 mb-4">
+                  {job.companies[0]?.logo_url ? (
+                    <Image
+                      src={job.companies[0].logo_url}
+                      alt={`${job.companies[0].name} logo`}
+                      width={48}
+                      height={48}
+                      className="w-12 h-12 rounded-lg object-cover border border-gray-200"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  ) : null}
+                  <div className={`w-12 h-12 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-lg flex items-center justify-center ${job.companies[0]?.logo_url ? 'hidden' : ''}`}>
+                    <span className="text-white font-bold text-sm">
+                      {getCompanyInitials(job.companies[0]?.name || 'Company')}
+                    </span>
                   </div>
-                </CardContent>
-              </Card>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 text-lg">{job.companies[0]?.name || 'Company'}</h4>
+                    <p className="text-sm text-gray-600">Technology Company</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600">
+                  Learn more about this company and their mission.
+                </p>
+              </div>
+
+              {/* Categories */}
+              {job.categories.length > 0 && (
+                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Categories</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {job.categories.map((category) => (
+                      <span key={category.id} className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full">
+                        {category.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Language Requirements */}
+              {job.language_requirements && job.language_requirements.length > 0 && (
+                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Language Requirements</h3>
+                  <div className="space-y-3">
+                    {job.language_requirements.map((lang, index) => (
+                      <div key={index} className="flex justify-between items-center">
+                        <span className="text-gray-600 font-medium">{lang.language?.name || 'Language'}</span>
+                        <span className="font-semibold text-gray-900">{lang.proficiency_level || 'Required'}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </main>
+      </div>
 
       <Footer />
     </div>
   );
-}
+};
+
+export default JobDetailsPage;
