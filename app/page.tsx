@@ -8,6 +8,7 @@ import AfricanJobFilters, { AfricanJobFilters as AfricanJobFiltersType } from '@
 import SimpleSearchBar from '@/components/ui/EnhancedSearchBar';
 import JobCard from '@/components/job/JobCard';
 import { jobsApiService, type JobListing, type JobSearchFilters } from '@/lib/api/jobs';
+import { useGeolocation } from '@/lib/hooks/useGeolocation';
 
 // Use the JobListing interface from the API service instead of the mock interface
 
@@ -17,6 +18,9 @@ export default function AfricaJobs() {
   // Client-side only state to prevent hydration issues
   const [isClient, setIsClient] = useState(false);
   
+  // Geolocation hook to detect user's country
+  const { countryCode } = useGeolocation();
+  
   // Removed unused jobs state
   const [filteredJobs, setFilteredJobs] = useState<JobListing[]>([]);
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
@@ -24,18 +28,9 @@ export default function AfricaJobs() {
   const [filters, setFilters] = useState<AfricanJobFiltersType>({
     search: '',
     location: '',
-    region: '',
     workMode: '',
-    jobType: [],
     experience: '',
     visaSponsorship: '',
-    languageRequirements: [],
-    companyType: '',
-    salaryCurrency: '',
-    salaryRange: { min: 0, max: 0 },
-    educationLevel: '',
-    specialConsiderations: [],
-    jobCategories: [],
     datePosted: ''
   });
   // Removed showFilters state since filters are now always visible at the top
@@ -64,19 +59,12 @@ export default function AfricaJobs() {
       // Map frontend filters to API filters
       const apiFilters: JobSearchFilters = {
         search: filters.search || undefined,
-        location: filters.location || undefined,
-        region: filters.region || undefined,
+        country: filters.location || undefined, // Changed from location to country
         work_mode: filters.workMode || undefined,
-        job_type: filters.jobType.length > 0 ? filters.jobType[0] : undefined,
         experience_level: filters.experience || undefined,
-        education_level: filters.educationLevel || undefined,
-        salary_currency: filters.salaryCurrency || undefined,
-        salary_min: filters.salaryRange.min > 0 ? filters.salaryRange.min : undefined,
-        salary_max: filters.salaryRange.max > 0 ? filters.salaryRange.max : undefined,
-        category_ids: filters.jobCategories.length > 0 ? filters.jobCategories : undefined,
-        language_ids: filters.languageRequirements.length > 0 ? filters.languageRequirements : undefined,
-        special_consideration_ids: filters.specialConsiderations.length > 0 ? filters.specialConsiderations : undefined,
+        // Removed category_ids since API doesn't have categories assigned to jobs
         ...(filters.visaSponsorship === 'available' && { has_visa_sponsorship: true }),
+        ...(filters.datePosted && { date_posted: filters.datePosted }),
         page: currentPage,
         per_page: pagination.per_page,
         sort_by: 'posted_at',
@@ -102,9 +90,9 @@ export default function AfricaJobs() {
           search: filters.search,
           workMode: filters.workMode,
           experience: filters.experience,
-          jobType: filters.jobType,
           location: filters.location,
-          visaSponsorship: filters.visaSponsorship
+          visaSponsorship: filters.visaSponsorship,
+          datePosted: filters.datePosted
         },
         api: apiFilters
       });
@@ -136,6 +124,19 @@ export default function AfricaJobs() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Auto-set location filter based on user's detected country
+  useEffect(() => {
+    if (countryCode && !filters.location) {
+      console.log('🌍 Auto-setting location filter to:', countryCode);
+      setFilters(prev => ({
+        ...prev,
+        location: countryCode
+      }));
+    } else if (countryCode) {
+      console.log('🌍 Detected country:', countryCode, 'but location filter already set to:', filters.location);
+    }
+  }, [countryCode, filters.location]);
 
   // Load jobs when filters change (only on client)
   useEffect(() => {
@@ -171,18 +172,9 @@ export default function AfricaJobs() {
     setFilters({
       search: '',
       location: '',
-      region: '',
       workMode: '',
-      jobType: [],
       experience: '',
       visaSponsorship: '',
-      languageRequirements: [],
-      companyType: '',
-      salaryCurrency: '',
-      salaryRange: { min: 0, max: 0 },
-      educationLevel: '',
-      specialConsiderations: [],
-      jobCategories: [],
       datePosted: ''
     });
     // Reset pagination when clearing filters
@@ -193,17 +185,9 @@ export default function AfricaJobs() {
     let count = 0;
     if (filters.search) count++;
     if (filters.location) count++;
-    if (filters.region) count++;
-    if (filters.jobCategories.length > 0) count++;
-    if (filters.jobType.length > 0) count++;
-    if (filters.experience) count++;
     if (filters.workMode) count++;
+    if (filters.experience) count++;
     if (filters.visaSponsorship) count++;
-    if (filters.companyType) count++;
-    if (filters.languageRequirements.length > 0) count++;
-    if (filters.specialConsiderations.length > 0) count++;
-    if (filters.salaryCurrency) count++;
-    if (filters.educationLevel) count++;
     if (filters.datePosted) count++;
     return count;
   };
@@ -312,10 +296,15 @@ export default function AfricaJobs() {
             {/* Results Header */}
                 <div className="mb-6">
               <p className="text-gray-600">
-                {!isClient ? 'Loading...' : isLoading ? 'Searching...' : `Found ${filteredJobs.length} jobs`}
+                {!isClient ? 'Loading...' : isLoading ? 'Searching...' : `Found ${pagination.total.toLocaleString()} jobs`}
                 {getActiveFiltersCount() > 0 && (
                   <span className="ml-2 text-sm text-[#244034] font-medium">
                     ({getActiveFiltersCount()} filter{getActiveFiltersCount() > 1 ? 's' : ''} applied)
+                  </span>
+                )}
+                {filters.location && countryCode === filters.location && (
+                  <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                    🌍 Auto-detected
                   </span>
                 )}
                   </p>

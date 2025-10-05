@@ -8,10 +8,10 @@ export interface FilterOption {
 
 // Popular options for quick access
 export const POPULAR_LOCATIONS = [
-  'accra-ghana',
-  'lagos-nigeria', 
-  'nairobi-kenya',
-  'johannesburg-south-africa'
+  'ghana',
+  'nigeria', 
+  'kenya',
+  'south-africa'
 ];
 
 export const POPULAR_CATEGORIES = [
@@ -21,148 +21,259 @@ export const POPULAR_CATEGORIES = [
   'agriculture-agribusiness'
 ];
 
-// African Locations with grouping
+// African Countries with grouping
 export const AFRICAN_LOCATIONS: FilterOption[] = [
-  // Popular Locations
-  { value: 'accra-ghana', label: 'Accra, Ghana', group: 'Popular' },
-  { value: 'lagos-nigeria', label: 'Lagos, Nigeria', group: 'Popular' },
-  { value: 'nairobi-kenya', label: 'Nairobi, Kenya', group: 'Popular' },
-  { value: 'johannesburg-south-africa', label: 'Johannesburg, South Africa', group: 'Popular' },
+  // Popular Countries
+  { value: 'ghana', label: 'Ghana', group: 'Popular' },
+  { value: 'nigeria', label: 'Nigeria', group: 'Popular' },
+  { value: 'kenya', label: 'Kenya', group: 'Popular' },
+  { value: 'south-africa', label: 'South Africa', group: 'Popular' },
 
   // West Africa
-  { value: 'abuja-nigeria', label: 'Abuja, Nigeria', group: 'West Africa' },
-  { value: 'abidjan-ivory-coast', label: 'Abidjan, Ivory Coast', group: 'West Africa' },
-  { value: 'dakar-senegal', label: 'Dakar, Senegal', group: 'West Africa' },
-  { value: 'freetown-sierra-leone', label: 'Freetown, Sierra Leone', group: 'West Africa' },
-  { value: 'ouagadougou-burkina-faso', label: 'Ouagadougou, Burkina Faso', group: 'West Africa' },
-  { value: 'bamako-mali', label: 'Bamako, Mali', group: 'West Africa' },
-  { value: 'conakry-guinea', label: 'Conakry, Guinea', group: 'West Africa' },
-  { value: 'monrovia-liberia', label: 'Monrovia, Liberia', group: 'West Africa' },
+  { value: 'senegal', label: 'Senegal', group: 'West Africa' },
+  { value: 'ivory-coast', label: 'Ivory Coast', group: 'West Africa' },
+  { value: 'sierra-leone', label: 'Sierra Leone', group: 'West Africa' },
+  { value: 'liberia', label: 'Liberia', group: 'West Africa' },
+  { value: 'guinea', label: 'Guinea', group: 'West Africa' },
+  { value: 'guinea-bissau', label: 'Guinea-Bissau', group: 'West Africa' },
+  { value: 'gambia', label: 'Gambia', group: 'West Africa' },
+  { value: 'cape-verde', label: 'Cape Verde', group: 'West Africa' },
+  { value: 'mali', label: 'Mali', group: 'West Africa' },
+  { value: 'burkina-faso', label: 'Burkina Faso', group: 'West Africa' },
+  { value: 'niger', label: 'Niger', group: 'West Africa' },
+  { value: 'chad', label: 'Chad', group: 'West Africa' },
+  { value: 'mauritania', label: 'Mauritania', group: 'West Africa' },
+  { value: 'benin', label: 'Benin', group: 'West Africa' },
+  { value: 'togo', label: 'Togo', group: 'West Africa' },
 
   // East Africa
-  { value: 'kampala-uganda', label: 'Kampala, Uganda', group: 'East Africa' },
-  { value: 'dar-es-salaam-tanzania', label: 'Dar es Salaam, Tanzania', group: 'East Africa' },
-  { value: 'addis-ababa-ethiopia', label: 'Addis Ababa, Ethiopia', group: 'East Africa' },
-  { value: 'kigali-rwanda', label: 'Kigali, Rwanda', group: 'East Africa' },
-  { value: 'mombasa-kenya', label: 'Mombasa, Kenya', group: 'East Africa' },
-  { value: 'arusha-tanzania', label: 'Arusha, Tanzania', group: 'East Africa' },
-  { value: 'entebbe-uganda', label: 'Entebbe, Uganda', group: 'East Africa' },
-  { value: 'mekelle-ethiopia', label: 'Mekelle, Ethiopia', group: 'East Africa' },
+  { value: 'ethiopia', label: 'Ethiopia', group: 'East Africa' },
+  { value: 'tanzania', label: 'Tanzania', group: 'East Africa' },
+  { value: 'uganda', label: 'Uganda', group: 'East Africa' },
+  { value: 'rwanda', label: 'Rwanda', group: 'East Africa' },
+  { value: 'burundi', label: 'Burundi', group: 'East Africa' },
+  { value: 'djibouti', label: 'Djibouti', group: 'East Africa' },
+  { value: 'eritrea', label: 'Eritrea', group: 'East Africa' },
+  { value: 'somalia', label: 'Somalia', group: 'East Africa' },
+  { value: 'south-sudan', label: 'South Sudan', group: 'East Africa' },
+  { value: 'sudan', label: 'Sudan', group: 'East Africa' },
 
   // Southern Africa
-  { value: 'cape-town-south-africa', label: 'Cape Town, South Africa', group: 'Southern Africa' },
-  { value: 'harare-zimbabwe', label: 'Harare, Zimbabwe', group: 'Southern Africa' },
-  { value: 'lusaka-zambia', label: 'Lusaka, Zambia', group: 'Southern Africa' },
-  { value: 'gaborone-botswana', label: 'Gaborone, Botswana', group: 'Southern Africa' },
-  { value: 'maputo-mozambique', label: 'Maputo, Mozambique', group: 'Southern Africa' },
-  { value: 'windhoek-namibia', label: 'Windhoek, Namibia', group: 'Southern Africa' },
-  { value: 'maseru-lesotho', label: 'Maseru, Lesotho', group: 'Southern Africa' },
-  { value: 'mbabane-eswatini', label: 'Mbabane, Eswatini', group: 'Southern Africa' },
+  { value: 'botswana', label: 'Botswana', group: 'Southern Africa' },
+  { value: 'namibia', label: 'Namibia', group: 'Southern Africa' },
+  { value: 'zambia', label: 'Zambia', group: 'Southern Africa' },
+  { value: 'zimbabwe', label: 'Zimbabwe', group: 'Southern Africa' },
+  { value: 'malawi', label: 'Malawi', group: 'Southern Africa' },
+  { value: 'mozambique', label: 'Mozambique', group: 'Southern Africa' },
+  { value: 'lesotho', label: 'Lesotho', group: 'Southern Africa' },
+  { value: 'swaziland', label: 'Eswatini (Swaziland)', group: 'Southern Africa' },
+  { value: 'angola', label: 'Angola', group: 'Southern Africa' },
 
   // North Africa
-  { value: 'cairo-egypt', label: 'Cairo, Egypt', group: 'North Africa' },
-  { value: 'casablanca-morocco', label: 'Casablanca, Morocco', group: 'North Africa' },
-  { value: 'tunis-tunisia', label: 'Tunis, Tunisia', group: 'North Africa' },
-  { value: 'algiers-algeria', label: 'Algiers, Algeria', group: 'North Africa' },
-  { value: 'tripoli-libya', label: 'Tripoli, Libya', group: 'North Africa' },
-  { value: 'khartoum-sudan', label: 'Khartoum, Sudan', group: 'North Africa' },
-  { value: 'alexandria-egypt', label: 'Alexandria, Egypt', group: 'North Africa' },
-  { value: 'rabat-morocco', label: 'Rabat, Morocco', group: 'North Africa' },
+  { value: 'egypt', label: 'Egypt', group: 'North Africa' },
+  { value: 'morocco', label: 'Morocco', group: 'North Africa' },
+  { value: 'algeria', label: 'Algeria', group: 'North Africa' },
+  { value: 'tunisia', label: 'Tunisia', group: 'North Africa' },
+  { value: 'libya', label: 'Libya', group: 'North Africa' },
 
   // Central Africa
-  { value: 'kinshasa-drc', label: 'Kinshasa, DRC', group: 'Central Africa' },
-  { value: 'douala-cameroon', label: 'Douala, Cameroon', group: 'Central Africa' },
-  { value: 'yaounde-cameroon', label: 'Yaoundé, Cameroon', group: 'Central Africa' },
-  { value: 'bangui-central-african-republic', label: 'Bangui, Central African Republic', group: 'Central Africa' },
-  { value: 'brazzaville-congo', label: 'Brazzaville, Congo', group: 'Central Africa' },
-  { value: 'libreville-gabon', label: 'Libreville, Gabon', group: 'Central Africa' },
-  { value: 'malabo-equatorial-guinea', label: 'Malabo, Equatorial Guinea', group: 'Central Africa' },
+  { value: 'democratic-republic-of-congo', label: 'DR Congo', group: 'Central Africa' },
+  { value: 'republic-of-congo', label: 'Republic of Congo', group: 'Central Africa' },
+  { value: 'cameroon', label: 'Cameroon', group: 'Central Africa' },
+  { value: 'central-african-republic', label: 'Central African Republic', group: 'Central Africa' },
+  { value: 'gabon', label: 'Gabon', group: 'Central Africa' },
+  { value: 'equatorial-guinea', label: 'Equatorial Guinea', group: 'Central Africa' },
+  { value: 'sao-tome-and-principe', label: 'São Tomé and Príncipe', group: 'Central Africa' },
 
-  // Diaspora
-  { value: 'washington-dc', label: 'Washington DC', group: 'Diaspora' },
-  { value: 'california-ca', label: 'California, CA', group: 'Diaspora' },
-  { value: 'new-york', label: 'New York', group: 'Diaspora' },
-  { value: 'miami', label: 'Miami', group: 'Diaspora' },
-  { value: 'toronto-canada', label: 'Toronto, Canada', group: 'Diaspora' },
-  { value: 'vancouver-canada', label: 'Vancouver, Canada', group: 'Diaspora' },
-  { value: 'london-uk', label: 'London, UK', group: 'Diaspora' },
-  { value: 'manchester-uk', label: 'Manchester, UK', group: 'Diaspora' },
-  { value: 'paris-france', label: 'Paris, France', group: 'Diaspora' },
-  { value: 'berlin-germany', label: 'Berlin, Germany', group: 'Diaspora' },
-  { value: 'amsterdam-netherlands', label: 'Amsterdam, Netherlands', group: 'Diaspora' },
-  { value: 'dubai-uae', label: 'Dubai, UAE', group: 'Diaspora' },
-  { value: 'doha-qatar', label: 'Doha, Qatar', group: 'Diaspora' },
+  // Island Nations
+  { value: 'madagascar', label: 'Madagascar', group: 'Island Nations' },
+  { value: 'mauritius', label: 'Mauritius', group: 'Island Nations' },
+  { value: 'seychelles', label: 'Seychelles', group: 'Island Nations' },
+  { value: 'comoros', label: 'Comoros', group: 'Island Nations' },
+  { value: 'reunion', label: 'Réunion', group: 'Island Nations' },
+  { value: 'mayotte', label: 'Mayotte', group: 'Island Nations' },
+
+  // Diaspora (Countries with significant African diaspora)
+  { value: 'united-states', label: 'United States', group: 'Diaspora' },
+  { value: 'canada', label: 'Canada', group: 'Diaspora' },
+  { value: 'united-kingdom', label: 'United Kingdom', group: 'Diaspora' },
+  { value: 'france', label: 'France', group: 'Diaspora' },
+  { value: 'germany', label: 'Germany', group: 'Diaspora' },
+  { value: 'netherlands', label: 'Netherlands', group: 'Diaspora' },
+  { value: 'belgium', label: 'Belgium', group: 'Diaspora' },
+  { value: 'switzerland', label: 'Switzerland', group: 'Diaspora' },
+  { value: 'sweden', label: 'Sweden', group: 'Diaspora' },
+  { value: 'norway', label: 'Norway', group: 'Diaspora' },
+  { value: 'denmark', label: 'Denmark', group: 'Diaspora' },
+  { value: 'australia', label: 'Australia', group: 'Diaspora' },
+  { value: 'new-zealand', label: 'New Zealand', group: 'Diaspora' },
+  { value: 'brazil', label: 'Brazil', group: 'Diaspora' },
+  { value: 'argentina', label: 'Argentina', group: 'Diaspora' },
+  { value: 'vietnam', label: 'Vietnam', group: 'Diaspora' },
+  { value: 'thailand', label: 'Thailand', group: 'Diaspora' },
+  { value: 'philippines', label: 'Philippines', group: 'Diaspora' },
+  { value: 'malaysia', label: 'Malaysia', group: 'Diaspora' },
   { value: 'singapore', label: 'Singapore', group: 'Diaspora' },
-  { value: 'hong-kong', label: 'Hong Kong', group: 'Diaspora' },
-  { value: 'sydney-australia', label: 'Sydney, Australia', group: 'Diaspora' },
-  { value: 'melbourne-australia', label: 'Melbourne, Australia', group: 'Diaspora' },
+  { value: 'indonesia', label: 'Indonesia', group: 'Diaspora' },
+  { value: 'south-korea', label: 'South Korea', group: 'Diaspora' },
+  { value: 'japan', label: 'Japan', group: 'Diaspora' },
+  { value: 'china', label: 'China', group: 'Diaspora' },
+  { value: 'india', label: 'India', group: 'Diaspora' },
+  { value: 'uae', label: 'United Arab Emirates', group: 'Diaspora' },
+  { value: 'saudi-arabia', label: 'Saudi Arabia', group: 'Diaspora' },
+  { value: 'qatar', label: 'Qatar', group: 'Diaspora' },
+  { value: 'kuwait', label: 'Kuwait', group: 'Diaspora' },
+  { value: 'bahrain', label: 'Bahrain', group: 'Diaspora' },
+  { value: 'oman', label: 'Oman', group: 'Diaspora' },
+  { value: 'jordan', label: 'Jordan', group: 'Diaspora' },
+  { value: 'lebanon', label: 'Lebanon', group: 'Diaspora' },
+  { value: 'turkey', label: 'Turkey', group: 'Diaspora' },
+  { value: 'israel', label: 'Israel', group: 'Diaspora' }
 ];
 
 // African Job Categories with grouping
 export const AFRICAN_JOB_CATEGORIES: FilterOption[] = [
   // Popular Categories
-  { value: 'information-technology', label: 'Information Technology Jobs', group: 'Popular' },
-  { value: 'healthcare', label: 'Healthcare Jobs', group: 'Popular' },
-  { value: 'finance-accounting', label: 'Finance and Accounting Jobs', group: 'Popular' },
-  { value: 'agriculture-agribusiness', label: 'Agriculture & Agribusiness Jobs', group: 'Popular' },
+  { value: 'information-technology', label: 'Information Technology', group: 'Popular' },
+  { value: 'healthcare', label: 'Healthcare', group: 'Popular' },
+  { value: 'finance-accounting', label: 'Finance & Accounting', group: 'Popular' },
+  { value: 'agriculture-agribusiness', label: 'Agriculture & Agribusiness', group: 'Popular' },
 
-  // Technology & IT
-  { value: 'telecommunications', label: 'Telecommunications Jobs', group: 'Technology & IT' },
-  { value: 'microfinance-fintech', label: 'Microfinance & Fintech Jobs', group: 'Technology & IT' },
-  { value: 'research-development', label: 'Research & Development Jobs', group: 'Technology & IT' },
-  { value: 'science-biotechnology', label: 'Science & Biotechnology Jobs', group: 'Technology & IT' },
+  // Technology & Digital
+  { value: 'software-development', label: 'Software Development', group: 'Technology & Digital' },
+  { value: 'data-science-analytics', label: 'Data Science & Analytics', group: 'Technology & Digital' },
+  { value: 'cybersecurity', label: 'Cybersecurity', group: 'Technology & Digital' },
+  { value: 'artificial-intelligence', label: 'Artificial Intelligence', group: 'Technology & Digital' },
+  { value: 'blockchain-cryptocurrency', label: 'Blockchain & Cryptocurrency', group: 'Technology & Digital' },
+  { value: 'e-commerce-digital-marketing', label: 'E-commerce & Digital Marketing', group: 'Technology & Digital' },
+  { value: 'telecommunications', label: 'Telecommunications', group: 'Technology & Digital' },
 
-  // Healthcare & Medical
-  { value: 'pharmaceuticals', label: 'Pharmaceuticals Jobs', group: 'Healthcare & Medical' },
-  { value: 'social-services', label: 'Social Services Jobs', group: 'Healthcare & Medical' },
+  // Business & Finance
+  { value: 'banking-financial-services', label: 'Banking & Financial Services', group: 'Business & Finance' },
+  { value: 'microfinance-fintech', label: 'Microfinance & Fintech', group: 'Business & Finance' },
+  { value: 'investment-private-equity', label: 'Investment & Private Equity', group: 'Business & Finance' },
+  { value: 'insurance', label: 'Insurance', group: 'Business & Finance' },
+  { value: 'consulting', label: 'Consulting', group: 'Business & Finance' },
+  { value: 'audit-tax', label: 'Audit & Tax', group: 'Business & Finance' },
+  { value: 'business-development', label: 'Business Development', group: 'Business & Finance' },
+  { value: 'project-management', label: 'Project Management', group: 'Business & Finance' },
 
-  // Finance & Business
-  { value: 'banking-microfinance', label: 'Banking & Microfinance Jobs', group: 'Finance & Business' },
-  { value: 'insurance', label: 'Insurance Jobs', group: 'Finance & Business' },
-  { value: 'consulting', label: 'Consulting Jobs', group: 'Finance & Business' },
-  { value: 'legal-services', label: 'Legal Services Jobs', group: 'Finance & Business' },
+  // Healthcare & Life Sciences
+  { value: 'medical-practice', label: 'Medical Practice', group: 'Healthcare & Life Sciences' },
+  { value: 'public-health', label: 'Public Health', group: 'Healthcare & Life Sciences' },
+  { value: 'pharmaceuticals', label: 'Pharmaceuticals', group: 'Healthcare & Life Sciences' },
+  { value: 'medical-devices', label: 'Medical Devices', group: 'Healthcare & Life Sciences' },
+  { value: 'healthcare-administration', label: 'Healthcare Administration', group: 'Healthcare & Life Sciences' },
+  { value: 'mental-health', label: 'Mental Health', group: 'Healthcare & Life Sciences' },
+  { value: 'nursing', label: 'Nursing', group: 'Healthcare & Life Sciences' },
 
-  // Agriculture & Development
-  { value: 'development-ngo', label: 'Development & NGO Jobs', group: 'Agriculture & Development' },
-  { value: 'export-import-trade', label: 'Export/Import & Trade Jobs', group: 'Agriculture & Development' },
-  { value: 'logistics-supply-chain', label: 'Logistics & Supply Chain Jobs', group: 'Agriculture & Development' },
+  // Agriculture & Environment
+  { value: 'sustainable-agriculture', label: 'Sustainable Agriculture', group: 'Agriculture & Environment' },
+  { value: 'agribusiness', label: 'Agribusiness', group: 'Agriculture & Environment' },
+  { value: 'food-processing', label: 'Food Processing', group: 'Agriculture & Environment' },
+  { value: 'environmental-conservation', label: 'Environmental Conservation', group: 'Agriculture & Environment' },
+  { value: 'renewable-energy', label: 'Renewable Energy', group: 'Agriculture & Environment' },
+  { value: 'water-management', label: 'Water Management', group: 'Agriculture & Environment' },
+  { value: 'climate-change', label: 'Climate Change', group: 'Agriculture & Environment' },
+
+  // Education & Training
+  { value: 'higher-education', label: 'Higher Education', group: 'Education & Training' },
+  { value: 'vocational-training', label: 'Vocational Training', group: 'Education & Training' },
+  { value: 'e-learning', label: 'E-learning', group: 'Education & Training' },
+  { value: 'educational-technology', label: 'Educational Technology', group: 'Education & Training' },
+  { value: 'curriculum-development', label: 'Curriculum Development', group: 'Education & Training' },
+  { value: 'teacher-training', label: 'Teacher Training', group: 'Education & Training' },
 
   // Infrastructure & Construction
-  { value: 'mining-natural-resources', label: 'Mining & Natural Resources Jobs', group: 'Infrastructure & Construction' },
-  { value: 'renewable-energy', label: 'Renewable Energy Jobs', group: 'Infrastructure & Construction' },
-  { value: 'construction-infrastructure', label: 'Construction & Infrastructure Jobs', group: 'Infrastructure & Construction' },
-  { value: 'aviation', label: 'Aviation Jobs', group: 'Infrastructure & Construction' },
-  { value: 'maritime-shipping', label: 'Maritime & Shipping Jobs', group: 'Infrastructure & Construction' },
-  { value: 'transportation', label: 'Transportation Jobs', group: 'Infrastructure & Construction' },
+  { value: 'civil-engineering', label: 'Civil Engineering', group: 'Infrastructure & Construction' },
+  { value: 'construction-management', label: 'Construction Management', group: 'Infrastructure & Construction' },
+  { value: 'urban-planning', label: 'Urban Planning', group: 'Infrastructure & Construction' },
+  { value: 'transportation-logistics', label: 'Transportation & Logistics', group: 'Infrastructure & Construction' },
+  { value: 'real-estate', label: 'Real Estate', group: 'Infrastructure & Construction' },
+  { value: 'architecture', label: 'Architecture', group: 'Infrastructure & Construction' },
 
-  // Government & Public Sector
-  { value: 'government-public-sector', label: 'Government & Public Sector Jobs', group: 'Government & Public Sector' },
-  { value: 'international-organizations', label: 'International Organizations Jobs', group: 'Government & Public Sector' },
-  { value: 'african-union-ecowas', label: 'African Union & ECOWAS Jobs', group: 'Government & Public Sector' },
-
-  // Manufacturing & Production
-  { value: 'manufacturing', label: 'Manufacturing Jobs', group: 'Manufacturing & Production' },
-  { value: 'textiles-garments', label: 'Textiles & Garments Jobs', group: 'Manufacturing & Production' },
-  { value: 'food-processing', label: 'Food Processing Jobs', group: 'Manufacturing & Production' },
-
-  // Services & Retail
-  { value: 'retail-commerce', label: 'Retail & Commerce Jobs', group: 'Services & Retail' },
-  { value: 'real-estate-property', label: 'Real Estate & Property Jobs', group: 'Services & Retail' },
-  { value: 'hospitality-tourism', label: 'Hospitality & Tourism Jobs', group: 'Services & Retail' },
+  // Manufacturing & Industry
+  { value: 'manufacturing', label: 'Manufacturing', group: 'Manufacturing & Industry' },
+  { value: 'automotive', label: 'Automotive', group: 'Manufacturing & Industry' },
+  { value: 'textiles-apparel', label: 'Textiles & Apparel', group: 'Manufacturing & Industry' },
+  { value: 'mining-metals', label: 'Mining & Metals', group: 'Manufacturing & Industry' },
+  { value: 'oil-gas', label: 'Oil & Gas', group: 'Manufacturing & Industry' },
+  { value: 'chemicals', label: 'Chemicals', group: 'Manufacturing & Industry' },
 
   // Media & Communications
-  { value: 'media-broadcasting', label: 'Media & Broadcasting Jobs', group: 'Media & Communications' },
-  { value: 'marketing-advertising', label: 'Marketing & Advertising Jobs', group: 'Media & Communications' },
-  { value: 'creative-arts-design', label: 'Creative Arts & Design Jobs', group: 'Media & Communications' },
+  { value: 'journalism', label: 'Journalism', group: 'Media & Communications' },
+  { value: 'broadcasting', label: 'Broadcasting', group: 'Media & Communications' },
+  { value: 'public-relations', label: 'Public Relations', group: 'Media & Communications' },
+  { value: 'advertising', label: 'Advertising', group: 'Media & Communications' },
+  { value: 'content-creation', label: 'Content Creation', group: 'Media & Communications' },
+  { value: 'social-media', label: 'Social Media', group: 'Media & Communications' },
 
-  // Support Services
-  { value: 'human-resources', label: 'Human Resources Jobs', group: 'Support Services' },
-  { value: 'customer-service', label: 'Customer Service Jobs', group: 'Support Services' },
-  { value: 'administrative', label: 'Administrative Jobs', group: 'Support Services' },
-  { value: 'security', label: 'Security Jobs', group: 'Support Services' },
+  // Legal & Compliance
+  { value: 'corporate-law', label: 'Corporate Law', group: 'Legal & Compliance' },
+  { value: 'international-law', label: 'International Law', group: 'Legal & Compliance' },
+  { value: 'compliance', label: 'Compliance', group: 'Legal & Compliance' },
+  { value: 'regulatory-affairs', label: 'Regulatory Affairs', group: 'Legal & Compliance' },
+  { value: 'intellectual-property', label: 'Intellectual Property', group: 'Legal & Compliance' },
+
+  // Government & Public Sector
+  { value: 'public-administration', label: 'Public Administration', group: 'Government & Public Sector' },
+  { value: 'policy-analysis', label: 'Policy Analysis', group: 'Government & Public Sector' },
+  { value: 'international-development', label: 'International Development', group: 'Government & Public Sector' },
+  { value: 'diplomacy', label: 'Diplomacy', group: 'Government & Public Sector' },
+  { value: 'public-policy', label: 'Public Policy', group: 'Government & Public Sector' },
+
+  // Non-Profit & Social Impact
+  { value: 'ngo-management', label: 'NGO Management', group: 'Non-Profit & Social Impact' },
+  { value: 'social-work', label: 'Social Work', group: 'Non-Profit & Social Impact' },
+  { value: 'community-development', label: 'Community Development', group: 'Non-Profit & Social Impact' },
+  { value: 'human-rights', label: 'Human Rights', group: 'Non-Profit & Social Impact' },
+  { value: 'gender-equality', label: 'Gender Equality', group: 'Non-Profit & Social Impact' },
+  { value: 'youth-development', label: 'Youth Development', group: 'Non-Profit & Social Impact' },
+
+  // Tourism & Hospitality
+  { value: 'hospitality', label: 'Hospitality', group: 'Tourism & Hospitality' },
+  { value: 'tourism', label: 'Tourism', group: 'Tourism & Hospitality' },
+  { value: 'event-management', label: 'Event Management', group: 'Tourism & Hospitality' },
+  { value: 'restaurant-management', label: 'Restaurant Management', group: 'Tourism & Hospitality' },
+  { value: 'hotel-management', label: 'Hotel Management', group: 'Tourism & Hospitality' },
+
+  // Retail & Consumer Goods
+  { value: 'retail-management', label: 'Retail Management', group: 'Retail & Consumer Goods' },
+  { value: 'supply-chain', label: 'Supply Chain', group: 'Retail & Consumer Goods' },
+  { value: 'procurement', label: 'Procurement', group: 'Retail & Consumer Goods' },
+  { value: 'quality-assurance', label: 'Quality Assurance', group: 'Retail & Consumer Goods' },
+  { value: 'customer-service', label: 'Customer Service', group: 'Retail & Consumer Goods' },
+
+  // Research & Development
+  { value: 'research-development', label: 'Research & Development', group: 'Research & Development' },
+  { value: 'innovation', label: 'Innovation', group: 'Research & Development' },
+  { value: 'product-development', label: 'Product Development', group: 'Research & Development' },
+  { value: 'market-research', label: 'Market Research', group: 'Research & Development' },
+  { value: 'biotechnology', label: 'Biotechnology', group: 'Research & Development' },
+
+  // Sales & Marketing
+  { value: 'sales', label: 'Sales', group: 'Sales & Marketing' },
+  { value: 'marketing', label: 'Marketing', group: 'Sales & Marketing' },
+  { value: 'brand-management', label: 'Brand Management', group: 'Sales & Marketing' },
+  { value: 'business-development', label: 'Business Development', group: 'Sales & Marketing' },
+  { value: 'account-management', label: 'Account Management', group: 'Sales & Marketing' },
+
+  // Human Resources
+  { value: 'human-resources', label: 'Human Resources', group: 'Human Resources' },
+  { value: 'talent-acquisition', label: 'Talent Acquisition', group: 'Human Resources' },
+  { value: 'organizational-development', label: 'Organizational Development', group: 'Human Resources' },
+  { value: 'employee-relations', label: 'Employee Relations', group: 'Human Resources' },
+  { value: 'compensation-benefits', label: 'Compensation & Benefits', group: 'Human Resources' },
+
+  // Operations & Administration
+  { value: 'operations', label: 'Operations', group: 'Operations & Administration' },
+  { value: 'administrative', label: 'Administrative', group: 'Operations & Administration' },
+  { value: 'facilities-management', label: 'Facilities Management', group: 'Operations & Administration' },
+  { value: 'office-management', label: 'Office Management', group: 'Operations & Administration' },
+  { value: 'executive-assistant', label: 'Executive Assistant', group: 'Operations & Administration' }
 ];
 
-// Other filter options (keeping existing structure)
+// Work Arrangements
 export const WORK_ARRANGEMENTS = [
   { value: '', label: 'All Work Arrangements' },
   { value: 'remote', label: 'Remote' },
@@ -176,129 +287,34 @@ export const WORK_ARRANGEMENTS = [
   { value: 'internship', label: 'Internship' },
 ];
 
+// Experience Levels
 export const EXPERIENCE_LEVELS = [
   { value: '', label: 'All Experience Levels' },
   { value: 'entry-level', label: 'Entry Level (0-2 years)' },
-  { value: 'junior', label: 'Junior (2-4 years)' },
-  { value: 'mid-level', label: 'Mid-Level (4-6 years)' },
+  { value: 'mid-level', label: 'Mid Level (3-5 years)' },
   { value: 'senior', label: 'Senior (6-10 years)' },
-  { value: 'lead', label: 'Lead (10+ years)' },
-  { value: 'executive', label: 'Executive Level' },
-  { value: 'fresh-graduate', label: 'Fresh Graduate' },
-  { value: 'career-changer', label: 'Career Changer' },
-  { value: 'returning-professional', label: 'Returning Professional' },
-  { value: 'diaspora-return', label: 'Diaspora Return' },
+  { value: 'executive', label: 'Executive (10+ years)' },
 ];
 
+// Visa Sponsorship Options
 export const VISA_SPONSORSHIP_OPTIONS = [
   { value: '', label: 'No Preference' },
+  { value: 'available', label: 'Visa Sponsorship Available' },
+  { value: 'us-visa-sponsorship', label: 'US Visa Sponsorship' },
   { value: 'uk-visa-sponsorship', label: 'UK Visa Sponsorship' },
   { value: 'canada-visa-sponsorship', label: 'Canada Visa Sponsorship' },
-  { value: 'us-visa-sponsorship', label: 'US Visa Sponsorship' },
+  { value: 'eu-visa-sponsorship', label: 'EU Visa Sponsorship' },
   { value: 'australia-visa-sponsorship', label: 'Australia Visa Sponsorship' },
   { value: 'germany-visa-sponsorship', label: 'Germany Visa Sponsorship' },
-  { value: 'netherlands-visa-sponsorship', label: 'Netherlands Visa Sponsorship' },
-  { value: 'dubai-uae-visa-sponsorship', label: 'Dubai/UAE Visa Sponsorship' },
-  { value: 'singapore-visa-sponsorship', label: 'Singapore Visa Sponsorship' },
-  { value: 'south-africa-work-permit', label: 'South Africa Work Permit' },
-  { value: 'kenya-work-permit', label: 'Kenya Work Permit' },
-  { value: 'ghana-work-permit', label: 'Ghana Work Permit' },
-  { value: 'nigeria-work-permit', label: 'Nigeria Work Permit' },
-  { value: 'intra-africa-mobility', label: 'Intra-Africa Mobility' },
 ];
 
-export const COMPANY_TYPES = [
-  { value: '', label: 'All Company Types' },
-  { value: 'multinational', label: 'Multinational Corporation' },
-  { value: 'african-corporate', label: 'African Corporate' },
-  { value: 'startup', label: 'Startup' },
-  { value: 'ngo-nonprofit', label: 'NGO/Nonprofit' },
-  { value: 'government', label: 'Government' },
-  { value: 'international-organization', label: 'International Organization' },
-  { value: 'development-agency', label: 'Development Agency' },
-  { value: 'financial-institution', label: 'Financial Institution' },
-  { value: 'educational-institution', label: 'Educational Institution' },
-  { value: 'healthcare-facility', label: 'Healthcare Facility' },
-  { value: 'manufacturing', label: 'Manufacturing Company' },
-  { value: 'trading-company', label: 'Trading Company' },
-  { value: 'consulting-firm', label: 'Consulting Firm' },
-  { value: 'media-company', label: 'Media Company' },
-];
-
-export const LANGUAGE_REQUIREMENTS = [
-  { value: '', label: 'No Preference' },
-  { value: 'english', label: 'English' },
-  { value: 'french', label: 'French' },
-  { value: 'arabic', label: 'Arabic' },
-  { value: 'portuguese', label: 'Portuguese' },
-  { value: 'spanish', label: 'Spanish' },
-  { value: 'swahili', label: 'Swahili' },
-  { value: 'hausa', label: 'Hausa' },
-  { value: 'yoruba', label: 'Yoruba' },
-  { value: 'amharic', label: 'Amharic' },
-  { value: 'multiple-languages', label: 'Multiple Languages' },
-];
-
-export const SALARY_CURRENCIES = [
-  { value: '', label: 'All Currencies' },
-  { value: 'usd', label: 'USD ($)' },
-  { value: 'eur', label: 'EUR (€)' },
-  { value: 'gbp', label: 'GBP (£)' },
-  { value: 'cad', label: 'CAD (C$)' },
-  { value: 'aud', label: 'AUD (A$)' },
-  { value: 'zar', label: 'ZAR (R)' },
-  { value: 'ngn', label: 'NGN (₦)' },
-  { value: 'kes', label: 'KES (KSh)' },
-  { value: 'ghs', label: 'GHS (₵)' },
-  { value: 'egp', label: 'EGP (E£)' },
-  { value: 'mad', label: 'MAD (د.م.)' },
-  { value: 'tnd', label: 'TND (د.ت)' },
-  { value: 'xof', label: 'XOF (CFA)' },
-  { value: 'xaf', label: 'XAF (FCFA)' },
-];
-
-export const EDUCATION_LEVELS = [
-  { value: '', label: 'All Education Levels' },
-  { value: 'primary-school', label: 'Primary School' },
-  { value: 'secondary-school', label: 'Secondary School' },
-  { value: 'vocational-training', label: 'Vocational Training' },
-  { value: 'diploma', label: 'Diploma' },
-  { value: 'bachelor-degree', label: 'Bachelor\'s Degree' },
-  { value: 'master-degree', label: 'Master\'s Degree' },
-  { value: 'phd', label: 'PhD' },
-  { value: 'professional-certification', label: 'Professional Certification' },
-  { value: 'international-qualification', label: 'International Qualification' },
-  { value: 'african-university', label: 'African University' },
-  { value: 'western-university', label: 'Western University' },
-];
-
-export const JOB_TYPES = [
-  { value: 'full-time', label: 'Full-time' },
-  { value: 'part-time', label: 'Part-time' },
-  { value: 'contract', label: 'Contract' },
-  { value: 'freelance', label: 'Freelance' },
-  { value: 'internship', label: 'Internship' },
-  { value: 'temporary', label: 'Temporary' },
-  { value: 'volunteer', label: 'Volunteer' },
-];
-
-export const SPECIAL_CONSIDERATIONS = [
-  { value: 'diaspora-welcome', label: 'Diaspora Welcome' },
-  { value: 'local-hire-preferred', label: 'Local Hire Preferred' },
-  { value: 'expatriate-position', label: 'Expatriate Position' },
-  { value: 'national-service', label: 'National Service' },
-  { value: 'youth-program', label: 'Youth Program' },
-  { value: 'women-encouraged', label: 'Women Encouraged' },
-  { value: 'disability-friendly', label: 'Disability Friendly' },
-  { value: 'relocation-assistance', label: 'Relocation Assistance' },
-  { value: 'housing-provided', label: 'Housing Provided' },
-  { value: 'transportation-provided', label: 'Transportation Provided' },
-];
-
+// Date Posted Options
 export const DATE_POSTED_OPTIONS = [
-  { value: '', label: 'Anytime' },
-  { value: 'today', label: 'Today' },
-  { value: 'week', label: 'This week' },
-  { value: 'month', label: 'This month' },
-  { value: '3months', label: 'Last 3 months' },
+  { value: '', label: 'Any Time' },
+  { value: 'last_24_hours', label: 'Last 24 hours' },
+  { value: 'last_week', label: 'Last week' },
+  { value: 'last_month', label: 'Last month' },
+  { value: 'last_3_months', label: 'Last 3 months' },
+  { value: 'last_6_months', label: 'Last 6 months' },
+  { value: 'last_year', label: 'Last year' },
 ];
