@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { CompanyLogo } from '@/components/ui/CompanyLogo';
 import type { JobListing } from '@/lib/api/jobs';
 
 interface JobCardProps {
@@ -33,14 +33,6 @@ const JobCard: React.FC<JobCardProps> = ({
     return null;
   };
 
-  const getCompanyInitials = (companyName: string) => {
-    return companyName
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   const stripHtmlTags = (html: string) => {
     if (typeof window === 'undefined') return html;
@@ -62,26 +54,12 @@ const JobCard: React.FC<JobCardProps> = ({
           <div className="flex items-start space-x-4 flex-1">
             {/* Company Logo */}
             <div className="flex-shrink-0">
-              {job.companies[0]?.logo_url ? (
-                <Image
-                  src={job.companies[0].logo_url}
-                  alt={`${job.companies[0].name} logo`}
-                  width={56}
-                  height={56}
-                  className="w-14 h-14 rounded-xl object-cover border border-gray-200 shadow-sm"
-                  onError={(e) => {
-                    // Fallback to initials if image fails to load
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    target.nextElementSibling?.classList.remove('hidden');
-                  }}
-                />
-              ) : null}
-              <div className={`w-14 h-14 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-xl flex items-center justify-center shadow-sm ${job.companies[0]?.logo_url ? 'hidden' : ''}`}>
-                <span className="text-white font-bold text-lg">
-                  {getCompanyInitials(job.companies[0]?.name || 'Company')}
-                </span>
-              </div>
+              <CompanyLogo
+                logoUrl={job.companies[0]?.logo_url}
+                companyName={job.companies[0]?.name || 'Company'}
+                size={56}
+                className="w-14 h-14 rounded-xl border border-gray-200 shadow-sm"
+              />
             </div>
             
             {/* Job Info */}
