@@ -128,13 +128,10 @@ export default function AfricaJobs() {
   // Auto-set location filter based on user's detected country
   useEffect(() => {
     if (countryCode && !filters.location) {
-      console.log('🌍 Auto-setting location filter to:', countryCode);
       setFilters(prev => ({
         ...prev,
         location: countryCode
       }));
-    } else if (countryCode) {
-      console.log('🌍 Detected country:', countryCode, 'but location filter already set to:', filters.location);
     }
   }, [countryCode, filters.location]);
 
@@ -284,10 +281,11 @@ export default function AfricaJobs() {
                       className="w-full bg-white"
                     />
                     </div>
-        <AfricanJobFilters
-                  onFiltersChange={handleFiltersChange}
-                  initialFilters={filters}
-                />
+            <AfricanJobFilters
+              onFiltersChange={handleFiltersChange}
+              initialFilters={filters}
+              autoDetectedCountry={countryCode || undefined}
+            />
         </section>
 
         {/* Results Section */}

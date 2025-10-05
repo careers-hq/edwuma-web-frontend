@@ -14,6 +14,7 @@ import {
 interface AfricanJobFiltersProps {
   onFiltersChange: (filters: AfricanJobFilters) => void;
   initialFilters?: AfricanJobFilters;
+  autoDetectedCountry?: string; // Add prop to know which country was auto-detected
 }
 
 export interface AfricanJobFilters {
@@ -26,7 +27,7 @@ export interface AfricanJobFilters {
 }
 
 
-const AfricanJobFilters: React.FC<AfricanJobFiltersProps> = ({ onFiltersChange, initialFilters }) => {
+const AfricanJobFilters: React.FC<AfricanJobFiltersProps> = ({ onFiltersChange, initialFilters, autoDetectedCountry }) => {
   const [filters, setFilters] = useState<AfricanJobFilters>({
     search: '',
     location: '',
@@ -71,18 +72,25 @@ const AfricanJobFilters: React.FC<AfricanJobFiltersProps> = ({ onFiltersChange, 
         {/* Essential Filters Row - Always Visible */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
           {/* Country Filter - Searchable Dropdown */}
-          <SearchableDropdown
-            label="Country"
-            options={AFRICAN_LOCATIONS}
-            value={filters.location}
-            onChange={(value) => handleFilterChange('location', value)}
-            placeholder="Select country"
-            popularOptions={POPULAR_LOCATIONS}
-            showSearch={true}
-            showGroups={true}
-            onViewAll={() => setIsLocationModalOpen(true)}
-            className=""
-          />
+          <div className="relative">
+            <SearchableDropdown
+              label="Country"
+              options={AFRICAN_LOCATIONS}
+              value={filters.location}
+              onChange={(value) => handleFilterChange('location', value)}
+              placeholder="Select country"
+              popularOptions={POPULAR_LOCATIONS}
+              showSearch={true}
+              showGroups={true}
+              onViewAll={() => setIsLocationModalOpen(true)}
+              className=""
+            />
+            {filters.location && autoDetectedCountry === filters.location && (
+              <span className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-green-500 text-white text-xs rounded-full">
+                🌍
+              </span>
+            )}
+          </div>
 
 
           {/* Work Mode Filter */}

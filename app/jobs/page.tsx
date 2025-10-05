@@ -220,8 +220,7 @@ export default function JobsPage() {
           <div className="lg:col-span-3">
             {/* Search Bar and Results Header */}
             <div className="mb-6">
-             
-              
+
               {/* Full Width Search Bar */}
               <div className="flex gap-2">
                 <div className="relative flex-1">
