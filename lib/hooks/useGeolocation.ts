@@ -39,11 +39,17 @@ export const useGeolocation = (): UseGeolocationReturn => {
       if (userLocation) {
         const country = await geolocationService.getCountryForFiltering();
         setCountryCode(country);
+      } else {
+        // If geolocation fails, don't treat it as an error - just continue without auto-detection
+        console.warn('Geolocation failed, continuing without auto-detection');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to detect location';
       setError(errorMessage);
       console.error('Geolocation error:', err);
+      
+      // Don't block the UI if geolocation fails - just log the error
+      // The user can still use the app without auto-detected location
     } finally {
       setIsLoading(false);
     }

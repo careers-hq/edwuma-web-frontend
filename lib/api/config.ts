@@ -11,6 +11,17 @@ export const API_CONFIG = {
   RETRY_DELAY: 1000, // 1 second
 } as const;
 
+// Helper function to get the correct API URL based on environment
+export const getApiUrl = (): string => {
+  // In production on Vercel, use the production API URL
+  if (process.env.NODE_ENV === 'production' && process.env.VERCEL) {
+    return process.env.NEXT_PUBLIC_API_URL || 'https://api.edwuma.com';
+  }
+  
+  // In development, use localhost or the configured URL
+  return API_CONFIG.BASE_URL;
+};
+
 export const API_ENDPOINTS = {
   // Authentication
   AUTH: {

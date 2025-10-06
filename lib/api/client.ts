@@ -3,7 +3,7 @@
  * Central HTTP client for making API requests with authentication and error handling
  */
 
-import { API_CONFIG, STORAGE_KEYS } from './config';
+import { API_CONFIG, STORAGE_KEYS, getApiUrl } from './config';
 import type { ApiResponse, ApiError } from './types';
 
 class ApiClient {
@@ -11,7 +11,7 @@ class ApiClient {
   private timeout: number;
 
   constructor() {
-    this.baseURL = `${API_CONFIG.BASE_URL}/api/${API_CONFIG.VERSION}`;
+    this.baseURL = `${getApiUrl()}/api/${API_CONFIG.VERSION}`;
     this.timeout = API_CONFIG.TIMEOUT;
   }
 

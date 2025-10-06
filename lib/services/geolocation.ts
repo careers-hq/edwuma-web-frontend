@@ -24,6 +24,7 @@ class GeolocationService {
 
   /**
    * Get user's location data from IP address
+   * Now uses internal API route for better Vercel compatibility
    */
   async getUserLocation(): Promise<GeolocationData | null> {
     try {
@@ -33,7 +34,26 @@ class GeolocationService {
         return cached;
       }
 
-      // Try multiple IP geolocation services
+      // Try internal API route first (uses Vercel headers)
+      try {
+        const response = await fetch('/api/geolocation', {
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.country) {
+            this.cacheLocation(data);
+            return data;
+          }
+        }
+      } catch (apiError) {
+        console.warn('Internal geolocation API failed:', apiError);
+      }
+
+      // Fallback to external APIs if internal route fails
       for (const endpoint of this.API_ENDPOINTS) {
         try {
           const data = await this.fetchFromService(endpoint);
