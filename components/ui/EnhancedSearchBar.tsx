@@ -143,6 +143,7 @@ const SimpleSearchBar: React.FC<SimpleSearchBarProps> = ({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             className="w-full pl-12 pr-10 py-3 text-base border border-gray-300 rounded-lg focus:border-[#244034] focus:outline-none focus:ring-2 focus:ring-[#244034] focus:ring-opacity-20"
+            suppressHydrationWarning
           />
           
           {/* Clear Button */}
@@ -162,6 +163,7 @@ const SimpleSearchBar: React.FC<SimpleSearchBarProps> = ({
           variant="primary"
           onClick={handleSearch}
           className="px-8 py-3 text-base font-semibold bg-[#244034] hover:bg-[#1a2f26] rounded-lg"
+          suppressHydrationWarning
         >
           Search
         </Button>

@@ -273,19 +273,36 @@ export default function AfricaJobs() {
         
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
           <div className="flex items-center justify-between mb-6">
-        <SimpleSearchBar
-                      placeholder="Search for jobs, companies, locations, or skills..."
-                      value={filters.search}
-                      onChange={(value) => setFilters((prev: AfricanJobFiltersType) => ({ ...prev, search: value }))}
-                      onSearch={(value) => setFilters((prev: AfricanJobFiltersType) => ({ ...prev, search: value }))}
-                      className="w-full bg-white"
-                    />
-                    </div>
-            <AfricanJobFilters
-              onFiltersChange={handleFiltersChange}
-              initialFilters={filters}
-              autoDetectedCountry={countryCode || undefined}
-            />
+            {isClient ? (
+              <SimpleSearchBar
+                placeholder="Search for jobs, companies, locations, or skills..."
+                value={filters.search}
+                onChange={(value) => setFilters((prev: AfricanJobFiltersType) => ({ ...prev, search: value }))}
+                onSearch={(value) => setFilters((prev: AfricanJobFiltersType) => ({ ...prev, search: value }))}
+                className="w-full bg-white"
+              />
+            ) : (
+              <div className="w-full bg-white border border-gray-300 rounded-lg h-12 flex items-center px-4">
+                <div className="w-5 h-5 bg-gray-300 rounded animate-pulse"></div>
+                <div className="ml-3 w-32 h-4 bg-gray-300 rounded animate-pulse"></div>
+              </div>
+            )}
+          </div>
+            {isClient ? (
+              <AfricanJobFilters
+                onFiltersChange={handleFiltersChange}
+                initialFilters={filters}
+                autoDetectedCountry={countryCode || undefined}
+              />
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                  ))}
+                </div>
+              </div>
+            )}
         </section>
 
         {/* Results Section */}

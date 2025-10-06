@@ -35,7 +35,10 @@ const JobCard: React.FC<JobCardProps> = ({
 
 
   const stripHtmlTags = (html: string) => {
-    if (typeof window === 'undefined') return html;
+    if (typeof window === 'undefined') {
+      // Server-side: simple regex-based HTML stripping
+      return html.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ').trim();
+    }
     const doc = new DOMParser().parseFromString(html, 'text/html');
     return doc.body.textContent || '';
   };

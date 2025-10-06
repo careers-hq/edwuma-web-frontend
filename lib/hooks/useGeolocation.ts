@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { geolocationService, GeolocationData } from '@/lib/services/geolocation';
 
 interface UseGeolocationReturn {
@@ -17,8 +17,12 @@ export const useGeolocation = (): UseGeolocationReturn => {
   const [countryCode, setCountryCode] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
-  const fetchLocation = async () => {
+  const fetchLocation = useCallback(async () => {
+    // Only run on client side
+    if (!isClient) return;
+    
     if (!geolocationService.isAvailable()) {
       setError('Geolocation not available in this environment');
       setIsLoading(false);
@@ -43,7 +47,7 @@ export const useGeolocation = (): UseGeolocationReturn => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isClient]);
 
   const refetch = async () => {
     geolocationService.clearCache();
@@ -51,8 +55,14 @@ export const useGeolocation = (): UseGeolocationReturn => {
   };
 
   useEffect(() => {
-    fetchLocation();
+    setIsClient(true);
   }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      fetchLocation();
+    }
+  }, [isClient, fetchLocation]);
 
   return {
     location,
