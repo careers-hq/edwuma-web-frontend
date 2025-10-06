@@ -78,38 +78,38 @@ class GeolocationService {
   /**
    * Normalize location data from different API providers
    */
-  private normalizeLocationData(data: any, endpoint: string): GeolocationData | null {
+  private normalizeLocationData(data: Record<string, unknown>, endpoint: string): GeolocationData | null {
     try {
       // ipapi.co format
       if (endpoint.includes('ipapi.co')) {
         return {
-          country: data.country_name || '',
-          countryCode: data.country_code || '',
-          region: data.region || '',
-          city: data.city || '',
-          timezone: data.timezone || ''
+          country: (data.country_name as string) || '',
+          countryCode: (data.country_code as string) || '',
+          region: (data.region as string) || '',
+          city: (data.city as string) || '',
+          timezone: (data.timezone as string) || ''
         };
       }
 
       // ipinfo.io format
       if (endpoint.includes('ipinfo.io')) {
         return {
-          country: data.country || '',
-          countryCode: data.country || '',
-          region: data.region || '',
-          city: data.city || '',
-          timezone: data.timezone || ''
+          country: (data.country as string) || '',
+          countryCode: (data.country as string) || '',
+          region: (data.region as string) || '',
+          city: (data.city as string) || '',
+          timezone: (data.timezone as string) || ''
         };
       }
 
       // ip-api.com format
       if (endpoint.includes('ip-api.com')) {
         return {
-          country: data.country || '',
-          countryCode: data.countryCode || '',
-          region: data.regionName || '',
-          city: data.city || '',
-          timezone: data.timezone || ''
+          country: (data.country as string) || '',
+          countryCode: (data.countryCode as string) || '',
+          region: (data.regionName as string) || '',
+          city: (data.city as string) || '',
+          timezone: (data.timezone as string) || ''
         };
       }
 

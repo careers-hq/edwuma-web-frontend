@@ -251,15 +251,19 @@ class JobsApiService {
       }
     });
 
-    const response = await this.apiClient.get<JobSearchResponse>(`/jobs?${queryParams.toString()}`);
-    return response;
+    const response = await this.apiClient.get<{ jobs: JobListing[]; pagination: { current_page: number; last_page: number; per_page: number; total: number; from: number | null; to: number | null; }; }>(`/jobs?${queryParams.toString()}`);
+    return {
+      success: response.success,
+      message: response.message,
+      data: response.data
+    };
   }
 
   /**
    * Get a single job by ID
    */
   async getJob(jobId: string): Promise<ApiResponse<JobListing>> {
-    const response = await this.apiClient.get<ApiResponse<JobListing>>(`/jobs/${jobId}`);
+    const response = await this.apiClient.get<JobListing>(`/jobs/${jobId}`);
     return response;
   }
 
@@ -279,8 +283,12 @@ class JobsApiService {
       }
     });
 
-    const response = await this.apiClient.get<JobSearchResponse>(`/companies/${companyId}/jobs?${queryParams.toString()}`);
-    return response;
+    const response = await this.apiClient.get<{ jobs: JobListing[]; pagination: { current_page: number; last_page: number; per_page: number; total: number; from: number | null; to: number | null; }; }>(`/companies/${companyId}/jobs?${queryParams.toString()}`);
+    return {
+      success: response.success,
+      message: response.message,
+      data: response.data
+    };
   }
 
   /**
@@ -299,8 +307,12 @@ class JobsApiService {
       }
     });
 
-    const response = await this.apiClient.get<JobSearchResponse>(`/locations/${locationId}/jobs?${queryParams.toString()}`);
-    return response;
+    const response = await this.apiClient.get<{ jobs: JobListing[]; pagination: { current_page: number; last_page: number; per_page: number; total: number; from: number | null; to: number | null; }; }>(`/locations/${locationId}/jobs?${queryParams.toString()}`);
+    return {
+      success: response.success,
+      message: response.message,
+      data: response.data
+    };
   }
 
   /**
@@ -319,8 +331,12 @@ class JobsApiService {
       }
     });
 
-    const response = await this.apiClient.get<JobSearchResponse>(`/categories/${categoryId}/jobs?${queryParams.toString()}`);
-    return response;
+    const response = await this.apiClient.get<{ jobs: JobListing[]; pagination: { current_page: number; last_page: number; per_page: number; total: number; from: number | null; to: number | null; }; }>(`/categories/${categoryId}/jobs?${queryParams.toString()}`);
+    return {
+      success: response.success,
+      message: response.message,
+      data: response.data
+    };
   }
 
   /**
@@ -339,8 +355,12 @@ class JobsApiService {
       }
     });
 
-    const response = await this.apiClient.get<JobSearchResponse>(`/locations/region/${region}?${queryParams.toString()}`);
-    return response;
+    const response = await this.apiClient.get<{ jobs: JobListing[]; pagination: { current_page: number; last_page: number; per_page: number; total: number; from: number | null; to: number | null; }; }>(`/locations/region/${region}?${queryParams.toString()}`);
+    return {
+      success: response.success,
+      message: response.message,
+      data: response.data
+    };
   }
 }
 

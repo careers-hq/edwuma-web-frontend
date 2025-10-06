@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
-    domains: ['localhost', 'jobdataapi.com'],
+    domains: ['localhost', 'jobdataapi.com', 'api-test.edwuma.com'],
   },
 };
 

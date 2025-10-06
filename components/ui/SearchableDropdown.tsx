@@ -30,7 +30,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   className = "",
   showSearch = true,
   showGroups = true,
-  popularOptions = [],
+  popularOptions: _ = [],
   onViewAll
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -199,7 +199,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                     {groupName}
                   </div>
                 )}
-                {groupedOptions[groupName].map((option, index) => {
+                {groupedOptions[groupName].map((option) => {
                   const globalIndex = filteredOptions.findIndex(opt => opt.value === option.value);
                   const isFocused = focusedIndex === globalIndex;
                   const isSelected = value === option.value;

@@ -12,7 +12,6 @@ import type {
   User,
   ForgotPasswordRequest,
   ResetPasswordRequest,
-  ApiResponse,
 } from './types';
 
 class AuthService {
@@ -35,8 +34,9 @@ class AuthService {
       }
 
       throw new Error(response.message || 'Login failed');
-    } catch (error: any) {
-      throw new Error(error.message || 'Login failed');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+      throw new Error(errorMessage);
     }
   }
 
@@ -59,8 +59,9 @@ class AuthService {
       }
 
       throw new Error(response.message || 'Registration failed');
-    } catch (error: any) {
-      throw new Error(error.message || 'Registration failed');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Registration failed';
+      throw new Error(errorMessage);
     }
   }
 
@@ -136,8 +137,9 @@ class AuthService {
       if (!response.success) {
         throw new Error(response.message || 'Failed to send password reset email');
       }
-    } catch (error: any) {
-      throw new Error(error.message || 'Failed to send password reset email');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send password reset email';
+      throw new Error(errorMessage);
     }
   }
 
@@ -151,8 +153,9 @@ class AuthService {
       if (!response.success) {
         throw new Error(response.message || 'Password reset failed');
       }
-    } catch (error: any) {
-      throw new Error(error.message || 'Password reset failed');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Password reset failed';
+      throw new Error(errorMessage);
     }
   }
 

@@ -88,7 +88,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoading: false,
         isInitialized: true,
       });
-    } catch (error: any) {
+    } catch (error) {
       setAuthState(prev => ({ ...prev, isLoading: false }));
       throw error;
     }
@@ -106,7 +106,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoading: false,
         isInitialized: true,
       });
-    } catch (error: any) {
+    } catch (error) {
       setAuthState(prev => ({ ...prev, isLoading: false }));
       throw error;
     }

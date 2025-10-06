@@ -97,7 +97,7 @@ const getStatusText = (status: string) => {
 };
 
 function DashboardContent() {
-  const { user, logout, getUserDisplayName } = useAuth();
+  const { logout, getUserDisplayName } = useAuth();
   const [applications] = useState<JobApplication[]>(mockApplications);
   const [savedJobs] = useState<SavedJob[]>(mockSavedJobs);
   const [activeTab, setActiveTab] = useState<'overview' | 'applications' | 'saved' | 'profile'>('overview');

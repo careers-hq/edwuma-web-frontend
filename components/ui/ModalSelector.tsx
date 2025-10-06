@@ -30,7 +30,7 @@ const ModalSelector: React.FC<ModalSelectorProps> = ({
   onSelectionChange,
   multiSelect = false,
   showGroups = true,
-  popularOptions = []
+  popularOptions: _ = []
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [localSelection, setLocalSelection] = useState<string[]>(selectedValues);

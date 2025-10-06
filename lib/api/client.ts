@@ -3,7 +3,7 @@
  * Central HTTP client for making API requests with authentication and error handling
  */
 
-import { API_CONFIG, HTTP_STATUS, STORAGE_KEYS } from './config';
+import { API_CONFIG, STORAGE_KEYS } from './config';
 import type { ApiResponse, ApiError } from './types';
 
 class ApiClient {
@@ -62,7 +62,7 @@ class ApiClient {
     const contentType = response.headers.get('content-type');
     const isJson = contentType && contentType.includes('application/json');
     
-    let data: any;
+    let data: unknown;
     if (isJson) {
       data = await response.json();
     } else {
@@ -70,15 +70,16 @@ class ApiClient {
     }
 
     if (!response.ok) {
+      const errorData = data as Record<string, unknown>;
       const error: ApiError = {
-        message: data?.message || 'An error occurred',
-        errors: data?.errors,
+        message: (errorData?.message as string) || 'An error occurred',
+        errors: errorData?.errors as Record<string, string[]> | undefined,
         status: response.status,
       };
       throw error;
     }
 
-    return data;
+    return data as ApiResponse<T>;
   }
 
   /**
@@ -134,7 +135,7 @@ class ApiClient {
   /**
    * GET request
    */
-  public async get<T>(endpoint: string, params?: Record<string, any>): Promise<ApiResponse<T>> {
+  public async get<T>(endpoint: string, params?: Record<string, unknown>): Promise<ApiResponse<T>> {
     const url = new URL(this.getUrl(endpoint));
     
     if (params) {
@@ -153,7 +154,7 @@ class ApiClient {
    */
   public async post<T>(
     endpoint: string,
-    data?: any,
+    data?: unknown,
     options?: RequestInit
   ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
@@ -168,7 +169,7 @@ class ApiClient {
    */
   public async put<T>(
     endpoint: string,
-    data?: any,
+    data?: unknown,
     options?: RequestInit
   ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
@@ -183,7 +184,7 @@ class ApiClient {
    */
   public async patch<T>(
     endpoint: string,
-    data?: any,
+    data?: unknown,
     options?: RequestInit
   ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
@@ -209,7 +210,7 @@ class ApiClient {
   public async upload<T>(
     endpoint: string,
     file: File,
-    additionalData?: Record<string, any>
+    additionalData?: Record<string, unknown>
   ): Promise<ApiResponse<T>> {
     const formData = new FormData();
     formData.append('file', file);
@@ -241,13 +242,13 @@ class ApiClient {
    */
   public async refreshToken(): Promise<boolean> {
     try {
-      const response = await this.post<{ user: any; token: string }>('/auth/refresh');
+      const response = await this.post<{ user: unknown; token: string }>('/auth/refresh');
       if (response.success && response.data.token) {
         this.setToken(response.data.token);
         return true;
       }
       return false;
-    } catch (error) {
+    } catch {
       this.removeToken();
       return false;
     }
