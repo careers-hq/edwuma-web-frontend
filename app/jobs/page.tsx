@@ -8,123 +8,212 @@ import { Button } from '@/components/ui/Button';
 import { JobFilters as JobFiltersType } from '@/components/job/JobFilters';
 import JobFilters from '@/components/job/JobFilters';
 import HeroSection from '@/components/home/HeroSection';
+import type { JobListing } from '@/lib/api/jobs';
 
-
-interface Job {
-  id: string;
-  title: string;
-  company: string;
-  location: string;
-  type: string;
-  experience: string;
-  postedAt: string;
-  category: string;
-  salary?: string;
-  description?: string;
-}
-
-const mockJobs: Job[] = [
+const mockJobs: JobListing[] = [
   {
     id: '1',
+    external_id: null,
     title: 'Senior Software Engineer',
-    company: 'TechCorp Ghana',
-    location: 'Accra, Ghana',
-    type: 'Full-Time',
-    experience: 'Senior',
-    postedAt: '2024-01-15',
-    category: 'Information Technology',
-    salary: '$80,000 - $120,000',
     description: 'We are looking for a senior software engineer to join our growing team...',
+    requirements: '5+ years of experience in software development',
+    benefits: 'Health insurance, flexible hours, remote work',
+    salary: { min: 80000, max: 120000, currency: 'USD' },
+    work_mode: { value: 'hybrid', label: 'Hybrid' },
+    job_type: { value: 'full-time', label: 'Full-Time' },
+    experience_level: { value: 'senior', label: 'Senior' },
+    education_level: { value: 'bachelor', label: 'Bachelor\'s Degree' },
+    application: { url: null, deadline: null, deadline_formatted: null },
+    timing: { 
+      posted_at: '2024-01-15T00:00:00Z', 
+      posted_at_formatted: '2024-01-15',
+      expires_at: null,
+      expires_at_formatted: null
+    },
+    status: { value: 'active', label: 'Active' },
+    source: { value: 'direct', label: 'Direct', url: null },
+    data_quality_score: 95,
+    companies: [{ 
+      id: '1', 
+      name: 'TechCorp Ghana', 
+      description: 'Leading tech company', 
+      website: 'https://techcorp.gh',
+      logo_url: undefined,
+      size: '50-200',
+      industry: 'Technology',
+      founded_year: 2015,
+      headquarters: 'Accra, Ghana',
+      type: 'Private',
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z'
+    }],
+    locations: [{ 
+      id: '1', 
+      name: 'Accra, Ghana', 
+      city: 'Accra', 
+      state: null, 
+      country: 'Ghana', 
+      region: 'West Africa',
+      latitude: 5.6037,
+      longitude: -0.1870,
+      is_diaspora: false,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z'
+    }],
+    categories: [{ 
+      id: '1', 
+      name: 'Information Technology', 
+      description: 'IT and software development jobs',
+      parent_id: null,
+      level: 1,
+      is_african_specific: false,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z'
+    }],
+    skills: [],
+    language_requirements: [],
+    visa_sponsorship: [],
+    special_considerations: [],
+    created_at: '2024-01-15T00:00:00Z',
+    updated_at: '2024-01-15T00:00:00Z'
   },
   {
     id: '2',
+    external_id: null,
     title: 'Marketing Manager',
-    company: 'Growth Solutions',
-    location: 'Washington DC',
-    type: 'Full-Time',
-    experience: 'Intermediate',
-    postedAt: '2024-01-14',
-    category: 'Sales and Marketing',
-    salary: '$60,000 - $80,000',
     description: 'Lead our marketing initiatives and drive growth for our company...',
+    requirements: '3+ years of marketing experience',
+    benefits: 'Health insurance, performance bonuses',
+    salary: { min: 60000, max: 80000, currency: 'USD' },
+    work_mode: { value: 'remote', label: 'Remote' },
+    job_type: { value: 'full-time', label: 'Full-Time' },
+    experience_level: { value: 'intermediate', label: 'Intermediate' },
+    education_level: { value: 'bachelor', label: 'Bachelor\'s Degree' },
+    application: { url: null, deadline: null, deadline_formatted: null },
+    timing: { 
+      posted_at: '2024-01-14T00:00:00Z', 
+      posted_at_formatted: '2024-01-14',
+      expires_at: null,
+      expires_at_formatted: null
+    },
+    status: { value: 'active', label: 'Active' },
+    source: { value: 'direct', label: 'Direct', url: null },
+    data_quality_score: 90,
+    companies: [{ 
+      id: '2', 
+      name: 'Growth Solutions', 
+      description: 'Marketing agency', 
+      website: 'https://growthsolutions.com',
+      logo_url: undefined,
+      size: '10-50',
+      industry: 'Marketing',
+      founded_year: 2020,
+      headquarters: 'Washington DC',
+      type: 'Private',
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z'
+    }],
+    locations: [{ 
+      id: '2', 
+      name: 'Washington DC', 
+      city: 'Washington', 
+      state: 'DC', 
+      country: 'United States', 
+      region: 'North America',
+      latitude: 38.9072,
+      longitude: -77.0369,
+      is_diaspora: true,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z'
+    }],
+    categories: [{ 
+      id: '2', 
+      name: 'Sales and Marketing', 
+      description: 'Sales and marketing jobs',
+      parent_id: null,
+      level: 1,
+      is_african_specific: false,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z'
+    }],
+    skills: [],
+    language_requirements: [],
+    visa_sponsorship: [],
+    special_considerations: [],
+    created_at: '2024-01-14T00:00:00Z',
+    updated_at: '2024-01-14T00:00:00Z'
   },
   {
     id: '3',
+    external_id: null,
     title: 'Data Analyst',
-    company: 'Analytics Pro',
-    location: 'California, CA',
-    type: 'Contract',
-    experience: 'Entry Level',
-    postedAt: '2024-01-13',
-    category: 'Information Technology',
-    salary: '$50,000 - $70,000',
     description: 'Analyze data and provide insights to help drive business decisions...',
-  },
-  {
-    id: '4',
-    title: 'Healthcare Administrator',
-    company: 'MedCenter',
-    location: 'New York',
-    type: 'Full-Time',
-    experience: 'Experienced',
-    postedAt: '2024-01-12',
-    category: 'Healthcare',
-    salary: '$70,000 - $90,000',
-    description: 'Manage healthcare operations and ensure quality patient care...',
-  },
-  {
-    id: '5',
-    title: 'Financial Advisor',
-    company: 'Wealth Management Inc',
-    location: 'Miami',
-    type: 'Full-Time',
-    experience: 'Senior',
-    postedAt: '2024-01-11',
-    category: 'Finance and Accounting',
-    salary: '$90,000 - $130,000',
-    description: 'Provide financial advice and investment strategies to clients...',
-  },
-  {
-    id: '6',
-    title: 'UX Designer',
-    company: 'Design Studio',
-    location: 'Remote',
-    type: 'Part-Time',
-    experience: 'Intermediate',
-    postedAt: '2024-01-10',
-    category: 'Creative Arts and Design',
-    salary: '$60,000 - $80,000',
-    description: 'Create user-centered designs for our digital products...',
-  },
-  {
-    id: '7',
-    title: 'Project Manager',
-    company: 'Construction Co',
-    location: 'Accra, Ghana',
-    type: 'Full-Time',
-    experience: 'Experienced',
-    postedAt: '2024-01-09',
-    category: 'Construction and Skilled Trades',
-    salary: '$70,000 - $95,000',
-    description: 'Manage construction projects from planning to completion...',
-  },
-  {
-    id: '8',
-    title: 'Customer Service Representative',
-    company: 'Service Corp',
-    location: 'Remote',
-    type: 'Full-Time',
-    experience: 'Entry Level',
-    postedAt: '2024-01-08',
-    category: 'Customer Service',
-    salary: '$35,000 - $45,000',
-    description: 'Provide excellent customer service and support to our clients...',
-  },
+    requirements: '2+ years of data analysis experience',
+    benefits: 'Health insurance, learning budget',
+    salary: { min: 50000, max: 70000, currency: 'USD' },
+    work_mode: { value: 'hybrid', label: 'Hybrid' },
+    job_type: { value: 'contract', label: 'Contract' },
+    experience_level: { value: 'entry', label: 'Entry Level' },
+    education_level: { value: 'bachelor', label: 'Bachelor\'s Degree' },
+    application: { url: null, deadline: null, deadline_formatted: null },
+    timing: { 
+      posted_at: '2024-01-13T00:00:00Z', 
+      posted_at_formatted: '2024-01-13',
+      expires_at: null,
+      expires_at_formatted: null
+    },
+    status: { value: 'active', label: 'Active' },
+    source: { value: 'direct', label: 'Direct', url: null },
+    data_quality_score: 85,
+    companies: [{ 
+      id: '3', 
+      name: 'Analytics Pro', 
+      description: 'Data analytics company', 
+      website: 'https://analyticspro.com',
+      logo_url: undefined,
+      size: '20-100',
+      industry: 'Technology',
+      founded_year: 2018,
+      headquarters: 'California, CA',
+      type: 'Private',
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z'
+    }],
+    locations: [{ 
+      id: '3', 
+      name: 'California, CA', 
+      city: 'San Francisco', 
+      state: 'CA', 
+      country: 'United States', 
+      region: 'North America',
+      latitude: 37.7749,
+      longitude: -122.4194,
+      is_diaspora: true,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z'
+    }],
+    categories: [{ 
+      id: '1', 
+      name: 'Information Technology', 
+      description: 'IT and software development jobs',
+      parent_id: null,
+      level: 1,
+      is_african_specific: false,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z'
+    }],
+    skills: [],
+    language_requirements: [],
+    visa_sponsorship: [],
+    special_considerations: [],
+    created_at: '2024-01-13T00:00:00Z',
+    updated_at: '2024-01-13T00:00:00Z'
+  }
 ];
 
 export default function JobsPage() {
-  const [jobs] = useState<Job[]>(mockJobs);
-  const [filteredJobs, setFilteredJobs] = useState<Job[]>(mockJobs);
+  const [jobs] = useState<JobListing[]>(mockJobs);
+  const [filteredJobs, setFilteredJobs] = useState<JobListing[]>(mockJobs);
   const [filters, setFilters] = useState<JobFiltersType>({
     search: '',
     category: '',
@@ -144,25 +233,25 @@ export default function JobsPage() {
     if (filters.search) {
       filtered = filtered.filter(job =>
         job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-        job.company.toLowerCase().includes(filters.search.toLowerCase()) ||
+        job.companies[0]?.name.toLowerCase().includes(filters.search.toLowerCase()) ||
         job.description?.toLowerCase().includes(filters.search.toLowerCase())
       );
     }
 
     if (filters.category) {
-      filtered = filtered.filter(job => job.category === filters.category);
+      filtered = filtered.filter(job => job.categories[0]?.name === filters.category);
     }
 
     if (filters.location) {
-      filtered = filtered.filter(job => job.location === filters.location);
+      filtered = filtered.filter(job => job.locations[0]?.name === filters.location);
     }
 
     if (filters.jobType && filters.jobType.length > 0) {
-      filtered = filtered.filter(job => filters.jobType.includes(job.type));
+      filtered = filtered.filter(job => filters.jobType.includes(job.job_type.value));
     }
 
     if (filters.experience) {
-      filtered = filtered.filter(job => job.experience === filters.experience);
+      filtered = filtered.filter(job => job.experience_level.value === filters.experience);
     }
 
     setFilteredJobs(filtered);
@@ -220,8 +309,7 @@ export default function JobsPage() {
           <div className="lg:col-span-3">
             {/* Search Bar and Results Header */}
             <div className="mb-6">
-             
-              
+
               {/* Full Width Search Bar */}
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -260,7 +348,6 @@ export default function JobsPage() {
                 <JobCard
                   key={job.id}
                   job={job}
-                  showDescription={true}
                   onSave={handleSaveJob}
                   isSaved={savedJobs.has(job.id)}
                 />

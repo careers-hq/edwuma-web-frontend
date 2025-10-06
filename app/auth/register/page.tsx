@@ -1,22 +1,38 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { useAuth } from '@/lib/auth';
+import type { RegisterRequest } from '@/lib/api';
 
 export default function RegisterPage() {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+  const router = useRouter();
+  const { register, isAuthenticated, isLoading: authLoading } = useAuth();
+  
+  const [formData, setFormData] = useState<RegisterRequest>({
+    first_name: '',
+    last_name: '',
     email: '',
+    phone: '',
     password: '',
-    confirmPassword: '',
-    agreeToTerms: false,
+    password_confirmation: '',
+    agree_to_terms_and_policy: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, authLoading, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -34,12 +50,12 @@ export default function RegisterPage() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
+    if (!formData.first_name.trim()) {
+      newErrors.first_name = 'First name is required';
     }
 
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
+    if (!formData.last_name.trim()) {
+      newErrors.last_name = 'Last name is required';
     }
 
     if (!formData.email) {
@@ -48,20 +64,24 @@ export default function RegisterPage() {
       newErrors.email = 'Please enter a valid email address';
     }
 
+    if (formData.phone && !/^[\+]?[1-9][\d]$/.test(formData.phone.replace(/\s/g, ''))) {
+      newErrors.phone = 'Please enter a valid phone number';
+    }
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters';
     }
 
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+    if (!formData.password_confirmation) {
+      newErrors.password_confirmation = 'Please confirm your password';
+    } else if (formData.password !== formData.password_confirmation) {
+      newErrors.password_confirmation = 'Passwords do not match';
     }
 
-    if (!formData.agreeToTerms) {
-      newErrors.agreeToTerms = 'You must agree to the terms and conditions';
+    if (!formData.agree_to_terms_and_policy) {
+      newErrors.agree_to_terms_and_policy = 'You must agree to the terms and conditions';
     }
 
     setErrors(newErrors);
@@ -75,22 +95,42 @@ export default function RegisterPage() {
       return;
     }
 
-    setIsLoading(true);
+    setIsSubmitting(true);
+    setErrors({});
     
     try {
-      // TODO: Implement actual registration logic
-      console.log('Registration attempt:', formData);
+      // Filter out empty phone field if not provided
+      const registrationData = {
+        ...formData,
+        phone: formData.phone?.trim() || undefined,
+      };
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Redirect to dashboard or verification page
-      window.location.href = '/auth/verify-email';
-    } catch (error) {
+      await register(registrationData);
+      // Redirect will happen automatically via useEffect
+      router.push('/dashboard');
+    } catch (error: unknown) {
       console.error('Registration error:', error);
-      setErrors({ general: 'Registration failed. Please try again.' });
+      
+      const errorMessage = error instanceof Error ? error.message : 'Registration failed. Please try again.';
+      const errorObj = error as { errors?: Record<string, string[]> };
+      
+      // Handle different types of errors
+      if (errorMessage.includes('email')) {
+        setErrors({ email: 'This email address is already registered.' });
+      } else if (errorMessage.includes('validation')) {
+        // Handle validation errors from API
+        const validationErrors = errorObj.errors || {};
+        // Convert string[] to string for our error state
+        const formattedErrors: Record<string, string> = {};
+        Object.entries(validationErrors).forEach(([key, messages]) => {
+          formattedErrors[key] = Array.isArray(messages) ? messages[0] : messages;
+        });
+        setErrors(formattedErrors);
+      } else {
+        setErrors({ general: errorMessage });
+      }
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -100,18 +140,18 @@ export default function RegisterPage() {
         {/* Header */}
         <div className="text-center">
           <Link href="/" className="inline-block">
-            <span className="text-3xl font-bold text-[#244034] font-['Gordita']">
+            <span className="text-3xl font-bold text-primary font-['Gordita']">
               edwuma
             </span>
           </Link>
-          <h2 className="mt-6 text-3xl font-bold text-[#244034]">
+          <h2 className="mt-6 text-3xl font-bold text-primary">
             Create your account
           </h2>
           <p className="mt-2 text-sm text-[rgba(0,0,0,0.7)]">
             Or{' '}
             <Link
               href="/auth/login"
-              className="font-medium text-[#244034] hover:text-[#1a2f26] transition-colors"
+              className="font-medium text-primary hover:text-success transition-colors"
             >
               sign in to your existing account
             </Link>
@@ -121,7 +161,7 @@ export default function RegisterPage() {
         {/* Registration Form */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-center text-xl font-semibold text-[#244034]">
+            <CardTitle className="text-center text-xl font-semibold text-primary">
               Register
             </CardTitle>
           </CardHeader>
@@ -136,18 +176,18 @@ export default function RegisterPage() {
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   label="First Name"
-                  name="firstName"
-                  value={formData.firstName}
+                  name="first_name"
+                  value={formData.first_name}
                   onChange={handleInputChange}
-                  error={errors.firstName}
+                  error={errors.first_name}
                   placeholder="First name"
                 />
                 <Input
                   label="Last Name"
-                  name="lastName"
-                  value={formData.lastName}
+                  name="last_name"
+                  value={formData.last_name}
                   onChange={handleInputChange}
-                  error={errors.lastName}
+                  error={errors.last_name}
                   placeholder="Last name"
                 />
               </div>
@@ -168,60 +208,113 @@ export default function RegisterPage() {
               />
 
               <Input
-                label="Password"
-                type="password"
-                name="password"
-                value={formData.password}
+                label="Phone Number (Optional)"
+                type="tel"
+                name="phone"
+                value={formData.phone}
                 onChange={handleInputChange}
-                error={errors.password}
-                placeholder="Create a password"
+                error={errors.phone}
+                placeholder="Enter your phone number"
                 leftIcon={
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
                 }
-                helperText="Must be at least 8 characters"
               />
 
-              <Input
-                label="Confirm Password"
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                error={errors.confirmPassword}
-                placeholder="Confirm your password"
-                leftIcon={
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                }
-              />
+              <div className="relative">
+                <Input
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  error={errors.password}
+                  placeholder="Create a password"
+                  leftIcon={
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  }
+                  helperText="Must be at least 8 characters"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  style={{ top: 'calc(50% + 12px)' }} // Adjust for label height
+                >
+                  {showPassword ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+
+              <div className="relative">
+                <Input
+                  label="Confirm Password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="password_confirmation"
+                  value={formData.password_confirmation}
+                  onChange={handleInputChange}
+                  error={errors.password_confirmation}
+                  placeholder="Confirm your password"
+                  leftIcon={
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  }
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  style={{ top: 'calc(50% + 12px)' }} // Adjust for label height
+                >
+                  {showConfirmPassword ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
 
               <div className="flex items-start">
                 <div className="flex items-center h-5">
                   <input
                     id="agreeToTerms"
-                    name="agreeToTerms"
+                    name="agree_to_terms_and_policy"
                     type="checkbox"
-                    checked={formData.agreeToTerms}
+                    checked={formData.agree_to_terms_and_policy}
                     onChange={handleInputChange}
-                    className="h-4 w-4 text-[#244034] focus:ring-[#244034] border-gray-300 rounded"
+                    className="h-4 w-4 text-primary focus:ring-[#244034] border-gray-300 rounded"
                   />
                 </div>
                 <div className="ml-3 text-sm">
                   <label htmlFor="agreeToTerms" className="text-[rgba(0,0,0,0.7)]">
                     I agree to the{' '}
-                    <Link href="/terms" className="text-[#244034] hover:text-[#1a2f26] transition-colors">
+                    <Link href="/terms" className="text-primary hover:text-success transition-colors">
                       Terms of Service
                     </Link>{' '}
                     and{' '}
-                    <Link href="/privacy" className="text-[#244034] hover:text-[#1a2f26] transition-colors">
+                    <Link href="/privacy" className="text-primary hover:text-success transition-colors">
                       Privacy Policy
                     </Link>
                   </label>
-                  {errors.agreeToTerms && (
-                    <p className="mt-1 text-sm text-red-600">{errors.agreeToTerms}</p>
+                  {errors.agree_to_terms_and_policy && (
+                    <p className="mt-1 text-sm text-red-600">{errors.agree_to_terms_and_policy}</p>
                   )}
                 </div>
               </div>
@@ -231,7 +324,8 @@ export default function RegisterPage() {
                 variant="primary"
                 size="lg"
                 className="w-full"
-                loading={isLoading}
+                loading={isSubmitting || authLoading}
+                disabled={isSubmitting || authLoading}
               >
                 Create Account
               </Button>
@@ -260,9 +354,9 @@ export default function RegisterPage() {
                 </Button>
                 <Button variant="outline" className="w-full">
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                    <path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11.75 20h-3v-10h3v10zm-1.5-11.27c-.97 0-1.75-.79-1.75-1.76 0-.97.78-1.76 1.75-1.76s1.75.79 1.75 1.76c0 .97-.78 1.76-1.75 1.76zm15.25 11.27h-3v-5.6c0-1.34-.03-3.07-1.87-3.07-1.87 0-2.16 1.46-2.16 2.97v5.7h-3v-10h2.88v1.36h.04c.4-.75 1.38-1.54 2.85-1.54 3.05 0 3.61 2.01 3.61 4.62v5.56z"/>
                   </svg>
-                  Twitter
+                  LinkedIn
                 </Button>
               </div>
             </div>
