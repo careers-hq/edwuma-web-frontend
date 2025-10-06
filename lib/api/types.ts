@@ -117,7 +117,7 @@ export interface Company {
   name: string;
   description?: string;
   website?: string;
-  logo?: string; // This is now a proxy URL that hides third-party sources
+  logo?: string; // Direct URL to company logo
   industry?: string;
   size?: string;
   location?: string;
