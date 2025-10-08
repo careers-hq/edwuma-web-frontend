@@ -90,7 +90,7 @@ const AfricanJobCard: React.FC<AfricanJobCardProps> = ({
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-bold text-[#244034] mb-1">
+              <h3 className="text-xs font-bold text-[#244034] mb-1 line-clamp-2 break-words leading-tight">
                 {job.title}
               </h3>
               <div className="flex items-center gap-3 flex-wrap">
@@ -215,8 +215,8 @@ const AfricanJobCard: React.FC<AfricanJobCardProps> = ({
       {/* Mobile Layout */}
       <div className="lg:hidden">
         {/* Header Section */}
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-start space-x-3">
+        <div className="flex items-start justify-between mb-3 gap-2">
+          <div className="flex items-start space-x-3 flex-1 min-w-0">
             {/* Company Logo */}
             <div className="w-10 h-10 bg-[#244034] rounded-lg flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold text-sm">
@@ -224,17 +224,17 @@ const AfricanJobCard: React.FC<AfricanJobCardProps> = ({
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-bold text-[#244034] mb-1">
+              <h3 className="text-xs font-bold text-[#244034] mb-1 line-clamp-2 break-words leading-tight">
                 {job.title}
               </h3>
-              <p className="text-sm text-[rgba(0,0,0,0.7)] mb-2">
+              <p className="text-xs text-[rgba(0,0,0,0.7)] mb-2 truncate">
                 {job.company}
               </p>
             </div>
           </div>
           <button
             onClick={handleSave}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
             aria-label={isSaved ? 'Remove from saved' : 'Save job'}
           >
             <svg

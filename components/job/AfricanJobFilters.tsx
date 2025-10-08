@@ -124,6 +124,20 @@ const AfricanJobFilters: React.FC<AfricanJobFiltersProps> = ({ onFiltersChange, 
           <div className="flex flex-wrap gap-2">
             <span className="text-xs font-medium text-gray-500 self-center mr-2">Quick filters:</span>
             
+            {/* Anywhere in the World - Coming Soon */}
+            <button
+              disabled
+              className="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed relative group"
+            >
+              🌎 Anywhere in the World
+              <span className="ml-1.5 px-1.5 py-0.5 bg-indigo-100 text-indigo-600 rounded text-[10px] font-semibold">
+                COMING SOON
+              </span>
+              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                Global remote jobs coming soon!
+              </span>
+            </button>
+
             {/* Visa Sponsorship */}
             <button
               onClick={() => handleFilterChange('visaSponsorship', filters.visaSponsorship ? '' : 'us-visa-sponsorship')}
@@ -171,45 +185,6 @@ const AfricanJobFilters: React.FC<AfricanJobFiltersProps> = ({ onFiltersChange, 
             >
               👔 Senior Level
             </button>
-
-
-          </div>
-
-          {/* Filter Presets */}
-          <div className="flex flex-wrap gap-2">
-            <span className="text-xs font-medium text-gray-500 self-center mr-2">Popular searches:</span>
-            
-            {/* Remote Jobs */}
-            <button
-              onClick={() => {
-                handleFilterChange('workMode', 'remote');
-              }}
-              className="px-3 py-1.5 rounded-full text-xs font-medium bg-white text-gray-600 border border-gray-300 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 transition-all duration-200"
-            >
-              💻 Remote Jobs
-            </button>
-
-            {/* Senior Jobs */}
-            <button
-              onClick={() => {
-                handleFilterChange('experience', 'senior');
-              }}
-              className="px-3 py-1.5 rounded-full text-xs font-medium bg-white text-gray-600 border border-gray-300 hover:bg-green-50 hover:border-green-300 hover:text-green-700 transition-all duration-200"
-            >
-              👔 Senior Jobs
-            </button>
-
-            {/* Visa Sponsorship */}
-            <button
-              onClick={() => {
-                handleFilterChange('visaSponsorship', 'available');
-              }}
-              className="px-3 py-1.5 rounded-full text-xs font-medium bg-white text-gray-600 border border-gray-300 hover:bg-yellow-50 hover:border-yellow-300 hover:text-yellow-700 transition-all duration-200"
-            >
-              🛂 Visa Sponsorship
-            </button>
-
-
 
             {/* Clear All Button */}
             {getActiveFiltersCount() > 0 && (

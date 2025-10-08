@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { CompanyLogo } from '@/components/ui/CompanyLogo';
 import type { JobListing } from '@/lib/api/jobs';
+import { getJobSlug } from '@/lib/utils/slug';
 
 interface JobCardProps {
   job: JobListing;
@@ -51,10 +52,10 @@ const JobCard: React.FC<JobCardProps> = ({
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl hover:border-gray-300 transition-all duration-300 group cursor-pointer">
-      <Link href={`/jobs/${job.id}`}>
+      <Link href={`/jobs/${getJobSlug(job)}`}>
         {/* Header Section */}
-        <div className="flex items-start justify-between mb-5">
-          <div className="flex items-start space-x-4 flex-1">
+        <div className="flex items-start justify-between mb-5 gap-3">
+          <div className="flex items-start space-x-4 flex-1 min-w-0">
             {/* Company Logo */}
             <div className="flex-shrink-0">
               <CompanyLogo
@@ -67,31 +68,31 @@ const JobCard: React.FC<JobCardProps> = ({
             
             {/* Job Info */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#244034] transition-colors line-clamp-1">
+              <h3 className="text-sm font-bold text-gray-900 mb-2 group-hover:text-[#244034] transition-colors line-clamp-2 break-words">
                 {job.title}
               </h3>
-              <div className="flex items-center gap-4 flex-wrap mb-3">
-                <span className="text-base font-semibold text-gray-700">
+              <div className="flex items-center gap-2 sm:gap-4 flex-wrap mb-3">
+                <span className="text-sm font-semibold text-gray-700 truncate">
                   {job.companies[0]?.name || 'Company'}
                 </span>
-                <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                <div className="flex items-center gap-1">
-                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span className="w-1 h-1 bg-gray-400 rounded-full flex-shrink-0"></span>
+                <div className="flex items-center gap-1 min-w-0">
+                  <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-gray-600 truncate">
                     {job.locations[0]?.name || 'Location'}
                   </span>
                   {job.locations[0]?.country && (
-                    <span className="text-sm text-gray-600">, {job.locations[0].country}</span>
+                    <span className="text-sm text-gray-600 truncate">, {job.locations[0].country}</span>
                   )}
                 </div>
               </div>
               
               {/* Salary */}
               {job.salary && (job.salary.min || job.salary.max) && (
-                <p className="text-[#4ade80] font-bold text-base mb-3">
+                <p className="text-[#4ade80] font-bold text-base mb-3 truncate">
                   {formatCurrency(job.salary.min, job.salary.max, job.salary.currency)}
                 </p>
               )}
@@ -131,22 +132,22 @@ const JobCard: React.FC<JobCardProps> = ({
 
         {/* Job Meta Tags */}
         <div className="flex flex-wrap gap-2 mb-4">
-          <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg">
+          <span className="px-2 sm:px-3 py-1 bg-gray-100 text-gray-700 text-xs1 sm:text-sm1 capitalize font-semibold rounded-lg whitespace-nowrap" style={{ textTransform: 'capitalize' }}>
             {job.experience_level.label}
           </span>
-          <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-semibold rounded-lg">
+          <span className="px-2 sm:px-3 py-1 bg-blue-50 text-blue-700 text-xs1 sm:text-sm1 font-semibold rounded-lg whitespace-nowrap">
             {job.job_type.label}
           </span>
-          <span className="px-3 py-1 bg-green-50 text-green-700 text-sm font-semibold rounded-lg">
+          <span className="px-2 sm:px-3 py-1 bg-green-50 text-green-700 text-xs sm:text-sm font-semibold rounded-lg whitespace-nowrap">
             {job.work_mode.label}
           </span>
           {job.education_level && (
-            <span className="px-3 py-1 bg-purple-50 text-purple-700 text-sm font-semibold rounded-lg">
+            <span className="px-2 sm:px-3 py-1 bg-purple-50 text-purple-700 text-xs sm:text-sm font-semibold rounded-lg whitespace-nowrap">
               {job.education_level.label}
             </span>
           )}
           {job.visa_sponsorship.length > 0 && (
-            <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-sm font-semibold rounded-lg">
+            <span className="px-2 sm:px-3 py-1 bg-emerald-50 text-emerald-700 text-xs sm:text-sm font-semibold rounded-lg whitespace-nowrap">
               Visa Sponsorship
             </span>
           )}

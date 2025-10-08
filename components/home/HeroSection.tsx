@@ -1,59 +1,69 @@
 'use client';
 
 import React from 'react';
+import { Button } from '@/components/ui/Button';
+import Link from 'next/link';
 
 const HeroSection: React.FC = () => {
 
   return (
-    <section className="relative bg-primary text-white py-20 lg:py-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative bg-primary text-white py-12 lg:py-16 overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/20 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full mb-4 border border-white/20">
+            <span className="text-lg">🌍</span>
+            <span className="text-xs font-medium">Africa&apos;s Cross-Border Jobs Platform</span>
+          </div>
+
           {/* Main Headline */}
           <h1
-            className="text-5xl md:text-6xl lg:text-7xl font-bold font-['Gordita'] leading-tight"
+            className="text-3xl md:text-4xl lg:text-5xl font-bold font-['Gordita'] leading-tight mb-3"
             style={{ color: '#fff' }}
           >
-            Find Your Dream Job Today
+            Unlock Global Opportunities
+            <br />
+            <span className="text-[#4ade80]">Across Africa & Beyond</span>
           </h1>
 
           {/* Subheadline */}
-          <p className="text-lg md:text-xl text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed">
-            Looking for a job? Browse through our job listings and find the perfect one for you.
+          <p className="text-base md:text-lg text-white/90 mb-6 max-w-3xl mx-auto leading-relaxed">
+            Connect with visa-sponsored jobs, remote positions, and cross-border career opportunities 
+            designed for African talent.
           </p>
-          
-          {/* Search Bar */}
-          {/* <form onSubmit={handleSearch} className="max-w-4xl mx-auto">
-            <div className="flex flex-col sm:flex-row bg-white rounded-lg overflow-hidden shadow-lg">
-              <div className="flex-1 flex items-center px-4 py-4">
-                <svg 
-                  className="w-5 h-5 text-gray-400 mr-3" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth="2" 
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
-                  />
-                </svg>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search Job title, Company or Keyword"
-                  className="flex-1 text-gray-900 placeholder-gray-500 focus:outline-none text-lg"
-                />
-              </div>
-              <Button
-                type="submit"
-                className="bg-[#CFFD6B] text-black font-bold text-lg px-8 py-5 hover:bg-[#B8E85A] transition-colors sm:rounded-r-lg sm:rounded-l-none rounded-lg border-0 w-full sm:w-auto"
-              >
-                SEARCH
-              </Button>
+
+       
+
+          {/* Compact Stats & Countries */}
+          <div className="flex flex-wrap justify-center items-center gap-4 md:gap-6 max-w-4xl mx-auto">
+            {/* Stat Pills */}
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
+              <span className="text-xl font-bold text-[#4ade80]">4</span>
+              <span className="text-xs text-white/80">Countries</span>
             </div>
-          </form> */}
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
+              <span className="text-xl">✅</span>
+              <span className="text-xs text-white/80">Visa Sponsorship</span>
+            </div>
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
+              <span className="text-xl">💼</span>
+              <span className="text-xs text-white/80">Remote Jobs</span>
+            </div>
+            
+            {/* Country Flags */}
+            <div className="hidden md:flex items-center gap-2 text-xl">
+              <span>🇳🇬</span>
+              <span>🇰🇪</span>
+              <span>🇿🇦</span>
+              <span>🇬🇭</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>

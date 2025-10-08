@@ -137,12 +137,15 @@ const SimpleSearchBar: React.FC<SimpleSearchBarProps> = ({
           <input
             ref={inputRef}
             type="text"
+            id="job-search-input"
+            name="job-search"
             value={value}
             onChange={handleInputChange}
             onFocus={handleInputFocus}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             className="w-full pl-12 pr-10 py-3 text-base border border-gray-300 rounded-lg focus:border-[#244034] focus:outline-none focus:ring-2 focus:ring-[#244034] focus:ring-opacity-20"
+            aria-label="Search for jobs"
             suppressHydrationWarning
           />
           
@@ -151,6 +154,7 @@ const SimpleSearchBar: React.FC<SimpleSearchBarProps> = ({
             <button
               onClick={clearSearch}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Clear search"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -180,6 +184,7 @@ const SimpleSearchBar: React.FC<SimpleSearchBarProps> = ({
                 className={`w-full flex items-center px-3 py-2 text-sm text-left rounded-md hover:bg-gray-100 transition-colors ${
                   focusedIndex === index ? 'bg-gray-100' : ''
                 }`}
+                aria-label={`Search for ${suggestion}`}
               >
                 <span className="text-gray-400 mr-3">🔍</span>
                 <span className="text-gray-700">{suggestion}</span>

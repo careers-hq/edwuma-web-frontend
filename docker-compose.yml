@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  edwuma-frontend:
+    image: ${REGISTRY:-ghcr.io}/${IMAGE_NAME:-edwuma-web-frontend}:${IMAGE_TAG:-latest}
+    container_name: edwuma-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+    env_file:
+      - .env.production
+    networks:
+      - edwuma-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.edwuma-frontend.rule=Host(`edwuma.com`) || Host(`www.edwuma.com`)"
+      - "traefik.http.routers.edwuma-frontend.tls=true"
+      - "traefik.http.routers.edwuma-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.edwuma-frontend.loadbalancer.server.port=3000"
+
+  nginx:
+    image: nginx:alpine
+    container_name: edwuma-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - nginx-logs:/var/log/nginx
+    depends_on:
+      - edwuma-frontend
+    networks:
+      - edwuma-network
+
+networks:
+  edwuma-network:
+    driver: bridge
+
+volumes:
+  nginx-logs:
+    driver: local

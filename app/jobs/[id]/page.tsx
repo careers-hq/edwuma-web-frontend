@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,6 +8,22 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { jobsApiService, type JobListing } from '@/lib/api/jobs';
+import { getJobSlug, extractJobId } from '@/lib/utils/slug';
+
+// Extended company type with links for the job detail page
+type CompanyWithLinks = {
+  id: string;
+  name: string;
+  description?: string;
+  logo_url?: string;
+  industry?: string;
+  links?: {
+    website?: string;
+    linkedin?: string;
+    twitter?: string;
+    github?: string;
+  };
+};
 
 const JobDetailsPage: React.FC = () => {
   const params = useParams();
@@ -15,8 +31,38 @@ const JobDetailsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+  const [similarJobs, setSimilarJobs] = useState<JobListing[]>([]);
+  const [isLoadingSimilar, setIsLoadingSimilar] = useState(false);
+  const similarJobsLoadedRef = useRef(false);
 
-  const jobId = params?.id as string;
+  const jobSlugOrId = params?.id as string;
+  const jobId = extractJobId(jobSlugOrId);
+
+  const loadSimilarJobs = useCallback(async () => {
+    if (!job) return;
+    
+    try {
+      setIsLoadingSimilar(true);
+      // Get similar jobs based on company, categories, or skills
+      const filters = {
+        per_page: 3,
+        ...(job.companies[0]?.name && { company: job.companies[0].name }),
+        ...(job.categories.length > 0 && { category_ids: [job.categories[0].id] }),
+        ...(job.skills.length > 0 && { skill_ids: [job.skills[0].id] }),
+      };
+      
+      const response = await jobsApiService.searchJobs(filters);
+      if (response.success && response.data) {
+        // Filter out the current job
+        const filtered = response.data.jobs.filter((similarJob: JobListing) => similarJob.id !== job.id);
+        setSimilarJobs(filtered.slice(0, 3));
+      }
+    } catch (err) {
+      console.error('Error loading similar jobs:', err);
+    } finally {
+      setIsLoadingSimilar(false);
+    }
+  }, [job]);
 
   useEffect(() => {
     const loadJob = async () => {
@@ -25,6 +71,9 @@ const JobDetailsPage: React.FC = () => {
       try {
         setIsLoading(true);
         setError(null);
+        setJob(null); // Clear previous job
+        setSimilarJobs([]); // Clear previous similar jobs
+        similarJobsLoadedRef.current = false; // Reset similar jobs flag
         const response = await jobsApiService.getJob(jobId);
         
         if (response.success && response.data) {
@@ -42,6 +91,14 @@ const JobDetailsPage: React.FC = () => {
 
     loadJob();
   }, [jobId]);
+
+  // Separate useEffect for loading similar jobs when job changes
+  useEffect(() => {
+    if (job && !similarJobsLoadedRef.current) {
+      similarJobsLoadedRef.current = true;
+      loadSimilarJobs();
+    }
+  }, [job, loadSimilarJobs]);
 
   const formatCurrency = (min: number | null, max: number | null, currency: string | null) => {
     if (!min && !max) return null;
@@ -64,6 +121,7 @@ const JobDetailsPage: React.FC = () => {
       .toUpperCase()
       .slice(0, 2);
   };
+
 
   const handleSaveJob = () => {
     if (!job) return;
@@ -122,25 +180,25 @@ const JobDetailsPage: React.FC = () => {
         {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <nav className="flex items-center space-x-2 text-sm text-gray-600">
-            <Link href="/" className="hover:text-[#244034] transition-colors">
+          <nav className="flex items-center space-x-2 text-sm text-gray-600 overflow-hidden">
+            <Link href="/" className="hover:text-[#244034] transition-colors flex-shrink-0">
               Home
             </Link>
-            <span>/</span>
-            <Link href="/" className="hover:text-[#244034] transition-colors">
+            <span className="flex-shrink-0">/</span>
+            <Link href="/" className="hover:text-[#244034] transition-colors flex-shrink-0">
               Jobs
             </Link>
-            <span>/</span>
-            <span className="text-gray-900 font-medium">{job.title}</span>
+            <span className="flex-shrink-0">/</span>
+            <span className="text-gray-900 font-medium truncate">{job.title}</span>
         </nav>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Job Header Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8">
-                <div className="flex items-start justify-between">
-            <div className="flex items-start space-x-6 flex-1">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8 mb-8">
+                <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start space-x-4 sm:space-x-6 flex-1 min-w-0">
               {/* Company Logo */}
               <div className="flex-shrink-0">
                 {job.companies[0]?.logo_url ? (
@@ -149,7 +207,7 @@ const JobDetailsPage: React.FC = () => {
                     alt={`${job.companies[0].name} logo`}
                     width={80}
                     height={80}
-                    className="w-20 h-20 rounded-2xl object-cover border border-gray-200 shadow-sm"
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-gray-200 shadow-sm"
                     onError={(e) => {
                       // Fallback to initials if image fails to load
                       const target = e.target as HTMLImageElement;
@@ -158,56 +216,56 @@ const JobDetailsPage: React.FC = () => {
                     }}
                   />
                 ) : null}
-                <div className={`w-20 h-20 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-2xl flex items-center justify-center shadow-sm ${job.companies[0]?.logo_url ? 'hidden' : ''}`}>
-                  <span className="text-white font-bold text-xl">
+                <div className={`w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-2xl flex items-center justify-center shadow-sm ${job.companies[0]?.logo_url ? 'hidden' : ''}`}>
+                  <span className="text-white font-bold text-lg sm:text-xl">
                     {getCompanyInitials(job.companies[0]?.name || 'Company')}
                   </span>
                 </div>
               </div>
               
               {/* Job Info */}
-                  <div className="flex-1">
-                <h1 className="text-4xl font-bold text-gray-900 mb-3 leading-tight">{job.title}</h1>
-                <div className="flex items-center gap-6 text-lg text-gray-600 mb-4">
-                  <span className="font-semibold">{job.companies[0]?.name || 'Company'}</span>
-                  <span className="text-gray-400">•</span>
-                  <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex-1 min-w-0">
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-3 leading-tight break-words" style={{ fontSize: '1rem', lineHeight: '1.5rem' }}>{job.title}</h1>
+                <div className="flex items-center gap-2 sm:gap-6 text-sm text-gray-600 mb-4 flex-wrap">
+                  <span className="font-semibold truncate">{job.companies[0]?.name || 'Company'}</span>
+                  <span className="text-gray-400 flex-shrink-0">•</span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                    <span>{job.locations[0]?.name || 'Location'}</span>
+                    <span className="truncate">{job.locations[0]?.name || 'Location'}</span>
                     {job.locations[0]?.country && (
-                      <span className="text-gray-400">, {job.locations[0].country}</span>
+                      <span className="text-gray-400 truncate">, {job.locations[0].country}</span>
                     )}
                   </div>
                 </div>
                 
                 {/* Job Meta */}
-                <div className="flex items-center gap-8 text-sm text-gray-600">
+                <div className="flex items-center gap-4 sm:gap-8 text-xs sm:text-sm text-gray-600 flex-wrap">
                   <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>Posted {job.timing.posted_at_formatted}</span>
+                    <span className="truncate">Posted {job.timing.posted_at_formatted}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
                     </svg>
-                    <span>{job.job_type.label}</span>
+                    <span className="truncate">{job.job_type.label}</span>
                 </div>
                   <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
-                    <span>{job.work_mode.label}</span>
+                    <span className="truncate">{job.work_mode.label}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    <span>{job.experience_level.label}</span>
+                    <span className="truncate">{job.experience_level.label}</span>
                   </div>
                 </div>
               </div>
@@ -216,11 +274,11 @@ const JobDetailsPage: React.FC = () => {
             {/* Save Button */}
             <button
               onClick={handleSaveJob}
-              className="p-3 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0"
+              className="p-2 sm:p-3 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0"
               aria-label={isSaved ? 'Remove from saved' : 'Save job'}
             >
               <svg
-                className={`w-6 h-6 ${isSaved ? 'text-[#4ade80] fill-current' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`w-5 h-5 sm:w-6 sm:h-6 ${isSaved ? 'text-[#4ade80] fill-current' : 'text-gray-400 hover:text-gray-600'}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -232,6 +290,48 @@ const JobDetailsPage: React.FC = () => {
                   d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                 />
               </svg>
+            </button>
+          </div>
+
+          {/* Apply Now Button */}
+          <div className="mt-6 flex flex-col sm:flex-row gap-2 sm:gap-4">
+            {job.application.url ? (
+              <Link href={job.application.url} target="_blank" rel="noopener noreferrer" className="flex-2">
+                <Button variant="primary" size="lg" className="sm:w-full1 bg-[#244034] hover:bg-[#1a2e26] py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
+                  Apply Now
+                </Button>
+              </Link>
+            ) : (
+              <Button variant="primary" size="lg" className="flex-1 bg-gray-400 cursor-not-allowed py-4 text-lg font-semibold" disabled>
+                Apply Now
+              </Button>
+            )}
+            
+            <button 
+              className="px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg border border-gray-200 transition-colors flex items-center justify-center gap-2"
+              aria-label="Receive email notifications for similar jobs"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 15V11a6 6 0 10-12 0v4c0 .386-.149.735-.405 1.005L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 3v2"
+                />
+                <circle
+                  cx="12"
+                  cy="21"
+                  r="1"
+                  fill="currentColor"
+                />
+              </svg>
+              <span className="sm:inline">Receive Emails with Similar Jobs</span>
             </button>
           </div>
 
@@ -261,6 +361,48 @@ const JobDetailsPage: React.FC = () => {
                   dangerouslySetInnerHTML={{ __html: job.description }}
                   className="text-gray-700 leading-relaxed"
                 />
+              </div>
+              
+              {/* Apply Button - Moved here from sidebar */}
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                {job.application.url ? (
+                  <Link href={job.application.url} target="_blank" rel="noopener noreferrer" className="block">
+                    <Button variant="primary" size="lg" className="w-full bg-[#244034] hover:bg-[#1a2e26] py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
+                      Apply for this job
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button variant="primary" size="lg" className="w-full bg-gray-400 cursor-not-allowed py-4 text-lg font-semibold" disabled>
+                    Apply for this job
+                  </Button>
+                )}
+                
+                {/* Save Job Button */}
+                <div className="flex items-center justify-center mt-4">
+                  <button
+                    onClick={handleSaveJob}
+                    className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                      isSaved 
+                        ? 'bg-green-100 text-green-700 border border-green-200' 
+                        : 'bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 hover:text-gray-900'
+                    }`}
+                  >
+                    <svg 
+                      className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`}
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      />
+                    </svg>
+                    {isSaved ? 'Saved to your jobs' : 'Save this job'}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -303,34 +445,168 @@ const JobDetailsPage: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Similar Jobs */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Similar Jobs</h2>
+              {isLoadingSimilar ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="animate-pulse">
+                      <div className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg">
+                        <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : similarJobs.length > 0 ? (
+                <div className="space-y-4">
+                  {similarJobs.map((similarJob) => (
+                    <Link
+                      key={similarJob.id}
+                      href={`/jobs/${getJobSlug(similarJob)}`}
+                      className="block p-4 border border-gray-200 rounded-lg hover:border-[#244034] hover:shadow-md transition-all duration-200"
+                    >
+                      <div className="flex items-start space-x-4">
+                        {/* Company Logo */}
+                        <div className="flex-shrink-0">
+                          {similarJob.companies[0]?.logo_url ? (
+                            <Image
+                              src={similarJob.companies[0].logo_url}
+                              alt={`${similarJob.companies[0].name} logo`}
+                              width={48}
+                              height={48}
+                              className="w-12 h-12 rounded-lg object-cover border border-gray-200"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                target.nextElementSibling?.classList.remove('hidden');
+                              }}
+                            />
+                          ) : null}
+                          <div className={`w-12 h-12 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-lg flex items-center justify-center ${similarJob.companies[0]?.logo_url ? 'hidden' : ''}`}>
+                            <span className="text-white font-bold text-xs">
+                              {getCompanyInitials(similarJob.companies[0]?.name || 'Company')}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Job Info */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 text-lg mb-1 line-clamp-2">
+                            {similarJob.title}
+                          </h3>
+                          <p className="text-gray-600 text-sm mb-2">
+                            {similarJob.companies[0]?.name || 'Company'}
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                            <div className="flex items-center gap-1">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                              {similarJob.locations[0]?.name || 'Location'}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              {similarJob.timing.posted_at_formatted}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
+                  </svg>
+                  <p className="text-gray-500">No similar jobs found at the moment.</p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-8 space-y-6">
-              {/* Apply Button */}
+              {/* Company Info - Moved to top */}
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                {job.application.url ? (
-                  <Link href={job.application.url} target="_blank" rel="noopener noreferrer" className="block">
-                    <Button variant="primary" size="lg" className="w-full bg-[#244034] hover:bg-[#1a2e26] mb-4 py-4 text-lg font-semibold">
-                      Apply for this job
-                    </Button>
-                  </Link>
-                ) : (
-                  <Button variant="primary" size="lg" className="w-full bg-[#244034] hover:bg-[#1a2e26] mb-4 py-4 text-lg font-semibold" disabled>
-                    Apply for this job
-                  </Button>
-                )}
-                
-                <div className="text-center">
-                  <button
-                    onClick={handleSaveJob}
-                    className="text-sm text-gray-600 hover:text-[#244034] transition-colors font-medium"
-                  >
-                    {isSaved ? '✓ Saved to your jobs' : 'Save this job'}
-                  </button>
-                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">About the Company</h3>
+                <div className="flex items-center space-x-4 mb-4">
+                  {job.companies[0]?.logo_url ? (
+                    <Image
+                      src={job.companies[0].logo_url}
+                      alt={`${job.companies[0].name} logo`}
+                      width={48}
+                      height={48}
+                      className="w-12 h-12 rounded-lg object-cover border border-gray-200"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  ) : null}
+                  <div className={`w-12 h-12 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-lg flex items-center justify-center ${job.companies[0]?.logo_url ? 'hidden' : ''}`}>
+                    <span className="text-white font-bold text-sm">
+                      {getCompanyInitials(job.companies[0]?.name || 'Company')}
+                    </span>
                   </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 text-lg">{job.companies[0]?.name || 'Company'}</h4>
+                    <p className="text-sm text-gray-600">{job.companies[0]?.industry || 'Technology Company'}</p>
+                  </div>
+                </div>
+                
+                {/* Company Links */}
+                {(() => {
+                  const company = job.companies[0] as CompanyWithLinks;
+                  return (company?.links?.website || company?.links?.linkedin) && (
+                    <div className="flex gap-3 mb-4">
+                      {company?.links?.website && (
+                        <a
+                          href={company.links.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg border border-gray-200 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                          Website
+                        </a>
+                      )}
+                      {company?.links?.linkedin && (
+                        <a
+                          href={company.links.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm font-medium rounded-lg border border-blue-200 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                          </svg>
+                          LinkedIn
+                        </a>
+                      )}
+                </div>
+                  );
+                })()}
+                
+                <p className="text-sm text-gray-600">
+                  {job.companies[0]?.description || 'Learn more about this company and their mission.'}
+                </p>
+                  </div>
+
 
               {/* Job Details */}
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
@@ -363,39 +639,6 @@ const JobDetailsPage: React.FC = () => {
                     </div>
                   )}
                 </div>
-              </div>
-
-              {/* Company Info */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">About the Company</h3>
-                <div className="flex items-center space-x-4 mb-4">
-                  {job.companies[0]?.logo_url ? (
-                    <Image
-                      src={job.companies[0].logo_url}
-                      alt={`${job.companies[0].name} logo`}
-                      width={48}
-                      height={48}
-                      className="w-12 h-12 rounded-lg object-cover border border-gray-200"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        target.nextElementSibling?.classList.remove('hidden');
-                      }}
-                    />
-                  ) : null}
-                  <div className={`w-12 h-12 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-lg flex items-center justify-center ${job.companies[0]?.logo_url ? 'hidden' : ''}`}>
-                    <span className="text-white font-bold text-sm">
-                      {getCompanyInitials(job.companies[0]?.name || 'Company')}
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 text-lg">{job.companies[0]?.name || 'Company'}</h4>
-                    <p className="text-sm text-gray-600">Technology Company</p>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-600">
-                  Learn more about this company and their mission.
-                </p>
               </div>
 
               {/* Categories */}

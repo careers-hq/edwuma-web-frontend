@@ -62,13 +62,21 @@ export interface Company {
   id: string;
   name: string;
   description?: string;
-  website?: string;
   logo_url?: string;
-  size?: string;
+  size?: {
+    value: string;
+    label: string;
+  };
   industry?: string;
   founded_year?: number;
   headquarters?: string;
   type?: string;
+  links?: {
+    website?: string;
+    linkedin?: string;
+    twitter?: string;
+    github?: string;
+  };
   created_at: string;
   updated_at: string;
 }
@@ -151,6 +159,7 @@ export interface JobListing {
   id: string;
   external_id: string | null;
   title: string;
+  slug: string;
   description: string;
   requirements?: string;
   benefits?: string;

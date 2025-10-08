@@ -62,16 +62,24 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
             {/* Newsletter Subscription */}
             <div className="space-y-3">
               <h4 className="text-sm font-medium text-white">Stay Updated</h4>
-              <div className="flex">
+              <form className="flex" onSubmit={(e) => e.preventDefault()}>
                 <input
                   type="email"
+                  id="newsletter-email"
+                  name="newsletter-email"
                   placeholder="Enter your email"
                   className="flex-1 px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[#d2f34c] focus:border-transparent"
+                  aria-label="Email address for newsletter subscription"
+                  required
                 />
-                <button className="px-4 py-2 bg-[#d2f34c] text-[#244034] text-sm font-medium rounded-r-md hover:bg-[#c4e03f] transition-colors">
+                <button 
+                  type="submit"
+                  className="px-4 py-2 bg-[#d2f34c] text-[#244034] text-sm font-medium rounded-r-md hover:bg-[#c4e03f] transition-colors"
+                  aria-label="Subscribe to newsletter"
+                >
                   Subscribe
                 </button>
-              </div>
+              </form>
             </div>
           </div>
 

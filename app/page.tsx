@@ -9,6 +9,7 @@ import SimpleSearchBar from '@/components/ui/EnhancedSearchBar';
 import JobCard from '@/components/job/JobCard';
 import { jobsApiService, type JobListing, type JobSearchFilters } from '@/lib/api/jobs';
 import { useGeolocation } from '@/lib/hooks/useGeolocation';
+import HeroSection from '@/components/home/HeroSection';
 
 // Use the JobListing interface from the API service instead of the mock interface
 
@@ -195,79 +196,7 @@ export default function AfricaJobs() {
       
       <main>
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-[#244034] via-[#2d4a3e] to-[#365a4a] text-white py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-                <span className="w-2 h-2 bg-[#4ade80] rounded-full animate-pulse"></span>
-                <span className="text-sm font-medium">Live Jobs from Across Africa</span>
-              </div>
-              
-              <h1 className="text-5xl md:text-7xl font-bold font-['Gordita'] mb-6 leading-tight">
-                Your Gateway to
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#4ade80] to-[#6ee7b7]">
-                  African Careers
-                </span>
-              </h1>
-              
-              <p className="text-xl md:text-2xl text-gray-200 mb-4 max-w-4xl mx-auto leading-relaxed">
-                Join thousands of professionals who&apos;ve found their dream careers across Africa&apos;s fastest-growing companies
-              </p>
-              
-              <p className="text-lg text-gray-300 mb-12 max-w-3xl mx-auto">
-                From Lagos to Nairobi, Cape Town to Cairo - discover opportunities that shape the future of Africa
-              </p>
-
-              {/* Quick Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-[#4ade80] mb-2">
-                    {!isClient || isLoading ? '...' : `${pagination.total}+`}
-                  </div>
-                  <div className="text-gray-300 font-medium">Active Jobs</div>
-                  <div className="text-xs text-gray-400 mt-1">Updated daily</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-[#4ade80] mb-2">54</div>
-                  <div className="text-gray-300 font-medium">African Countries</div>
-                  <div className="text-xs text-gray-400 mt-1">Pan-African reach</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-[#4ade80] mb-2">500+</div>
-                  <div className="text-gray-300 font-medium">Partner Companies</div>
-                  <div className="text-xs text-gray-400 mt-1">From startups to MNCs</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-[#4ade80] mb-2">10K+</div>
-                  <div className="text-gray-300 font-medium">Successful Hires</div>
-                  <div className="text-xs text-gray-400 mt-1">Last 12 months</div>
-                </div>
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="flex flex-wrap justify-center items-center gap-8 text-gray-300">
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-[#4ade80]" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-sm">Verified Employers</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-[#4ade80]" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-sm">No Spam, Ever</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-[#4ade80]" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-sm">Free to Use</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+     <HeroSection />
 
         {/* Search & Filters Section */}
         
