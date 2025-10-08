@@ -30,7 +30,6 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   className = "",
   showSearch = true,
   showGroups = true,
-  popularOptions: _ = [],
   onViewAll
 }) => {
   const [isOpen, setIsOpen] = useState(false);

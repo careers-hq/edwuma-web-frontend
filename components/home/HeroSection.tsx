@@ -1,8 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Button } from '@/components/ui/Button';
-import Link from 'next/link';
 
 const HeroSection: React.FC = () => {
 
