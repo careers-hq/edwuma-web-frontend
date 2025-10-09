@@ -297,6 +297,14 @@ export default function JobsPage() {
     // Check if user is authenticated
     if (!isAuthenticated) {
       toast.error('Please login to save jobs');
+      try {
+        const loginUrl = new URL('/auth/login', window.location.origin);
+        // Return to the same listing URL after login
+        loginUrl.searchParams.set('returnTo', window.location.pathname + window.location.search + window.location.hash);
+        window.location.href = loginUrl.toString();
+      } catch {
+        window.location.href = '/auth/login';
+      }
       return;
     }
 

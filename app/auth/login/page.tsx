@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -13,6 +13,7 @@ import { processPostLoginRedirect } from '@/lib/utils/jobApplication';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   
   const [formData, setFormData] = useState<LoginRequest>({
@@ -28,16 +29,21 @@ export default function LoginPage() {
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
       const redirect = processPostLoginRedirect();
+      const rawReturnTo = searchParams.get('returnTo');
+      const safeReturnTo = rawReturnTo && rawReturnTo.startsWith('/') && !rawReturnTo.startsWith('//') ? rawReturnTo : null;
+
       if (redirect.shouldRedirectToJob && redirect.jobUrl) {
         // Open the job application URL in a new tab
         window.open(redirect.jobUrl, '_blank', 'noopener,noreferrer');
         // Then redirect to dashboard
         router.push(redirect.dashboardUrl);
+      } else if (safeReturnTo) {
+        router.push(safeReturnTo);
       } else {
         router.push(redirect.dashboardUrl);
       }
     }
-  }, [isAuthenticated, authLoading, router]);
+  }, [isAuthenticated, authLoading, router, searchParams]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -85,11 +91,16 @@ export default function LoginPage() {
       await login(formData);
       // Check if there's a job URL to redirect to after login
       const redirect = processPostLoginRedirect();
+      const rawReturnTo = searchParams.get('returnTo');
+      const safeReturnTo = rawReturnTo && rawReturnTo.startsWith('/') && !rawReturnTo.startsWith('//') ? rawReturnTo : null;
+
       if (redirect.shouldRedirectToJob && redirect.jobUrl) {
         // Open the job application URL in a new tab
         window.open(redirect.jobUrl, '_blank', 'noopener,noreferrer');
         // Then redirect to dashboard
         router.push(redirect.dashboardUrl);
+      } else if (safeReturnTo) {
+        router.push(safeReturnTo);
       } else {
         // Normal redirect to dashboard
         router.push(redirect.dashboardUrl);
