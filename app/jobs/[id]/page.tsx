@@ -9,6 +9,7 @@ import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { jobsApiService, type JobListing } from '@/lib/api/jobs';
 import { getJobSlug, extractJobId } from '@/lib/utils/slug';
+import { JobPostingSchema, BreadcrumbSchema } from '@/components/seo';
 
 // Extended company type with links for the job detail page
 type CompanyWithLinks = {
@@ -173,8 +174,19 @@ const JobDetailsPage: React.FC = () => {
     );
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://edwuma.com';
+  const breadcrumbItems = [
+    { name: 'Home', url: baseUrl },
+    { name: 'Jobs', url: `${baseUrl}/jobs` },
+    { name: job.title, url: `${baseUrl}/jobs/${job.slug}` },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* SEO Structured Data */}
+      <JobPostingSchema job={job} />
+      <BreadcrumbSchema items={breadcrumbItems} />
+      
       <Header />
       
         {/* Breadcrumb */}
@@ -375,7 +387,7 @@ const JobDetailsPage: React.FC = () => {
             </div>
             <div className="flex-1">
               <h4 className="font-semibold text-gray-900 text-lg">{job.companies[0]?.name || 'Company'}</h4>
-              <p className="text-sm text-gray-600">{job.companies[0]?.industry || 'Technology Company'}</p>
+              {/* <p className="text-sm text-gray-600">{job.companies[0]?.industry || ''}</p> */}
             </div>
           </div>
           
@@ -632,7 +644,7 @@ const JobDetailsPage: React.FC = () => {
                   </div>
                   <div className="flex-1">
                     <h4 className="font-semibold text-gray-900 text-lg">{job.companies[0]?.name || 'Company'}</h4>
-                    <p className="text-sm text-gray-600">{job.companies[0]?.industry || 'Technology Company'}</p>
+                    <p className="text-sm text-gray-600">{job.companies[0]?.industry || ''}</p>
                   </div>
                 </div>
                 
@@ -683,20 +695,20 @@ const JobDetailsPage: React.FC = () => {
                 <div className="space-y-4">
                   <div>
                     <span className="text-sm text-gray-600 font-medium">Experience Level</span>
-                    <p className="font-semibold text-gray-900">{job.experience_level.label}</p>
+                    <p className="font-semibold text-gray-900 capitalize">{job.experience_level.value}</p>
                   </div>
                   <div>
                     <span className="text-sm text-gray-600 font-medium">Employment Type</span>
-                    <p className="font-semibold text-gray-900">{job.job_type.label}</p>
+                    <p className="font-semibold text-gray-900 capitalize">{job.job_type.value}</p>
                   </div>
                   <div>
                     <span className="text-sm text-gray-600 font-medium">Work Arrangement</span>
-                    <p className="font-semibold text-gray-900">{job.work_mode.label}</p>
+                    <p className="font-semibold text-gray-900 capitalize">{job.work_mode.value}</p>
                   </div>
                   {job.education_level && (
                     <div>
                       <span className="text-sm text-gray-600 font-medium">Education Level</span>
-                      <p className="font-semibold text-gray-900">{job.education_level.label}</p>
+                      <p className="font-semibold text-gray-900 capitalize">{job.education_level.value}</p>
                   </div>
                   )}
                   {job.salary && (job.salary.min || job.salary.max) && (

@@ -125,25 +125,25 @@ const JobCard: React.FC<JobCardProps> = ({
         {job.description && (
           <div className="mb-4">
             <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
-              {truncateDescription(job.description, 150)}
+              {truncateDescription(job.description, 250)}
             </p>
           </div>
         )}
 
         {/* Job Meta Tags */}
         <div className="flex flex-wrap gap-2 mb-4">
-          <span className="px-2 sm:px-3 py-1 bg-gray-100 text-gray-700 text-xs1 sm:text-sm1 capitalize font-semibold rounded-lg whitespace-nowrap" style={{ textTransform: 'capitalize' }}>
-            {job.experience_level.label}
+          <span className="px-2 sm:px-3 py-1 bg-gray-100 text-gray-700 text-xs sm:text-sm capitalize font-semibold rounded-lg whitespace-nowrap">
+            {job.experience_level.value}
           </span>
           <span className="px-2 sm:px-3 py-1 bg-blue-50 text-blue-700 text-xs1 sm:text-sm1 font-semibold rounded-lg whitespace-nowrap">
-            {job.job_type.label}
+            {job.job_type.value}
           </span>
           <span className="px-2 sm:px-3 py-1 bg-green-50 text-green-700 text-xs sm:text-sm font-semibold rounded-lg whitespace-nowrap">
-            {job.work_mode.label}
+            {job.work_mode.value}
           </span>
           {job.education_level && (
             <span className="px-2 sm:px-3 py-1 bg-purple-50 text-purple-700 text-xs sm:text-sm font-semibold rounded-lg whitespace-nowrap">
-              {job.education_level.label}
+              {job.education_level.value}
             </span>
           )}
           {job.visa_sponsorship.length > 0 && (

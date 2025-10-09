@@ -50,7 +50,7 @@
 }
 
 body {
-  background: var(--background);
+  background: #F4F2EE;
   color: var(--foreground);
   font-family: 'Gordita', 'EB Garamond', serif, -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px;
