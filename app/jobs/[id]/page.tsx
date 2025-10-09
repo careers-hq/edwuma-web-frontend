@@ -350,6 +350,75 @@ const JobDetailsPage: React.FC = () => {
           )}
         </div>
 
+        {/* Company Info Card - Mobile Only (shows as second card) */}
+        <div className="lg:hidden bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">About the Company</h3>
+          <div className="flex items-center space-x-4 mb-4">
+            {job.companies[0]?.logo_url ? (
+              <Image
+                src={job.companies[0].logo_url}
+                alt={`${job.companies[0].name} logo`}
+                width={48}
+                height={48}
+                className="w-12 h-12 rounded-lg object-cover border border-gray-200"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  target.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+            ) : null}
+            <div className={`w-12 h-12 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-lg flex items-center justify-center ${job.companies[0]?.logo_url ? 'hidden' : ''}`}>
+              <span className="text-white font-bold text-sm">
+                {getCompanyInitials(job.companies[0]?.name || 'Company')}
+              </span>
+            </div>
+            <div className="flex-1">
+              <h4 className="font-semibold text-gray-900 text-lg">{job.companies[0]?.name || 'Company'}</h4>
+              <p className="text-sm text-gray-600">{job.companies[0]?.industry || 'Technology Company'}</p>
+            </div>
+          </div>
+          
+          {/* Company Links */}
+          {(() => {
+            const company = job.companies[0] as CompanyWithLinks;
+            return (company?.links?.website || company?.links?.linkedin) && (
+              <div className="flex gap-3 mb-4">
+                {company?.links?.website && (
+                  <a
+                    href={company.links.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg border border-gray-200 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    Website
+                  </a>
+                )}
+                {company?.links?.linkedin && (
+                  <a
+                    href={company.links.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm font-medium rounded-lg border border-blue-200 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                    LinkedIn
+                  </a>
+                )}
+              </div>
+            );
+          })()}
+          
+          <p className="text-sm text-gray-600">
+            {job.companies[0]?.description || 'Learn more about this company and their mission.'}
+          </p>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-8">
@@ -538,8 +607,8 @@ const JobDetailsPage: React.FC = () => {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-8 space-y-6">
-              {/* Company Info - Moved to top */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+              {/* Company Info - Desktop Only (hidden on mobile) */}
+              <div className="hidden lg:block bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">About the Company</h3>
                 <div className="flex items-center space-x-4 mb-4">
                   {job.companies[0]?.logo_url ? (

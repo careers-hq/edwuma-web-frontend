@@ -148,16 +148,18 @@ const AfricanJobFilters: React.FC<AfricanJobFiltersProps> = ({ onFiltersChange, 
               </span>
             </button>
 
-            {/* Visa Sponsorship */}
+            {/* Visa Sponsorship - Coming Soon */}
             <button
-              onClick={() => handleFilterChange('visaSponsorship', filters.visaSponsorship ? '' : 'us-visa-sponsorship')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
-                filters.visaSponsorship 
-                  ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm' 
-                  : 'bg-white text-gray-600 border-gray-300 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700'
-              }`}
+              disabled
+              className="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed relative group"
             >
               🌍 Visa Sponsorship
+              <span className="ml-1.5 px-1.5 py-0.5 bg-indigo-100 text-indigo-600 rounded text-[10px] font-semibold">
+                COMING SOON
+              </span>
+              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                Visa sponsorship filter coming soon!
+              </span>
             </button>
 
             {/* Remote Work */}
