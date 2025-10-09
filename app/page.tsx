@@ -142,6 +142,20 @@ export default function AfricaJobs() {
   }, [isClient, filters, loadJobs]);
 
   const handleSaveJob = (jobId: string) => {
+    // This page uses client-side mock save toggle; still enforce auth via redirect
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('edwuma_access_token') : null;
+      if (!token) {
+        const loginUrl = new URL('/auth/login', window.location.origin);
+        loginUrl.searchParams.set('returnTo', window.location.pathname + window.location.search + window.location.hash);
+        window.location.href = loginUrl.toString();
+        return;
+      }
+    } catch {
+      if (typeof window !== 'undefined') window.location.href = '/auth/login';
+      return;
+    }
+
     setSavedJobs(prev => {
       const newSaved = new Set(prev);
       if (newSaved.has(jobId)) {
