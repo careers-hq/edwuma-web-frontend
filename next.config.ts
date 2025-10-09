@@ -11,7 +11,6 @@ const nextConfig: NextConfig = {
         },
       },
     },
-    optimizeCss: true,
     optimizePackageImports: ['@/components/ui', '@/components/job', '@/components/layout'],
   },
   images: {
