@@ -303,7 +303,7 @@ function DashboardContent() {
                   </CardHeader>
                   <CardContent>
                     {isLoadingActivity ? (
-                      <div className="space-y-4">
+                    <div className="space-y-4">
                         {[1, 2, 3].map((i) => (
                           <div key={i} className="animate-pulse flex items-start gap-3 p-4 border border-gray-200 rounded-lg">
                             <div className="w-5 h-5 bg-gray-200 rounded"></div>
@@ -352,10 +352,10 @@ function DashboardContent() {
                               <p className="text-xs text-[rgba(0,0,0,0.5)] mt-1">
                                 {activity.location && `${activity.location} • `}{activity.timestamp}
                               </p>
-                            </div>
+                        </div>
                           </Link>
-                        ))}
-                      </div>
+                      ))}
+                    </div>
                     ) : (
                       <div className="text-center py-12">
                         <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -367,8 +367,8 @@ function DashboardContent() {
                         </p>
                         <Link href="/">
                           <Button variant="primary">Browse Jobs</Button>
-                        </Link>
-                      </div>
+                      </Link>
+                    </div>
                     )}
                   </CardContent>
                 </Card>
@@ -410,7 +410,7 @@ function DashboardContent() {
                   </CardHeader>
                   <CardContent>
                     {recentActivity.length > 0 ? (
-                      <div className="space-y-4">
+                    <div className="space-y-4">
                         {recentActivity.map((activity) => (
                           <div key={activity.id} className="flex items-start gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                             <div className="flex-shrink-0 mt-1">
@@ -441,11 +441,11 @@ function DashboardContent() {
                               <p className="text-sm text-[rgba(0,0,0,0.7)]">{activity.company}</p>
                               <p className="text-xs text-[rgba(0,0,0,0.5)] mt-1">
                                 {activity.location} • {activity.timestamp}
-                              </p>
-                            </div>
+                            </p>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
+                    </div>
                     ) : (
                       <div className="text-center py-12">
                         <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -489,35 +489,35 @@ function DashboardContent() {
                         ))}
                       </div>
                     ) : savedJobs.length > 0 ? (
-                      <div className="space-y-4">
+                    <div className="space-y-4">
                         {savedJobs.map((savedJob) => (
                           <div key={savedJob.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                            <div className="flex-1">
+                          <div className="flex-1">
                               <h3 className="font-semibold text-[#244034]">{savedJob.job.title}</h3>
                               <p className="text-sm text-[rgba(0,0,0,0.7)]">
                                 {savedJob.job.companies[0]?.name || 'Company'}
                               </p>
-                              <p className="text-xs text-[rgba(0,0,0,0.5)]">
+                            <p className="text-xs text-[rgba(0,0,0,0.5)]">
                                 {savedJob.job.locations[0]?.name || 'Location'} • {savedJob.job.job_type.label}
-                              </p>
-                            </div>
-                            <div className="flex items-center space-x-2">
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-2">
                               <Button 
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => handleRemoveSavedJob(savedJob.id)}
                               >
-                                Remove
+                              Remove
                               </Button>
                               <Link href={`/jobs/${getJobSlug(savedJob.job)}`}>
                                 <Button variant="primary" size="sm">
                                   View Job
-                                </Button>
-                              </Link>
-                            </div>
+                              </Button>
+                            </Link>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
+                    </div>
                     ) : (
                       <div className="text-center py-12">
                         <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

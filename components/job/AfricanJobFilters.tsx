@@ -89,30 +89,30 @@ const AfricanJobFilters: React.FC<AfricanJobFiltersProps> = ({ onFiltersChange, 
       <CardContent className="p-4">
         {/* Location Suggestion Banner */}
         {shouldShowSuggestion && (
-          <div className="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start gap-3 mb-3">
               <div className="flex-shrink-0">
-                <span className="text-2xl">🌍</span>
+                <span className="text-3xl">🌍</span>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">
+              <div className="flex-1 min-w-0">
+                <p className="text-base font-semibold text-gray-900 mb-1">
                   Looking for jobs in {getCountryName(autoDetectedCountry || '')}?
                 </p>
-                <p className="text-xs text-gray-600 mt-0.5">
+                <p className="text-sm text-gray-600">
                   We detected you&apos;re browsing from {getCountryName(autoDetectedCountry || '')}. Filter jobs by this location?
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 onClick={handleApplySuggestion}
-                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
+                className="flex-1 sm:flex-none px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm active:scale-95"
               >
                 Yes, filter
               </button>
               <button
                 onClick={handleDismissSuggestion}
-                className="px-3 py-1.5 text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+                className="flex-1 sm:flex-none px-4 py-2.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 text-sm font-medium rounded-lg transition-colors active:scale-95"
               >
                 No, show all
               </button>
@@ -121,7 +121,7 @@ const AfricanJobFilters: React.FC<AfricanJobFiltersProps> = ({ onFiltersChange, 
         )}
 
         {/* Essential Filters Row - Always Visible */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
           {/* Country Filter - Searchable Dropdown */}
           <div className="relative">
             <SearchableDropdown
@@ -172,82 +172,86 @@ const AfricanJobFilters: React.FC<AfricanJobFiltersProps> = ({ onFiltersChange, 
         {/* Quick Filter Pills - Enhanced */}
         <div className="space-y-3">
           {/* Primary Quick Filters */}
-          <div className="flex flex-wrap gap-2">
-            <span className="text-xs font-medium text-gray-500 self-center mr-2">Quick filters:</span>
+          <div>
+            <span className="text-xs font-medium text-gray-500 block mb-2">Quick filters:</span>
+            <div className="flex flex-wrap gap-2">
             
-            {/* Anywhere in the World - Coming Soon */}
-            <button
-              disabled
-              className="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed relative group"
-            >
-              🌎 Anywhere in the World
-              <span className="ml-1.5 px-1.5 py-0.5 bg-indigo-100 text-indigo-600 rounded text-[10px] font-semibold">
-                COMING SOON
-              </span>
-              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
-                Global remote jobs coming soon!
-              </span>
-            </button>
-
-            {/* Visa Sponsorship - Coming Soon */}
-            <button
-              disabled
-              className="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed relative group"
-            >
-              🌍 Visa Sponsorship
-              <span className="ml-1.5 px-1.5 py-0.5 bg-indigo-100 text-indigo-600 rounded text-[10px] font-semibold">
-                COMING SOON
-              </span>
-              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
-                Visa sponsorship filter coming soon!
-              </span>
-            </button>
-
-            {/* Remote Work */}
-            <button
-              onClick={() => handleFilterChange('workMode', filters.workMode === 'remote' ? '' : 'remote')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
-                filters.workMode === 'remote' 
-                  ? 'bg-green-500 text-white border-green-500 shadow-sm' 
-                  : 'bg-white text-gray-600 border-gray-300 hover:bg-green-50 hover:border-green-300 hover:text-green-700'
-              }`}
-            >
-              💻 Remote Work
-            </button>
-
-            {/* Entry Level */}
-            <button
-              onClick={() => handleFilterChange('experience', filters.experience === 'entry-level' ? '' : 'entry-level')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
-                filters.experience === 'entry-level' 
-                  ? 'bg-blue-500 text-white border-blue-500 shadow-sm' 
-                  : 'bg-white text-gray-600 border-gray-300 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700'
-              }`}
-            >
-              🚀 Entry Level
-            </button>
-
-            {/* Senior Level */}
-            <button
-              onClick={() => handleFilterChange('experience', filters.experience === 'senior' ? '' : 'senior')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
-                filters.experience === 'senior' 
-                  ? 'bg-purple-500 text-white border-purple-500 shadow-sm' 
-                  : 'bg-white text-gray-600 border-gray-300 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-700'
-              }`}
-            >
-              👔 Senior Level
-            </button>
-
-            {/* Clear All Button */}
-            {getActiveFiltersCount() > 0 && (
+              {/* Anywhere in the World - Coming Soon */}
               <button
-                onClick={handleClearFilters}
-                className="px-3 py-1.5 rounded-full text-xs font-medium bg-red-500 text-white border border-red-500 hover:bg-red-600 transition-all duration-200 shadow-sm"
+                disabled
+                className="inline-flex items-center gap-1 px-3 py-2 rounded-full text-xs font-medium transition-all duration-200 border bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed"
               >
-                ✕ Clear All ({getActiveFiltersCount()})
+                <span>🌎</span>
+                <span className="xs:inline">Anywhere in the World</span>
+                {/* <span className="xs:hidden">Global</span> */}
+                <span className="px-1.5 py-0.5 bg-indigo-100 text-indigo-600 rounded text-[10px] font-semibold whitespace-nowrap">
+                  COMING SOON
+                </span>
               </button>
-            )}
+
+              {/* Visa Sponsorship - Coming Soon */}
+              <button
+                disabled
+                className="inline-flex items-center gap-1 px-3 py-2 rounded-full text-xs font-medium transition-all duration-200 border bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed"
+              >
+                <span>🌍</span>
+                <span className="xs:inline">Visa Sponsorship</span>
+                {/* <span className="xs:hidden">Visa</span> */}
+                <span className="px-1.5 py-0.5 bg-indigo-100 text-indigo-600 rounded text-[10px] font-semibold whitespace-nowrap">
+                  COMING SOON
+                </span>
+              </button>
+
+              {/* Remote Work */}
+              <button
+                onClick={() => handleFilterChange('workMode', filters.workMode === 'remote' ? '' : 'remote')}
+                className={`inline-flex items-center gap-1 px-3 py-2 rounded-full text-xs font-medium transition-all duration-200 border active:scale-95 ${
+                  filters.workMode === 'remote' 
+                    ? 'bg-green-500 text-white border-green-500 shadow-sm' 
+                    : 'bg-white text-gray-600 border-gray-300 hover:bg-green-50 hover:border-green-300 hover:text-green-700'
+                }`}
+              >
+                <span>💻</span>
+                <span>Remote Work</span>
+              </button>
+
+              {/* Entry Level */}
+              <button
+                onClick={() => handleFilterChange('experience', filters.experience === 'entry-level' ? '' : 'entry-level')}
+                className={`inline-flex items-center gap-1 px-3 py-2 rounded-full text-xs font-medium transition-all duration-200 border active:scale-95 ${
+                  filters.experience === 'entry-level' 
+                    ? 'bg-blue-500 text-white border-blue-500 shadow-sm' 
+                    : 'bg-white text-gray-600 border-gray-300 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700'
+                }`}
+              >
+                <span>🚀</span>
+                <span>Entry Level</span>
+              </button>
+
+              {/* Senior Level */}
+              <button
+                onClick={() => handleFilterChange('experience', filters.experience === 'senior' ? '' : 'senior')}
+                className={`inline-flex items-center gap-1 px-3 py-2 rounded-full text-xs font-medium transition-all duration-200 border active:scale-95 ${
+                  filters.experience === 'senior' 
+                    ? 'bg-purple-500 text-white border-purple-500 shadow-sm' 
+                    : 'bg-white text-gray-600 border-gray-300 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-700'
+                }`}
+              >
+                <span>👔</span>
+                <span>Senior Level</span>
+              </button>
+
+              {/* Clear All Button */}
+              {getActiveFiltersCount() > 0 && (
+                <button
+                  onClick={handleClearFilters}
+                  className="inline-flex items-center gap-1 px-3 py-2 rounded-full text-xs font-medium bg-red-500 text-white border border-red-500 hover:bg-red-600 transition-all duration-200 shadow-sm active:scale-95"
+                >
+                  <span>✕</span>
+                  <span>Clear All ({getActiveFiltersCount()})</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

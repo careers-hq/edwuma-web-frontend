@@ -279,12 +279,12 @@ export const WORK_ARRANGEMENTS = [
   { value: 'remote', label: 'Remote' },
   { value: 'hybrid', label: 'Hybrid' },
   { value: 'on-site', label: 'On-site' },
-  { value: 'field-work', label: 'Field Work' },
-  { value: 'travel-required', label: 'Travel Required' },
-  { value: 'project-based', label: 'Project-based' },
-  { value: 'consultant', label: 'Consultant' },
-  { value: 'volunteer', label: 'Volunteer' },
-  { value: 'internship', label: 'Internship' },
+  // { value: 'field-work', label: 'Field Work' },
+  // { value: 'travel-required', label: 'Travel Required' },
+  // { value: 'project-based', label: 'Project-based' },
+  // { value: 'consultant', label: 'Consultant' },
+  // { value: 'volunteer', label: 'Volunteer' },
+  // { value: 'internship', label: 'Internship' },
 ];
 
 // Experience Levels
