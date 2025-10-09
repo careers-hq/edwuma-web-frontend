@@ -4,6 +4,8 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import { WebSiteSchema } from "@/components/seo";
 import "@/lib/api/debug-auth"; // Debug utility for authentication
+import { Toaster } from "react-hot-toast";
+import FeedbackWidget from "@/components/ui/FeedbackWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -120,6 +122,8 @@ export default function RootLayout({
       >
         <AuthProvider>
           {children}
+          <Toaster position="top-right" />
+          <FeedbackWidget />
         </AuthProvider>
       </body>
     </html>

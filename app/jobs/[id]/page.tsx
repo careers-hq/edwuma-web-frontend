@@ -15,6 +15,7 @@ import { handleJobApplication } from '@/lib/utils/jobApplication';
 import { userActivitiesService } from '@/lib/api/activities';
 import { savedJobsService } from '@/lib/api/savedJobs';
 import toast from 'react-hot-toast';
+import { openFeedback, shouldSampleFeedback } from '@/lib/feedback/client';
 
 // Extended company type with links for the job detail page
 type CompanyWithLinks = {
@@ -215,6 +216,20 @@ const JobDetailsPage: React.FC = () => {
     }
     
     handleJobApplication(job.application.url, isAuthenticated);
+
+    // Sample a quick apply friction prompt
+    try {
+      if (job?.id && shouldSampleFeedback('apply_click', 0.15, 14)) {
+        openFeedback({
+          type: 'Apply/Redirect',
+          subType: 'Apply flow',
+          jobId: job.id,
+          jobTitle: job.title,
+          company: job.companies[0]?.name,
+          applicationUrl: job.application.url,
+        });
+      }
+    } catch {}
   };
 
   if (isLoading) {
@@ -436,6 +451,19 @@ const JobDetailsPage: React.FC = () => {
               </svg>
               <span className="sm:inline">Receive Emails with Similar Jobs</span>
             </button>
+            <button
+              onClick={() => openFeedback({
+                type: 'Job Details',
+                subType: 'Report job issue',
+                jobId: job.id,
+                jobTitle: job.title,
+                company: job.companies[0]?.name,
+                location: job.locations[0]?.name,
+              })}
+              className="px-6 py-4 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border border-gray-200 transition-colors"
+            >
+              Report a problem with this job
+            </button>
           </div>
 
           {/* Salary */}
@@ -578,6 +606,24 @@ const JobDetailsPage: React.FC = () => {
                     {isSaved ? 'Saved to your jobs' : 'Save this job'}
                   </button>
                 </div>
+
+                {/* Save feedback sampling */}
+                {!isSaved && job?.id && shouldSampleFeedback('save_reason', 0.1, 30) && (
+                  <div className="mt-3 text-center">
+                    <button
+                      onClick={() => openFeedback({
+                        type: 'Saved Jobs',
+                        subType: 'Save reason',
+                        jobId: job.id,
+                        jobTitle: job.title,
+                        company: job.companies[0]?.name,
+                      })}
+                      className="text-sm text-[#244034] hover:underline"
+                    >
+                      Tell us why you saved this
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 

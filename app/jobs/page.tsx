@@ -13,6 +13,7 @@ import { useAuth } from '@/lib/auth';
 import { savedJobsService } from '@/lib/api/savedJobs';
 import { userActivitiesService } from '@/lib/api/activities';
 import toast from 'react-hot-toast';
+import { openFeedback, shouldSampleFeedback } from '@/lib/feedback/client';
 
 const mockJobs: JobListing[] = [
   {
@@ -447,6 +448,21 @@ export default function JobsPage() {
               >
                 Clear Filters
               </Button>
+              {shouldSampleFeedback('no_results', 0.3, 14) && (
+                <div className="mt-6">
+                  <button
+                    onClick={() => openFeedback({
+                      type: 'Search/List',
+                      subType: 'No results',
+                      query: filters.search,
+                      filters,
+                    })}
+                    className="text-sm text-[#244034] hover:underline"
+                  >
+                    Tell us what you expected to find
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
