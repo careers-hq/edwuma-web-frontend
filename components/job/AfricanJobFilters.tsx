@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
 import SearchableDropdown from '@/components/ui/SearchableDropdown';
 import ModalSelector from '@/components/ui/ModalSelector';
@@ -38,16 +38,10 @@ const AfricanJobFilters: React.FC<AfricanJobFiltersProps> = ({ onFiltersChange, 
     ...initialFilters,
   });
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [showLocationSuggestion, setShowLocationSuggestion] = useState(true);
 
-  // Sync auto-detected country to the filter dropdown
-  useEffect(() => {
-    if (autoDetectedCountry && !filters.location) {
-      setFilters(prev => ({
-        ...prev,
-        location: autoDetectedCountry
-      }));
-    }
-  }, [autoDetectedCountry, filters.location]);
+  // Show location suggestion instead of auto-filtering
+  const shouldShowSuggestion = autoDetectedCountry && !filters.location && showLocationSuggestion;
 
   const handleFilterChange = (key: keyof AfricanJobFilters, value: string | string[] | { min: number; max: number }) => {
     const newFilters = { ...filters, [key]: value };
@@ -76,9 +70,56 @@ const AfricanJobFilters: React.FC<AfricanJobFiltersProps> = ({ onFiltersChange, 
   };
 
 
+  const handleApplySuggestion = () => {
+    handleFilterChange('location', autoDetectedCountry || '');
+    setShowLocationSuggestion(false);
+  };
+
+  const handleDismissSuggestion = () => {
+    setShowLocationSuggestion(false);
+  };
+
+  const getCountryName = (code: string) => {
+    const country = AFRICAN_LOCATIONS.find(loc => loc.value === code);
+    return country?.label || code;
+  };
+
   return (
     <Card className="w-full">
       <CardContent className="p-4">
+        {/* Location Suggestion Banner */}
+        {shouldShowSuggestion && (
+          <div className="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0">
+                <span className="text-2xl">🌍</span>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-900">
+                  Looking for jobs in {getCountryName(autoDetectedCountry || '')}?
+                </p>
+                <p className="text-xs text-gray-600 mt-0.5">
+                  We detected you&apos;re browsing from {getCountryName(autoDetectedCountry || '')}. Filter jobs by this location?
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                onClick={handleApplySuggestion}
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
+              >
+                Yes, filter
+              </button>
+              <button
+                onClick={handleDismissSuggestion}
+                className="px-3 py-1.5 text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+              >
+                No, show all
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Essential Filters Row - Always Visible */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
           {/* Country Filter - Searchable Dropdown */}

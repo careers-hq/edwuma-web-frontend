@@ -135,19 +135,19 @@ const JobCard: React.FC<JobCardProps> = ({
           <span className="px-2 sm:px-3 py-1 bg-gray-100 text-gray-700 text-xs sm:text-sm capitalize font-semibold rounded-lg whitespace-nowrap">
             {job.experience_level.value}
           </span>
-          <span className="px-2 sm:px-3 py-1 bg-blue-50 text-blue-700 text-xs1 sm:text-sm1 font-semibold rounded-lg whitespace-nowrap">
+          <span className="px-2 sm:px-3 py-1 bg-blue-50 text-blue-700 text-xs sm:text-sm capitalize font-semibold rounded-lg whitespace-nowrap">
             {job.job_type.value}
           </span>
-          <span className="px-2 sm:px-3 py-1 bg-green-50 text-green-700 text-xs sm:text-sm font-semibold rounded-lg whitespace-nowrap">
+          <span className="px-2 sm:px-3 py-1 bg-green-50 text-green-700 text-xs sm:text-sm capitalize font-semibold rounded-lg whitespace-nowrap">
             {job.work_mode.value}
           </span>
           {job.education_level && (
-            <span className="px-2 sm:px-3 py-1 bg-purple-50 text-purple-700 text-xs sm:text-sm font-semibold rounded-lg whitespace-nowrap">
+            <span className="px-2 sm:px-3 py-1 bg-purple-50 text-purple-700 text-xs sm:text-sm capitalize font-semibold rounded-lg whitespace-nowrap">
               {job.education_level.value}
             </span>
           )}
           {job.visa_sponsorship.length > 0 && (
-            <span className="px-2 sm:px-3 py-1 bg-emerald-50 text-emerald-700 text-xs sm:text-sm font-semibold rounded-lg whitespace-nowrap">
+            <span className="px-2 sm:px-3 py-1 bg-emerald-50 text-emerald-700 text-xs sm:text-sm capitalize font-semibold rounded-lg whitespace-nowrap">
               Visa Sponsorship
             </span>
           )}
@@ -158,12 +158,12 @@ const JobCard: React.FC<JobCardProps> = ({
           <div className="mb-4">
             <div className="flex flex-wrap gap-2">
               {job.categories.slice(0, 3).map((category) => (
-                <span key={category.id} className="px-3 py-1 bg-gray-50 text-gray-600 text-sm font-medium rounded-lg border">
+                <span key={category.id} className="px-3 py-1 bg-gray-50 text-gray-600 text-sm font-medium rounded-lg border capitalize">
                   {category.name}
                 </span>
               ))}
               {job.categories.length > 3 && (
-                <span className="px-3 py-1 bg-gray-50 text-gray-500 text-sm rounded-lg border">
+                <span className="px-3 py-1 bg-gray-50 text-gray-500 text-sm rounded-lg border capitalize">
                   +{job.categories.length - 3} more
                 </span>
               )}
@@ -174,7 +174,7 @@ const JobCard: React.FC<JobCardProps> = ({
         {/* Skills */}
         {job.skills.length > 0 && (
           <div className="mb-4">
-            <span className="text-sm text-gray-500 font-medium">Skills: </span>
+            <span className="text-sm text-gray-500 font-medium capitalize">Skills: </span>
             <span className="text-sm text-gray-600">
               {job.skills.slice(0, 3).map(skill => skill.name).join(', ')}
               {job.skills.length > 3 && ` +${job.skills.length - 3} more`}
@@ -185,7 +185,7 @@ const JobCard: React.FC<JobCardProps> = ({
         {/* Language Requirements */}
         {job.language_requirements && job.language_requirements.length > 0 && (
           <div className="mb-4">
-            <span className="text-sm text-gray-500 font-medium">Languages: </span>
+            <span className="text-sm text-gray-500 font-medium capitalize">Languages: </span>
             <span className="text-sm text-gray-600">
               {job.language_requirements.slice(0, 2).map(lang => lang.language?.name || 'Language').join(', ')}
               {job.language_requirements.length > 2 && ` +${job.language_requirements.length - 2} more`}

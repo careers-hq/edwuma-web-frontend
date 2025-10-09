@@ -126,15 +126,8 @@ export default function AfricaJobs() {
     setIsClient(true);
   }, []);
 
-  // Auto-set location filter based on user's detected country
-  useEffect(() => {
-    if (countryCode && !filters.location) {
-      setFilters(prev => ({
-        ...prev,
-        location: countryCode
-      }));
-    }
-  }, [countryCode, filters.location]);
+  // Don't auto-filter by country - let users discover all jobs
+  // The detected country is shown as a suggestion in the filters component
 
   // Load jobs when filters change (only on client)
   useEffect(() => {
@@ -272,7 +265,7 @@ export default function AfricaJobs() {
                 )}
                 {filters.location && countryCode === filters.location && (
                   <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                    🌍 Auto-detected
+                    🌍 Your location
                   </span>
                 )}
                   </p>
