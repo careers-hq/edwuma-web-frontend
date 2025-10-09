@@ -241,7 +241,11 @@ class AuthService {
     const user = this.getStoredUserData();
     if (!user) return '';
     
-    return `${user.first_name} ${user.last_name}`.trim() || user.email;
+    // Check profile first, then fall back to user object properties
+    const firstName = user.profile?.first_name || user.first_name || '';
+    const lastName = user.profile?.last_name || user.last_name || '';
+    
+    return `${firstName} ${lastName}`.trim() || user.email;
   }
 
   /**

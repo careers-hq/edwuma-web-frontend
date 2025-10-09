@@ -28,6 +28,8 @@ export interface User {
 export interface UserProfile {
   id: number;
   user_id: number;
+  first_name?: string;
+  last_name?: string;
   phone_number?: string;
   date_of_birth?: string;
   gender?: string;

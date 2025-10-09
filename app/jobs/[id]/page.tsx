@@ -10,6 +10,11 @@ import { Button } from '@/components/ui/Button';
 import { jobsApiService, type JobListing } from '@/lib/api/jobs';
 import { getJobSlug, extractJobId } from '@/lib/utils/slug';
 import { JobPostingSchema, BreadcrumbSchema } from '@/components/seo';
+import { useAuth } from '@/lib/auth';
+import { handleJobApplication } from '@/lib/utils/jobApplication';
+import { userActivitiesService } from '@/lib/api/activities';
+import { savedJobsService } from '@/lib/api/savedJobs';
+import toast from 'react-hot-toast';
 
 // Extended company type with links for the job detail page
 type CompanyWithLinks = {
@@ -28,6 +33,7 @@ type CompanyWithLinks = {
 
 const JobDetailsPage: React.FC = () => {
   const params = useParams();
+  const { isAuthenticated } = useAuth();
   const [job, setJob] = useState<JobListing | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +44,24 @@ const JobDetailsPage: React.FC = () => {
 
   const jobSlugOrId = params?.id as string;
   const jobId = extractJobId(jobSlugOrId);
+
+  // Check if job is saved
+  const checkSavedStatus = useCallback(async (jobListingId: string) => {
+    if (!isAuthenticated) {
+      setIsSaved(false);
+      return;
+    }
+
+    try {
+      const response = await savedJobsService.checkIfSaved(jobListingId);
+      
+      if (response.success && response.data) {
+        setIsSaved(response.data.is_saved);
+      }
+    } catch (error) {
+      console.error('Error checking saved status:', error);
+    }
+  }, [isAuthenticated]);
 
   const loadSimilarJobs = useCallback(async () => {
     if (!job) return;
@@ -79,6 +103,15 @@ const JobDetailsPage: React.FC = () => {
         
         if (response.success && response.data) {
           setJob(response.data);
+          
+          // Track job view activity (only if authenticated)
+          // Use the actual job ID (UUID) from the response, not the slug
+          if (isAuthenticated && response.data.id) {
+            userActivitiesService.trackActivity('view', response.data.id);
+            
+            // Check if job is saved
+            await checkSavedStatus(response.data.id);
+          }
         } else {
           setError('Job not found');
         }
@@ -91,7 +124,7 @@ const JobDetailsPage: React.FC = () => {
     };
 
     loadJob();
-  }, [jobId]);
+  }, [jobId, isAuthenticated, checkSavedStatus]);
 
   // Separate useEffect for loading similar jobs when job changes
   useEffect(() => {
@@ -124,9 +157,64 @@ const JobDetailsPage: React.FC = () => {
   };
 
 
-  const handleSaveJob = () => {
+  const handleSaveJob = async () => {
     if (!job) return;
-    setIsSaved(!isSaved);
+
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      toast.error('Please login to save jobs');
+      return;
+    }
+
+    try {
+      if (isSaved) {
+        // Unsave the job
+        const response = await savedJobsService.unsaveJob(job.id);
+        
+        if (response.success) {
+          setIsSaved(false);
+          toast.success('Job removed from saved');
+        } else {
+          toast.error('Failed to unsave job');
+        }
+      } else {
+        // Save the job
+        const response = await savedJobsService.saveJob(job.id);
+        
+        if (response.success) {
+          setIsSaved(true);
+          toast.success('Job saved successfully');
+          
+          // Track save activity with metadata
+          userActivitiesService.trackActivity('save', job.id, {
+            job_title: job.title,
+            company: job.companies[0]?.name,
+            location: job.locations[0]?.name,
+          });
+        } else {
+          toast.error(response.message || 'Failed to save job');
+        }
+      }
+    } catch (error) {
+      console.error('Error saving job:', error);
+      toast.error('An error occurred');
+    }
+  };
+
+  const handleApplyClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!job?.application.url) return;
+    
+    // Track apply click activity (only if authenticated)
+    if (isAuthenticated && job.id) {
+      userActivitiesService.trackActivity('apply_click', job.id, {
+        job_title: job.title,
+        company: job.companies[0]?.name,
+        application_url: job.application.url,
+      });
+    }
+    
+    handleJobApplication(job.application.url, isAuthenticated);
   };
 
   if (isLoading) {
@@ -308,11 +396,14 @@ const JobDetailsPage: React.FC = () => {
           {/* Apply Now Button */}
           <div className="mt-6 flex flex-col sm:flex-row gap-2 sm:gap-4">
             {job.application.url ? (
-              <Link href={job.application.url} target="_blank" rel="noopener noreferrer" className="flex-2">
-                <Button variant="primary" size="lg" className="sm:w-full1 bg-[#244034] hover:bg-[#1a2e26] py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
-                  Apply Now
-                </Button>
-              </Link>
+              <Button 
+                variant="primary" 
+                size="lg" 
+                className="flex-2 bg-[#244034] hover:bg-[#1a2e26] py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                onClick={handleApplyClick}
+              >
+                Apply Now
+              </Button>
             ) : (
               <Button variant="primary" size="lg" className="flex-1 bg-gray-400 cursor-not-allowed py-4 text-lg font-semibold" disabled>
                 Apply Now
@@ -447,11 +538,14 @@ const JobDetailsPage: React.FC = () => {
               {/* Apply Button - Moved here from sidebar */}
               <div className="mt-8 pt-6 border-t border-gray-200">
                 {job.application.url ? (
-                  <Link href={job.application.url} target="_blank" rel="noopener noreferrer" className="block">
-                    <Button variant="primary" size="lg" className="w-full bg-[#244034] hover:bg-[#1a2e26] py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
-                      Apply for this job
-                    </Button>
-                  </Link>
+                  <Button 
+                    variant="primary" 
+                    size="lg" 
+                    className="w-full bg-[#244034] hover:bg-[#1a2e26] py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                    onClick={handleApplyClick}
+                  >
+                    Apply for this job
+                  </Button>
                 ) : (
                   <Button variant="primary" size="lg" className="w-full bg-gray-400 cursor-not-allowed py-4 text-lg font-semibold" disabled>
                     Apply for this job

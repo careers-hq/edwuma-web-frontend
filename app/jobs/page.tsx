@@ -9,6 +9,10 @@ import { JobFilters as JobFiltersType } from '@/components/job/JobFilters';
 import JobFilters from '@/components/job/JobFilters';
 import HeroSection from '@/components/home/HeroSection';
 import type { JobListing } from '@/lib/api/jobs';
+import { useAuth } from '@/lib/auth';
+import { savedJobsService } from '@/lib/api/savedJobs';
+import { userActivitiesService } from '@/lib/api/activities';
+import toast from 'react-hot-toast';
 
 const mockJobs: JobListing[] = [
   {
@@ -215,6 +219,7 @@ const mockJobs: JobListing[] = [
 ];
 
 export default function JobsPage() {
+  const { isAuthenticated } = useAuth();
   const [jobs] = useState<JobListing[]>(mockJobs);
   const [filteredJobs, setFilteredJobs] = useState<JobListing[]>(mockJobs);
   const [filters, setFilters] = useState<JobFiltersType>({
@@ -226,8 +231,31 @@ export default function JobsPage() {
     workMode: '',
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
+  const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
   const jobsPerPage = 6;
+
+  // Fetch saved jobs when authenticated
+  useEffect(() => {
+    const fetchSavedJobs = async () => {
+      if (!isAuthenticated) {
+        setSavedJobIds(new Set());
+        return;
+      }
+
+      try {
+        const response = await savedJobsService.getSavedJobs(1, 100); // Fetch up to 100 saved jobs
+        
+        if (response.success && response.data) {
+          const savedIds = new Set(response.data.data.map(savedJob => savedJob.job.id));
+          setSavedJobIds(savedIds);
+        }
+      } catch (error) {
+        console.error('Error fetching saved jobs:', error);
+      }
+    };
+
+    fetchSavedJobs();
+  }, [isAuthenticated]);
 
   // Filter jobs based on current filters
   useEffect(() => {
@@ -265,16 +293,55 @@ export default function JobsPage() {
     setFilters(newFilters);
   };
 
-  const handleSaveJob = (jobId: string) => {
-    setSavedJobs(prev => {
-      const newSaved = new Set(prev);
-      if (newSaved.has(jobId)) {
-        newSaved.delete(jobId);
+  const handleSaveJob = async (jobId: string) => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      toast.error('Please login to save jobs');
+      return;
+    }
+
+    const isSaved = savedJobIds.has(jobId);
+    const job = jobs.find(j => j.id === jobId);
+
+    try {
+      if (isSaved) {
+        // Unsave the job
+        const response = await savedJobsService.unsaveJob(jobId);
+        
+        if (response.success) {
+          setSavedJobIds(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(jobId);
+            return newSet;
+          });
+          toast.success('Job removed from saved');
+        } else {
+          toast.error('Failed to unsave job');
+        }
       } else {
-        newSaved.add(jobId);
+        // Save the job
+        const response = await savedJobsService.saveJob(jobId);
+        
+        if (response.success) {
+          setSavedJobIds(prev => new Set(prev).add(jobId));
+          toast.success('Job saved successfully');
+          
+          // Track save activity with metadata
+          if (job) {
+            userActivitiesService.trackActivity('save', jobId, {
+              job_title: job.title,
+              company: job.companies[0]?.name,
+              location: job.locations[0]?.name,
+            });
+          }
+        } else {
+          toast.error(response.message || 'Failed to save job');
+        }
       }
-      return newSaved;
-    });
+    } catch (error) {
+      console.error('Error saving job:', error);
+      toast.error('An error occurred');
+    }
   };
 
   const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
@@ -352,7 +419,7 @@ export default function JobsPage() {
                   key={job.id}
                   job={job}
                   onSave={handleSaveJob}
-                  isSaved={savedJobs.has(job.id)}
+                  isSaved={savedJobIds.has(job.id)}
                 />
               ))}
             </div>

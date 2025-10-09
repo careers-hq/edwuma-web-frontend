@@ -5,6 +5,8 @@
 
 export { apiClient, ApiClient } from './client';
 export { authService, AuthService } from './auth';
+export { savedJobsService } from './savedJobs';
+export { userActivitiesService } from './activities';
 export { API_CONFIG, API_ENDPOINTS, STORAGE_KEYS, HTTP_STATUS } from './config';
 export type {
   // Base types
@@ -39,3 +41,15 @@ export type {
   // Search types
   JobSearchParams,
 } from './types';
+
+export type {
+  SavedJob,
+  SavedJobsResponse,
+} from './savedJobs';
+
+export type {
+  UserActivity,
+  ActivityStatistics,
+  ActivitySummary,
+  ActivitiesResponse,
+} from './activities';

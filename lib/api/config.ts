@@ -61,6 +61,20 @@ export const API_ENDPOINTS = {
     ACCEPT: '/invitations/accept',
     VALIDATE: '/invitations/validate',
   },
+  
+  // Saved Jobs
+  SAVED_JOBS: {
+    BASE: '/saved-jobs',
+    CHECK: '/saved-jobs/check',
+    COUNT: '/saved-jobs/count',
+  },
+  
+  // User Activities
+  ACTIVITIES: {
+    BASE: '/activities',
+    STATISTICS: '/activities/statistics',
+    SUMMARY: '/activities/summary',
+  },
 } as const;
 
 export const STORAGE_KEYS = {
