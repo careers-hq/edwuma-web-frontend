@@ -53,16 +53,16 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link href="/auth/login" className="text-white hover:text-primary transition-colors">
+            <Link href="/auth/login" className="text-white hover:text-accent font-semibold transition-colors">
               Login
             </Link>
-            <Link href="/employers">
+            <Link href="/auth/register">
               <Button 
-                variant="secondary" 
+                variant="outline" 
                 size="sm"
                 className="bg-[#B8F23E] text-[#2D4A43] hover:bg-[#A5D936] font-medium"
               >
-                Hire Top Talents
+                Sign Up
               </Button>
             </Link>
           </div>
