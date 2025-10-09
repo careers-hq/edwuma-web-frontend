@@ -1,49 +1,117 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+/**
+ * Get the user's IP address from request headers
+ * Supports multiple hosting platforms (Vercel, Netlify, Cloudflare, generic)
+ */
+function getUserIP(request: NextRequest): string | null {
+  // Try multiple headers in order of preference
+  const headers = [
+    'x-real-ip',                    // Standard proxy header
+    'x-forwarded-for',              // Standard proxy header (may contain multiple IPs)
+    'x-client-ip',                  // Generic client IP
+    'cf-connecting-ip',             // Cloudflare
+    'x-nf-client-connection-ip',    // Netlify
+    'x-vercel-forwarded-for',       // Vercel
+  ];
+
+  for (const header of headers) {
+    const value = request.headers.get(header);
+    if (value) {
+      // x-forwarded-for can contain multiple IPs (client, proxy1, proxy2)
+      // The first IP is the original client
+      const ip = value.split(',')[0].trim();
+      if (ip && ip !== '127.0.0.1' && ip !== '::1') {
+        return ip;
+      }
+    }
+  }
+
+  return null;
+}
+
 export async function GET(request: NextRequest) {
   try {
-    // Use Vercel's built-in geolocation headers first
-    const country = request.headers.get('x-vercel-ip-country');
-    const region = request.headers.get('x-vercel-ip-country-region');
-    const city = request.headers.get('x-vercel-ip-city');
-    const timezone = request.headers.get('x-vercel-ip-timezone');
+    // Method 1: Try Vercel's built-in geolocation headers (fastest)
+    const vercelCountry = request.headers.get('x-vercel-ip-country');
+    const vercelRegion = request.headers.get('x-vercel-ip-country-region');
+    const vercelCity = request.headers.get('x-vercel-ip-city');
+    const vercelTimezone = request.headers.get('x-vercel-ip-timezone');
     
-    if (country) {
+    if (vercelCountry) {
       return NextResponse.json({
-        country: country,
-        countryCode: country,
-        region: region || '',
-        city: city || '',
-        timezone: timezone || '',
+        country: vercelCountry,
+        countryCode: vercelCountry,
+        region: vercelRegion || '',
+        city: vercelCity || '',
+        timezone: vercelTimezone || '',
+        source: 'vercel'
       });
     }
+
+    // Method 2: Get user's IP and query external geolocation API
+    const userIP = getUserIP(request);
     
-    // Fallback to external API if Vercel headers are not available
+    if (!userIP) {
+      console.warn('Could not determine user IP address');
+      return NextResponse.json(null);
+    }
+
+    console.log('Detected user IP:', userIP);
+
+    // Try ipinfo.io with the user's actual IP
     try {
-      const externalResponse = await fetch('https://ipinfo.io/json', {
+      const ipinfoResponse = await fetch(`https://ipinfo.io/${userIP}/json`, {
         headers: { 
           'Accept': 'application/json',
           'User-Agent': 'Edwuma-App/1.0'
         },
-        // Add timeout to prevent hanging
         signal: AbortSignal.timeout(5000)
       });
       
-      if (externalResponse.ok) {
-        const data = await externalResponse.json();
+      if (ipinfoResponse.ok) {
+        const data = await ipinfoResponse.json();
         return NextResponse.json({
           country: data.country || '',
           countryCode: data.country || '',
           region: data.region || '',
           city: data.city || '',
           timezone: data.timezone || '',
+          source: 'ipinfo'
         });
       }
-    } catch (externalError) {
-      console.warn('External geolocation API failed:', externalError);
+    } catch (ipinfoError) {
+      console.warn('ipinfo.io failed:', ipinfoError);
+    }
+
+    // Fallback: Try ip-api.com (free, no API key needed)
+    try {
+      const ipapiResponse = await fetch(`http://ip-api.com/json/${userIP}`, {
+        headers: { 
+          'Accept': 'application/json'
+        },
+        signal: AbortSignal.timeout(5000)
+      });
+      
+      if (ipapiResponse.ok) {
+        const data = await ipapiResponse.json();
+        if (data.status === 'success') {
+          return NextResponse.json({
+            country: data.country || '',
+            countryCode: data.countryCode || '',
+            region: data.regionName || '',
+            city: data.city || '',
+            timezone: data.timezone || '',
+            source: 'ip-api'
+          });
+        }
+      }
+    } catch (ipapiError) {
+      console.warn('ip-api.com failed:', ipapiError);
     }
     
-    // If both methods fail, return null
+    // If all methods fail, return null
+    console.warn('All geolocation methods failed');
     return NextResponse.json(null);
   } catch (error) {
     console.error('Geolocation API error:', error);

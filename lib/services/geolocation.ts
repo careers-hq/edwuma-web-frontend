@@ -6,6 +6,7 @@ export interface GeolocationData {
   region?: string;
   city?: string;
   timezone?: string;
+  source?: 'vercel' | 'ipinfo' | 'ip-api' | string; // Which geolocation method was used
 }
 
 export interface GeolocationError {
