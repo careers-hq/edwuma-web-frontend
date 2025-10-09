@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
 import SearchableDropdown from '@/components/ui/SearchableDropdown';
 import ModalSelector from '@/components/ui/ModalSelector';
@@ -38,6 +38,16 @@ const AfricanJobFilters: React.FC<AfricanJobFiltersProps> = ({ onFiltersChange, 
     ...initialFilters,
   });
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+
+  // Sync auto-detected country to the filter dropdown
+  useEffect(() => {
+    if (autoDetectedCountry && !filters.location) {
+      setFilters(prev => ({
+        ...prev,
+        location: autoDetectedCountry
+      }));
+    }
+  }, [autoDetectedCountry, filters.location]);
 
   const handleFilterChange = (key: keyof AfricanJobFilters, value: string | string[] | { min: number; max: number }) => {
     const newFilters = { ...filters, [key]: value };

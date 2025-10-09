@@ -56,10 +56,11 @@ const HeroSection: React.FC = () => {
             
             {/* Country Flags */}
             <div className="hidden md:flex items-center gap-2 text-xl">
+              <span>🇬🇭</span>
               <span>🇳🇬</span>
               <span>🇰🇪</span>
               <span>🇿🇦</span>
-              <span>🇬🇭</span>
+              
             </div>
           </div>
         </div>
