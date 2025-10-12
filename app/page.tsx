@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
@@ -10,12 +11,20 @@ import JobCard from '@/components/job/JobCard';
 import { jobsApiService, type JobListing, type JobSearchFilters } from '@/lib/api/jobs';
 import { useGeolocation } from '@/lib/hooks/useGeolocation';
 import HeroSection from '@/components/home/HeroSection';
+import { useAuth } from '@/lib/auth';
+import { savedJobsService } from '@/lib/api/savedJobs';
+import { userActivitiesService } from '@/lib/api/activities';
+import toast from 'react-hot-toast';
 
 // Use the JobListing interface from the API service instead of the mock interface
 
 // Removed mock data - now using real API data
 
-export default function AfricaJobs() {
+function AfricaJobsContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { isAuthenticated } = useAuth();
+  
   // Client-side only state to prevent hydration issues
   const [isClient, setIsClient] = useState(false);
   
@@ -24,15 +33,29 @@ export default function AfricaJobs() {
   
   // Removed unused jobs state
   const [filteredJobs, setFilteredJobs] = useState<JobListing[]>([]);
-  const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
-  // Removed unused searchTerm state
-  const [filters, setFilters] = useState<AfricanJobFiltersType>({
-    search: '',
-    location: '',
-    workMode: '',
-    experience: '',
-    visaSponsorship: '',
-    datePosted: ''
+  const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
+  
+  // Initialize filters from URL search params
+  const [filters, setFilters] = useState<AfricanJobFiltersType>(() => {
+    if (typeof window === 'undefined') {
+      return {
+        search: '',
+        location: '',
+        workMode: '',
+        experience: '',
+        visaSponsorship: '',
+        datePosted: ''
+      };
+    }
+    
+    return {
+      search: searchParams.get('search') || '',
+      location: searchParams.get('location') || '',
+      workMode: searchParams.get('workMode') || '',
+      experience: searchParams.get('experience') || '',
+      visaSponsorship: searchParams.get('visaSponsorship') || '',
+      datePosted: searchParams.get('datePosted') || ''
+    };
   });
   // Removed showFilters state since filters are now always visible at the top
   const [isLoading, setIsLoading] = useState(false);
@@ -125,6 +148,29 @@ export default function AfricaJobs() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+  
+  // Fetch saved jobs when authenticated
+  useEffect(() => {
+    const fetchSavedJobs = async () => {
+      if (!isAuthenticated) {
+        setSavedJobIds(new Set());
+        return;
+      }
+
+      try {
+        const response = await savedJobsService.getSavedJobs(1, 100);
+        
+        if (response.success && response.data) {
+          const savedIds = new Set(response.data.data.map(savedJob => savedJob.job.id));
+          setSavedJobIds(savedIds);
+        }
+      } catch (error) {
+        console.error('Error fetching saved jobs:', error);
+      }
+    };
+
+    fetchSavedJobs();
+  }, [isAuthenticated]);
 
   // Don't auto-filter by country - let users discover all jobs
   // The detected country is shown as a suggestion in the filters component
@@ -140,48 +186,99 @@ export default function AfricaJobs() {
       return () => clearTimeout(timeoutId);
     }
   }, [isClient, filters, loadJobs]);
+  
+  // Update URL params when filters change
+  const updateURLParams = (newFilters: AfricanJobFiltersType) => {
+    if (typeof window === 'undefined') return;
+    
+    const params = new URLSearchParams();
+    
+    Object.entries(newFilters).forEach(([key, value]) => {
+      if (value) {
+        params.set(key, value);
+      }
+    });
+    
+    const newURL = params.toString() ? `/?${params.toString()}` : '/';
+    router.replace(newURL, { scroll: false });
+  };
 
-  const handleSaveJob = (jobId: string) => {
-    // This page uses client-side mock save toggle; still enforce auth via redirect
-    try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('edwuma_access_token') : null;
-      if (!token) {
+  const handleSaveJob = async (jobId: string) => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      toast.error('Please login to save jobs');
+      try {
         const loginUrl = new URL('/auth/login', window.location.origin);
         loginUrl.searchParams.set('returnTo', window.location.pathname + window.location.search + window.location.hash);
         window.location.href = loginUrl.toString();
-        return;
+      } catch {
+        window.location.href = '/auth/login';
       }
-    } catch {
-      if (typeof window !== 'undefined') window.location.href = '/auth/login';
       return;
     }
 
-    setSavedJobs(prev => {
-      const newSaved = new Set(prev);
-      if (newSaved.has(jobId)) {
-        newSaved.delete(jobId);
+    const isSaved = savedJobIds.has(jobId);
+    const job = filteredJobs.find(j => j.id === jobId);
+
+    try {
+      if (isSaved) {
+        // Unsave the job
+        const response = await savedJobsService.unsaveJob(jobId);
+        
+        if (response.success) {
+          setSavedJobIds(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(jobId);
+            return newSet;
+          });
+          toast.success('Job removed from saved');
+        } else {
+          toast.error('Failed to unsave job');
+        }
       } else {
-        newSaved.add(jobId);
+        // Save the job
+        const response = await savedJobsService.saveJob(jobId);
+        
+        if (response.success) {
+          setSavedJobIds(prev => new Set(prev).add(jobId));
+          toast.success('Job saved successfully');
+          
+          // Track save activity with metadata
+          if (job) {
+            userActivitiesService.trackActivity('save', jobId, {
+              job_title: job.title,
+              company: job.companies[0]?.name,
+              location: job.locations[0]?.name,
+            });
+          }
+        } else {
+          toast.error(response.message || 'Failed to save job');
+        }
       }
-      return newSaved;
-    });
+    } catch (error) {
+      console.error('Error saving job:', error);
+      toast.error('An error occurred');
+    }
   };
 
   const handleFiltersChange = (newFilters: AfricanJobFiltersType) => {
     setFilters(newFilters);
+    updateURLParams(newFilters);
     // Reset pagination when filters change
     setPagination(prev => ({ ...prev, current_page: 1 }));
   };
 
   const clearFilters = () => {
-    setFilters({
+    const clearedFilters = {
       search: '',
       location: '',
       workMode: '',
       experience: '',
       visaSponsorship: '',
       datePosted: ''
-    });
+    };
+    setFilters(clearedFilters);
+    updateURLParams(clearedFilters);
     // Reset pagination when clearing filters
     setPagination(prev => ({ ...prev, current_page: 1 }));
   };
@@ -326,7 +423,7 @@ export default function AfricaJobs() {
                         key={job.id}
                         job={job}
                         onSave={handleSaveJob}
-                        isSaved={savedJobs.has(job.id)}
+                        isSaved={savedJobIds.has(job.id)}
                       />
                     ))}
                 
@@ -400,5 +497,30 @@ export default function AfricaJobs() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function AfricaJobs() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <HeroSection />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="space-y-6">
+            {[...Array(3)].map((_, index) => (
+              <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+              </div>
+            ))}
+          </div>
+        </main>
+        <Footer />
+      </div>
+    }>
+      <AfricaJobsContent />
+    </Suspense>
   );
 }

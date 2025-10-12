@@ -54,13 +54,52 @@ const HeroSection: React.FC = () => {
               <span className="text-xs text-white/80">Remote Jobs</span>
             </div>
             
-            {/* Country Flags */}
-            <div className="hidden md:flex items-center gap-2 text-xl">
-              <span>🇬🇭</span>
-              <span>🇳🇬</span>
-              <span>🇰🇪</span>
-              <span>🇿🇦</span>
-              
+            {/* Country Badges with Flag Images */}
+            <div className="hidden md:flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src="https://flagcdn.com/w20/gh.png" 
+                  srcSet="https://flagcdn.com/w40/gh.png 2x"
+                  width="20" 
+                  alt="Ghana flag"
+                  className="rounded-sm"
+                />
+                <span className="font-medium">Ghana</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src="https://flagcdn.com/w20/ng.png" 
+                  srcSet="https://flagcdn.com/w40/ng.png 2x"
+                  width="20" 
+                  alt="Nigeria flag"
+                  className="rounded-sm"
+                />
+                <span className="font-medium">Nigeria</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src="https://flagcdn.com/w20/ke.png" 
+                  srcSet="https://flagcdn.com/w40/ke.png 2x"
+                  width="20" 
+                  alt="Kenya flag"
+                  className="rounded-sm"
+                />
+                <span className="font-medium">Kenya</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src="https://flagcdn.com/w20/za.png" 
+                  srcSet="https://flagcdn.com/w40/za.png 2x"
+                  width="20" 
+                  alt="South Africa flag"
+                  className="rounded-sm"
+                />
+                <span className="font-medium">South Africa</span>
+              </div>
             </div>
           </div>
         </div>

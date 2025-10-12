@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
+import ShareButton from '@/components/ui/ShareButton';
 import { jobsApiService, type JobListing } from '@/lib/api/jobs';
 import { getJobSlug, extractJobId } from '@/lib/utils/slug';
 import { JobPostingSchema, BreadcrumbSchema } from '@/components/seo';
@@ -33,6 +34,7 @@ type CompanyWithLinks = {
 
 const JobDetailsPage: React.FC = () => {
   const params = useParams();
+  const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [job, setJob] = useState<JobListing | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,6 +46,17 @@ const JobDetailsPage: React.FC = () => {
 
   const jobSlugOrId = params?.id as string;
   const jobId = extractJobId(jobSlugOrId);
+
+  // Handle back navigation with filters preserved
+  const handleBackToJobs = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Use browser back if coming from jobs page
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push('/');
+    }
+  };
 
   // Check if job is saved
   const checkSavedStatus = useCallback(async (jobListingId: string) => {
@@ -277,6 +290,12 @@ const JobDetailsPage: React.FC = () => {
     { name: job.title, url: `${baseUrl}/jobs/${job.slug}` },
   ];
 
+  const shareData = {
+    title: `${job.title} at ${job.companies[0]?.name}`,
+    text: `Check out this job opportunity: ${job.title} at ${job.companies[0]?.name} in ${job.locations[0]?.city || job.locations[0]?.country}`,
+    url: `${baseUrl}/jobs/${job.slug}`,
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* SEO Structured Data */}
@@ -293,9 +312,12 @@ const JobDetailsPage: React.FC = () => {
               Home
             </Link>
             <span className="flex-shrink-0">/</span>
-            <Link href="/" className="hover:text-[#244034] transition-colors flex-shrink-0">
+            <button
+              onClick={handleBackToJobs}
+              className="hover:text-[#244034] transition-colors flex-shrink-0 underline"
+            >
               Jobs
-            </Link>
+            </button>
             <span className="flex-shrink-0">/</span>
             <span className="text-gray-900 font-medium truncate">{job.title}</span>
         </nav>
@@ -399,51 +421,29 @@ const JobDetailsPage: React.FC = () => {
                 />
               </svg>
             </button>
+
+            {/* Share Button */}
+            <ShareButton shareData={shareData} variant="menu" size="lg" />
           </div>
 
           {/* Apply Now Button */}
-          <div className="mt-6 flex flex-col sm:flex-row gap-2 sm:gap-4">
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
             {job.application.url ? (
               <Button 
                 variant="primary" 
                 size="lg" 
-                className="flex-2 bg-[#244034] hover:bg-[#1a2e26] py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                className="sm:col-span-2 bg-[#244034] hover:bg-[#1a2e26] py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
                 onClick={handleApplyClick}
               >
                 Apply Now
               </Button>
             ) : (
-              <Button variant="primary" size="lg" className="flex-1 bg-gray-400 cursor-not-allowed py-4 text-lg font-semibold" disabled>
+              <Button variant="primary" size="lg" className="sm:col-span-2 bg-gray-400 cursor-not-allowed py-4 text-lg font-semibold" disabled>
                 Apply Now
               </Button>
             )}
             
-            <button 
-              className="px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg border border-gray-200 transition-colors flex items-center justify-center gap-2"
-              aria-label="Receive email notifications for similar jobs"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 15V11a6 6 0 10-12 0v4c0 .386-.149.735-.405 1.005L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 3v2"
-                />
-                <circle
-                  cx="12"
-                  cy="21"
-                  r="1"
-                  fill="currentColor"
-                />
-              </svg>
-              <span className="sm:inline">Receive Emails with Similar Jobs</span>
-            </button>
+            <ShareButton shareData={shareData} variant="button" size="lg" showLabel className="py-4 text-base" />
           </div>
 
           {/* Salary */}

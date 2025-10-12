@@ -216,60 +216,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-[#244034] mb-1">Email</h3>
-                    <p className="text-[rgba(0,0,0,0.7)]">support@edwuma.com</p>
-                    <p className="text-[rgba(0,0,0,0.7)]">info@edwuma.com</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="w-10 h-10 bg-[#244034] rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-[#244034] mb-1">Phone</h3>
-                    <p className="text-[rgba(0,0,0,0.7)]">+233 123 456 789</p>
-                    <p className="text-[rgba(0,0,0,0.7)]">+1 555 123 4567</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="w-10 h-10 bg-[#244034] rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-[#244034] mb-1">Address</h3>
-                    <p className="text-[rgba(0,0,0,0.7)]">
-                      123 Independence Avenue<br />
-                      Accra, Ghana<br />
-                      West Africa
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold text-[#244034]">Business Hours</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-[rgba(0,0,0,0.7)]">Monday - Friday</span>
-                    <span className="font-medium text-[#244034]">9:00 AM - 6:00 PM</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[rgba(0,0,0,0.7)]">Saturday</span>
-                    <span className="font-medium text-[#244034]">10:00 AM - 4:00 PM</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[rgba(0,0,0,0.7)]">Sunday</span>
-                    <span className="font-medium text-[#244034]">Closed</span>
+                    <p className="text-[rgba(0,0,0,0.7)]">hello@edwuma.com</p>
                   </div>
                 </div>
               </CardContent>

@@ -3,12 +3,15 @@ import { jobsApiService } from '@/lib/api/jobs';
 import { extractJobId } from '@/lib/utils/slug';
 
 export const runtime = 'edge';
-export const alt = 'Job Posting';
+export const alt = 'Job Posting on Edwuma';
 export const size = {
   width: 1200,
   height: 630,
 };
 export const contentType = 'image/png';
+
+// Revalidate every 24 hours
+export const revalidate = 86400;
 
 export default async function Image({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

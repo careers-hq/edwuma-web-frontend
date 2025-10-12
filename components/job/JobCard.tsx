@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { CompanyLogo } from '@/components/ui/CompanyLogo';
+import ShareButton from '@/components/ui/ShareButton';
 import type { JobListing } from '@/lib/api/jobs';
 import { getJobSlug } from '@/lib/utils/slug';
 
@@ -50,12 +51,19 @@ const JobCard: React.FC<JobCardProps> = ({
     return cleanText.substring(0, maxLength).trim() + '...';
   };
 
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://edwuma.com';
+  const jobUrl = `${baseUrl}/jobs/${getJobSlug(job)}`;
+  const shareData = {
+    title: `${job.title} at ${job.companies[0]?.name}`,
+    text: `Check out this job opportunity: ${job.title} at ${job.companies[0]?.name} in ${job.locations[0]?.city || job.locations[0]?.country}`,
+    url: jobUrl,
+  };
+
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl hover:border-gray-300 transition-all duration-300 group cursor-pointer">
-      <Link href={`/jobs/${getJobSlug(job)}`}>
-        {/* Header Section */}
-        <div className="flex items-start justify-between mb-5 gap-3">
-          <div className="flex items-start space-x-4 flex-1 min-w-0">
+    <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl hover:border-gray-300 transition-all duration-300 group">
+      {/* Header Section */}
+      <div className="flex items-start justify-between mb-5 gap-3">
+        <Link href={`/jobs/${getJobSlug(job)}`} className="flex items-start space-x-4 flex-1 min-w-0 cursor-pointer">
             {/* Company Logo */}
             <div className="flex-shrink-0">
               <CompanyLogo
@@ -97,12 +105,14 @@ const JobCard: React.FC<JobCardProps> = ({
                 </p>
               )}
             </div>
-          </div>
+        </Link>
 
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Save Button */}
           <button
             onClick={handleSave}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0"
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
             aria-label={isSaved ? 'Remove from saved' : 'Save job'}
           >
             <svg
@@ -119,8 +129,13 @@ const JobCard: React.FC<JobCardProps> = ({
               />
             </svg>
           </button>
-        </div>
 
+          {/* Share Button */}
+          <ShareButton shareData={shareData} variant="menu" size="md" />
+        </div>
+      </div>
+
+      <Link href={`/jobs/${getJobSlug(job)}`} className="cursor-pointer">
         {/* Job Description */}
         {job.description && (
           <div className="mb-4">

@@ -30,9 +30,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // Generate SEO-friendly title
     const title = `${job.title} at ${company?.name || 'Top Company'} in ${location?.city || location?.country || 'Africa'}`;
     
-    // Generate description
+    // Generate description - strip HTML tags
+    const stripHtml = (html: string) => {
+      return html.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ').trim();
+    };
+    
     const description = job.description 
-      ? `${job.description.substring(0, 155)}...` 
+      ? `${stripHtml(job.description).substring(0, 155)}...` 
       : `Apply for ${job.title} position at ${company?.name}. ${job.job_type.label} role in ${location?.city || location?.country}.`;
 
     // Generate keywords
@@ -50,6 +54,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ...job.skills.map(skill => skill.name),
     ].filter(Boolean).join(', ');
 
+    // Use dynamic OG image instead of company logo
+    const ogImageUrl = `${baseUrl}/jobs/${id}/opengraph-image`;
+
     return {
       title,
       description,
@@ -59,28 +66,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description,
         type: 'website',
         url: `${baseUrl}/jobs/${job.slug}`,
-        images: company?.logo_url ? [
+        images: [
           {
-            url: company.logo_url,
+            url: ogImageUrl,
             width: 1200,
             height: 630,
-            alt: `${company.name} logo`,
-          }
-        ] : [
-          {
-            url: `${baseUrl}/edwuma-logo-2023.png`,
-            width: 1200,
-            height: 630,
-            alt: 'Edwuma - Jobs in Africa',
+            alt: `${job.title} at ${company?.name}`,
+            type: 'image/png',
           }
         ],
         siteName: 'Edwuma',
+        locale: 'en_US',
       },
       twitter: {
         card: 'summary_large_image',
         title,
         description,
-        images: company?.logo_url ? [company.logo_url] : [`${baseUrl}/edwuma-logo-2023.png`],
+        images: [ogImageUrl],
+        creator: '@edwuma',
+        site: '@edwuma',
       },
       alternates: {
         canonical: `${baseUrl}/jobs/${job.slug}`,
