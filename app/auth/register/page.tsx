@@ -165,7 +165,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Social Registration */}
-        <Card>
+        {/* <Card>
           <CardContent className="pt-6">
             <div className="space-y-3">
               <Button variant="outline" className="w-full hover:bg-gray-50">
@@ -194,7 +194,7 @@ export default function RegisterPage() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Registration Form */}
         <Card>
