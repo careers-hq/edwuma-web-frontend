@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Turnstile } from '@/components/ui/Turnstile';
 import { useAuth } from '@/lib/auth';
 import type { LoginRequest } from '@/lib/api';
 import { processPostLoginRedirect } from '@/lib/utils/jobApplication';
@@ -24,6 +25,7 @@ function LoginForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string>('');
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -73,6 +75,10 @@ function LoginForm() {
       newErrors.password = 'Password must be at least 6 characters';
     }
 
+    if (!turnstileToken && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
+      newErrors.turnstile = 'Please complete the security verification';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -88,7 +94,13 @@ function LoginForm() {
     setErrors({});
     
     try {
-      await login(formData);
+      // Add turnstile token to form data
+      const loginData: LoginRequest = {
+        ...formData,
+        'cf-turnstile-response': turnstileToken,
+      };
+      
+      await login(loginData);
       // Check if there's a job URL to redirect to after login
       const redirect = processPostLoginRedirect();
       const rawReturnTo = searchParams.get('returnTo');
@@ -111,11 +123,16 @@ function LoginForm() {
       const errorMessage = error instanceof Error ? error.message : 'Login failed. Please try again.';
       
       // Handle different types of errors
-      if (errorMessage.includes('credentials')) {
+      if (errorMessage.toLowerCase().includes('credential') || errorMessage.toLowerCase().includes('password') || errorMessage.toLowerCase().includes('unauthorized')) {
         setErrors({ general: 'Invalid email or password. Please try again.' });
-      } else if (errorMessage.includes('deactivated')) {
+      } else if (errorMessage.toLowerCase().includes('deactivated') || errorMessage.toLowerCase().includes('inactive')) {
         setErrors({ general: 'Your account has been deactivated. Please contact support.' });
+      } else if (errorMessage.toLowerCase().includes('timeout')) {
+        setErrors({ general: 'Request timed out. Please check your connection and try again.' });
+      } else if (errorMessage.toLowerCase().includes('network')) {
+        setErrors({ general: 'Network error. Please check your internet connection and try again.' });
       } else {
+        // Display the actual error message from the API
         setErrors({ general: errorMessage });
       }
     } finally {
@@ -239,6 +256,19 @@ function LoginForm() {
                   </Link>
                 </div>
               </div>
+
+              {/* Cloudflare Turnstile */}
+              <Turnstile
+                onSuccess={(token) => {
+                  setTurnstileToken(token);
+                  setErrors(prev => ({ ...prev, turnstile: '' }));
+                }}
+                onError={() => setTurnstileToken('')}
+                onExpire={() => setTurnstileToken('')}
+              />
+              {errors.turnstile && (
+                <p className="text-sm text-red-600 -mt-4">{errors.turnstile}</p>
+              )}
 
               <Button
                 type="submit"

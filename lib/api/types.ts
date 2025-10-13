@@ -61,6 +61,7 @@ export interface LoginRequest {
   email: string;
   password: string;
   remember_me?: boolean;
+  'cf-turnstile-response'?: string;
 }
 
 export interface RegisterRequest {
@@ -71,6 +72,7 @@ export interface RegisterRequest {
   password_confirmation: string;
   agree_to_terms_and_policy: boolean;
   phone?: string;
+  'cf-turnstile-response'?: string;
 }
 
 export interface AuthResponse {
@@ -80,6 +82,7 @@ export interface AuthResponse {
 
 export interface ForgotPasswordRequest {
   email: string;
+  'cf-turnstile-response'?: string;
 }
 
 export interface ResetPasswordRequest {
@@ -87,6 +90,7 @@ export interface ResetPasswordRequest {
   email: string;
   password: string;
   password_confirmation: string;
+  'cf-turnstile-response'?: string;
 }
 
 // Job Types

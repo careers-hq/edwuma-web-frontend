@@ -6,6 +6,7 @@ import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Turnstile } from '@/components/ui/Turnstile';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -17,6 +18,7 @@ export default function ContactPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string>('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -51,6 +53,10 @@ export default function ContactPage() {
       newErrors.message = 'Message must be at least 10 characters long';
     }
 
+    if (!turnstileToken && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
+      newErrors.turnstile = 'Please complete the security verification';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -67,6 +73,7 @@ export default function ContactPage() {
     try {
       // TODO: Implement actual contact form submission
       console.log('Contact form submission:', formData);
+      console.log('Turnstile token:', turnstileToken);
       
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -186,6 +193,19 @@ export default function ContactPage() {
                       <p className="mt-1 text-sm text-red-600">{errors.message}</p>
                     )}
                   </div>
+
+                  {/* Cloudflare Turnstile */}
+                  <Turnstile
+                    onSuccess={(token) => {
+                      setTurnstileToken(token);
+                      setErrors(prev => ({ ...prev, turnstile: '' }));
+                    }}
+                    onError={() => setTurnstileToken('')}
+                    onExpire={() => setTurnstileToken('')}
+                  />
+                  {errors.turnstile && (
+                    <p className="text-sm text-red-600 -mt-4">{errors.turnstile}</p>
+                  )}
 
                   <Button
                     type="submit"

@@ -1,27 +1,24 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Turnstile } from '@/components/ui/Turnstile';
-import { useAuth } from '@/lib/auth';
-import type { RegisterRequest } from '@/lib/api';
+import type { ResetPasswordRequest } from '@/lib/api';
 
-export default function RegisterPage() {
+function ResetPasswordForm() {
   const router = useRouter();
-  const { register, isAuthenticated, isLoading: authLoading } = useAuth();
+  const searchParams = useSearchParams();
   
-  const [formData, setFormData] = useState<RegisterRequest>({
-    first_name: '',
-    last_name: '',
+  const [formData, setFormData] = useState<ResetPasswordRequest>({
+    token: '',
     email: '',
     password: '',
     password_confirmation: '',
-    agree_to_terms_and_policy: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,19 +26,21 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string>('');
 
-  // Redirect if already authenticated
+  // Get token and email from URL params
   useEffect(() => {
-    if (isAuthenticated && !authLoading) {
-      router.push('/dashboard');
+    const token = searchParams.get('token');
+    const email = searchParams.get('email');
+    
+    if (token && email) {
+      setFormData(prev => ({ ...prev, token, email }));
+    } else {
+      setErrors({ general: 'Invalid or missing reset link. Please request a new password reset.' });
     }
-  }, [isAuthenticated, authLoading, router]);
+  }, [searchParams]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({ 
-      ...prev, 
-      [name]: type === 'checkbox' ? checked : value 
-    }));
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
     
     // Clear error when user starts typing
     if (errors[name]) {
@@ -52,12 +51,8 @@ export default function RegisterPage() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.first_name.trim()) {
-      newErrors.first_name = 'First name is required';
-    }
-
-    if (!formData.last_name.trim()) {
-      newErrors.last_name = 'Last name is required';
+    if (!formData.token) {
+      newErrors.token = 'Reset token is missing';
     }
 
     if (!formData.email) {
@@ -76,10 +71,6 @@ export default function RegisterPage() {
       newErrors.password_confirmation = 'Please confirm your password';
     } else if (formData.password !== formData.password_confirmation) {
       newErrors.password_confirmation = 'Passwords do not match';
-    }
-
-    if (!formData.agree_to_terms_and_policy) {
-      newErrors.agree_to_terms_and_policy = 'You must agree to the terms and conditions';
     }
 
     if (!turnstileToken && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
@@ -101,33 +92,28 @@ export default function RegisterPage() {
     setErrors({});
     
     try {
-      // Add turnstile token to form data
-      const registerData: RegisterRequest = {
+      // TODO: Implement actual reset password API call
+      const requestData: ResetPasswordRequest = {
         ...formData,
         'cf-turnstile-response': turnstileToken,
       };
       
-      await register(registerData);
-      // Redirect will happen automatically via useEffect
-      router.push('/dashboard');
+      console.log('Reset password request:', requestData);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Redirect to login with success message
+      router.push('/auth/login?reset=success');
     } catch (error: unknown) {
-      console.error('Registration error:', error);
+      console.error('Reset password error:', error);
       
-      const errorMessage = error instanceof Error ? error.message : 'Registration failed. Please try again.';
-      const errorObj = error as { errors?: Record<string, string[]> };
+      const errorMessage = error instanceof Error ? error.message : 'Failed to reset password. Please try again.';
       
-      // Handle different types of errors
-      if (errorMessage.includes('email')) {
-        setErrors({ email: 'This email address is already registered.' });
-      } else if (errorMessage.includes('validation')) {
-        // Handle validation errors from API
-        const validationErrors = errorObj.errors || {};
-        // Convert string[] to string for our error state
-        const formattedErrors: Record<string, string> = {};
-        Object.entries(validationErrors).forEach(([key, messages]) => {
-          formattedErrors[key] = Array.isArray(messages) ? messages[0] : messages;
-        });
-        setErrors(formattedErrors);
+      if (errorMessage.toLowerCase().includes('token') || errorMessage.toLowerCase().includes('expired')) {
+        setErrors({ general: 'This reset link has expired or is invalid. Please request a new one.' });
+      } else if (errorMessage.toLowerCase().includes('password')) {
+        setErrors({ password: errorMessage });
       } else {
         setErrors({ general: errorMessage });
       }
@@ -150,57 +136,19 @@ export default function RegisterPage() {
               className="mx-auto"
             />
           </Link>
-          <h2 className="mt-6 text-3xl font-bold text-primary">
-            Create your account
+          <h2 className="mt-6 text-3xl font-bold text-[#244034]">
+            Reset your password
           </h2>
           <p className="mt-2 text-sm text-[rgba(0,0,0,0.7)]">
-            Already have an account?{' '}
-            <Link
-              href="/auth/login"
-              className="font-medium text-primary hover:text-success transition-colors underline"
-            >
-              Sign in here
-            </Link>
+            Enter your new password below
           </p>
         </div>
 
-        {/* Social Registration */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-3">
-              <Button variant="outline" className="w-full hover:bg-gray-50">
-                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Continue with Google
-              </Button>
-              <Button variant="outline" className="w-full hover:bg-gray-50">
-                <svg className="w-5 h-5 mr-2" fill="#0A66C2" viewBox="0 0 24 24">
-                  <path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11.75 20h-3v-10h3v10zm-1.5-11.27c-.97 0-1.75-.79-1.75-1.76 0-.97.78-1.76 1.75-1.76s1.75.79 1.75 1.76c0 .97-.78 1.76-1.75 1.76zm15.25 11.27h-3v-5.6c0-1.34-.03-3.07-1.87-3.07-1.87 0-2.16 1.46-2.16 2.97v5.7h-3v-10h2.88v1.36h.04c.4-.75 1.38-1.54 2.85-1.54 3.05 0 3.61 2.01 3.61 4.62v5.56z"/>
-                </svg>
-                Continue with LinkedIn
-              </Button>
-            </div>
-
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-[rgba(0,0,0,0.7)]">Or register with email</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Registration Form */}
+        {/* Reset Password Form */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-center text-xl font-semibold text-primary">
-              Register
+            <CardTitle className="text-center text-xl font-semibold text-[#244034]">
+              Create New Password
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -211,25 +159,6 @@ export default function RegisterPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input
-                  label="First Name"
-                  name="first_name"
-                  value={formData.first_name}
-                  onChange={handleInputChange}
-                  error={errors.first_name}
-                  placeholder="First name"
-                />
-                <Input
-                  label="Last Name"
-                  name="last_name"
-                  value={formData.last_name}
-                  onChange={handleInputChange}
-                  error={errors.last_name}
-                  placeholder="Last name"
-                />
-              </div>
-
               <Input
                 label="Email Address"
                 type="email"
@@ -238,6 +167,7 @@ export default function RegisterPage() {
                 onChange={handleInputChange}
                 error={errors.email}
                 placeholder="Enter your email"
+                disabled
                 leftIcon={
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
@@ -247,13 +177,13 @@ export default function RegisterPage() {
 
               <div className="relative">
                 <Input
-                  label="Password"
+                  label="New Password"
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
                   error={errors.password}
-                  placeholder="Create a password"
+                  placeholder="Create a new password"
                   leftIcon={
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -265,7 +195,7 @@ export default function RegisterPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                  style={{ top: 'calc(50% + 12px)' }} // Adjust for label height
+                  style={{ top: 'calc(50% + 12px)' }}
                 >
                   {showPassword ? (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -282,13 +212,13 @@ export default function RegisterPage() {
 
               <div className="relative">
                 <Input
-                  label="Confirm Password"
+                  label="Confirm New Password"
                   type={showConfirmPassword ? "text" : "password"}
                   name="password_confirmation"
                   value={formData.password_confirmation}
                   onChange={handleInputChange}
                   error={errors.password_confirmation}
-                  placeholder="Confirm your password"
+                  placeholder="Confirm your new password"
                   leftIcon={
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -299,7 +229,7 @@ export default function RegisterPage() {
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                  style={{ top: 'calc(50% + 12px)' }} // Adjust for label height
+                  style={{ top: 'calc(50% + 12px)' }}
                 >
                   {showConfirmPassword ? (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -312,34 +242,6 @@ export default function RegisterPage() {
                     </svg>
                   )}
                 </button>
-              </div>
-
-              <div className="flex items-start">
-                <div className="flex items-center h-5">
-                  <input
-                    id="agreeToTerms"
-                    name="agree_to_terms_and_policy"
-                    type="checkbox"
-                    checked={formData.agree_to_terms_and_policy}
-                    onChange={handleInputChange}
-                    className="h-4 w-4 text-primary focus:ring-[#244034] border-gray-300 rounded"
-                  />
-                </div>
-                <div className="ml-3 text-sm">
-                  <label htmlFor="agreeToTerms" className="text-[rgba(0,0,0,0.7)]">
-                    I agree to the{' '}
-                    <Link href="/terms" className="text-primary hover:text-success transition-colors underline">
-                      Terms of Service
-                    </Link>{' '}
-                    and{' '}
-                    <Link href="/privacy" className="text-primary hover:text-success transition-colors underline">
-                      Privacy Policy
-                    </Link>
-                  </label>
-                  {errors.agree_to_terms_and_policy && (
-                    <p className="mt-1 text-sm text-red-600">{errors.agree_to_terms_and_policy}</p>
-                  )}
-                </div>
               </div>
 
               {/* Cloudflare Turnstile */}
@@ -360,11 +262,20 @@ export default function RegisterPage() {
                 variant="primary"
                 size="lg"
                 className="w-full"
-                loading={isSubmitting || authLoading}
-                disabled={isSubmitting || authLoading}
+                loading={isSubmitting}
+                disabled={isSubmitting || !formData.token}
               >
-                Create Account
+                Reset Password
               </Button>
+
+              <div className="text-center">
+                <Link
+                  href="/auth/login"
+                  className="text-sm font-medium text-[#244034] hover:text-[#1a2f26] transition-colors"
+                >
+                  ← Back to Login
+                </Link>
+              </div>
             </form>
           </CardContent>
         </Card>
@@ -372,3 +283,12 @@ export default function RegisterPage() {
     </div>
   );
 }
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense>
+      <ResetPasswordForm />
+    </Suspense>
+  );
+}
+

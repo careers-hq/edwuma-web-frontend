@@ -35,6 +35,19 @@ class AuthService {
 
       throw new Error(response.message || 'Login failed');
     } catch (error) {
+      // Handle ApiError with proper message extraction
+      if (error && typeof error === 'object' && 'message' in error) {
+        const apiError = error as { message: string; status?: number; errors?: Record<string, string[]> };
+        
+        // If there are validation errors, format them
+        if (apiError.errors) {
+          const errorMessages = Object.values(apiError.errors).flat();
+          throw new Error(errorMessages[0] || apiError.message);
+        }
+        
+        throw new Error(apiError.message);
+      }
+      
       const errorMessage = error instanceof Error ? error.message : 'Login failed';
       throw new Error(errorMessage);
     }
@@ -60,6 +73,19 @@ class AuthService {
 
       throw new Error(response.message || 'Registration failed');
     } catch (error) {
+      // Handle ApiError with proper message extraction
+      if (error && typeof error === 'object' && 'message' in error) {
+        const apiError = error as { message: string; status?: number; errors?: Record<string, string[]> };
+        
+        // If there are validation errors, format them
+        if (apiError.errors) {
+          const errorMessages = Object.values(apiError.errors).flat();
+          throw new Error(errorMessages[0] || apiError.message);
+        }
+        
+        throw new Error(apiError.message);
+      }
+      
       const errorMessage = error instanceof Error ? error.message : 'Registration failed';
       throw new Error(errorMessage);
     }

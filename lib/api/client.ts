@@ -121,6 +121,11 @@ class ApiClient {
     } catch (error) {
       clearTimeout(timeoutId);
       
+      // If it's an ApiError (thrown from handleResponse), preserve it
+      if (error && typeof error === 'object' && 'message' in error && 'status' in error) {
+        throw error;
+      }
+      
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
           throw new Error('Request timeout');
