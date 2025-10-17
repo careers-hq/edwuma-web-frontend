@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -24,6 +24,7 @@ function AfricaJobsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
+  const jobListingsRef = useRef<HTMLDivElement>(null);
   
   // Client-side only state to prevent hydration issues
   const [isClient, setIsClient] = useState(false);
@@ -266,6 +267,16 @@ function AfricaJobsContent() {
     updateURLParams(newFilters);
     // Reset pagination when filters change
     setPagination(prev => ({ ...prev, current_page: 1 }));
+    
+    // Scroll to job listings when filters change
+    setTimeout(() => {
+      if (jobListingsRef.current) {
+        jobListingsRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }
+    }, 100);
   };
 
   const clearFilters = () => {
@@ -281,6 +292,16 @@ function AfricaJobsContent() {
     updateURLParams(clearedFilters);
     // Reset pagination when clearing filters
     setPagination(prev => ({ ...prev, current_page: 1 }));
+    
+    // Scroll to job listings when clearing filters
+    setTimeout(() => {
+      if (jobListingsRef.current) {
+        jobListingsRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }
+    }, 100);
   };
 
   const getActiveFiltersCount = () => {
@@ -292,6 +313,20 @@ function AfricaJobsContent() {
     if (filters.visaSponsorship) count++;
     if (filters.datePosted) count++;
     return count;
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPagination(prev => ({ ...prev, current_page: newPage }));
+    
+    // Scroll to job listings section after a short delay to allow state update
+    setTimeout(() => {
+      if (jobListingsRef.current) {
+        jobListingsRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }
+    }, 100);
   };
 
   return (
@@ -417,7 +452,7 @@ function AfricaJobsContent() {
                     ))}
                   </div>
                 ) : filteredJobs.length > 0 ? (
-                  <div className="space-y-6">
+                  <div className="space-y-6" ref={jobListingsRef}>
                     {filteredJobs.map((job) => (
                       <JobCard
                         key={job.id}
@@ -433,9 +468,7 @@ function AfricaJobsContent() {
                     <Button
                       variant="outline"
                       disabled={pagination.current_page === 1}
-                      onClick={() => {
-                        setPagination(prev => ({ ...prev, current_page: prev.current_page - 1 }));
-                      }}
+                      onClick={() => handlePageChange(pagination.current_page - 1)}
                     >
                       Previous
                     </Button>
@@ -445,9 +478,7 @@ function AfricaJobsContent() {
                     <Button
                       variant="outline"
                       disabled={pagination.current_page === pagination.last_page}
-                      onClick={() => {
-                        setPagination(prev => ({ ...prev, current_page: prev.current_page + 1 }));
-                      }}
+                      onClick={() => handlePageChange(pagination.current_page + 1)}
                     >
                       Next
                     </Button>
