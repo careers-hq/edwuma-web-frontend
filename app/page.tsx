@@ -315,19 +315,27 @@ function AfricaJobsContent() {
     return count;
   };
 
+  const [shouldScrollToJobs, setShouldScrollToJobs] = useState(false);
+
   const handlePageChange = (newPage: number) => {
     setPagination(prev => ({ ...prev, current_page: newPage }));
-    
-    // Scroll to job listings section after a short delay to allow state update
-    setTimeout(() => {
-      if (jobListingsRef.current) {
-        jobListingsRef.current.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start' 
-        });
-      }
-    }, 100);
+    setShouldScrollToJobs(true);
   };
+
+  // Scroll to job listings when jobs are loaded after pagination change
+  useEffect(() => {
+    if (shouldScrollToJobs && !isLoading && filteredJobs.length > 0) {
+      setTimeout(() => {
+        if (jobListingsRef.current) {
+          jobListingsRef.current.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+        }
+        setShouldScrollToJobs(false);
+      }, 100);
+    }
+  }, [shouldScrollToJobs, isLoading, filteredJobs.length]);
 
   return (
     <div className="min-h-screen bg-gray-50">
