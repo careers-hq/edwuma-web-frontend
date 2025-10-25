@@ -1,5 +1,6 @@
 import React from 'react';
-import { getFlagImageSrcSet, getCountryName } from '@/lib/utils/countryDisplay';
+import Image from 'next/image';
+import { getFlagImageSrcSet } from '@/lib/utils/countryDisplay';
 
 interface FlagIconProps {
   countryCode: string;
@@ -32,15 +33,15 @@ const FlagIcon: React.FC<FlagIconProps> = ({
   const flagData = getFlagImageSrcSet(countryCode, cdnWidth);
 
   return (
-    <img
+    <Image
       src={flagData.src}
-      srcSet={flagData.srcSet}
       width={size}
       height={size * 0.75} // Maintain 4:3 aspect ratio
       alt={flagData.alt}
       className={`inline-block ${rounded ? 'rounded-sm' : ''} ${className}`}
       loading="lazy"
       style={{ objectFit: 'cover' }}
+      unoptimized // Use unoptimized for external CDN images
     />
   );
 };

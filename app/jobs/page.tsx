@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -219,7 +219,7 @@ const mockJobs: JobListing[] = [
   }
 ];
 
-export default function JobsPage() {
+function JobsContent() {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -254,7 +254,7 @@ export default function JobsPage() {
         setIsRestoringScroll(false);
       }, 100);
     }
-  }, []);
+  }, [isRestoringScroll]);
 
   // Update URL when page changes
   useEffect(() => {
@@ -540,5 +540,27 @@ export default function JobsPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white">
+        <Header />
+        <HeroSection />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#244034] mx-auto"></div>
+              <p className="mt-4 text-[rgba(0,0,0,0.7)]">Loading jobs...</p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    }>
+      <JobsContent />
+    </Suspense>
   );
 }
