@@ -29,6 +29,7 @@ function DashboardContent() {
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [isLoadingActivity, setIsLoadingActivity] = useState(true);
   const [isLoadingSavedJobs, setIsLoadingSavedJobs] = useState(true);
+  const [removingJobId, setRemovingJobId] = useState<string | null>(null);
 
   // Fetch statistics
   useEffect(() => {
@@ -113,7 +114,13 @@ function DashboardContent() {
 
   // Handle remove saved job
   const handleRemoveSavedJob = async (savedJobId: string) => {
+    // Prevent duplicate calls
+    if (removingJobId === savedJobId) {
+      return;
+    }
+
     try {
+      setRemovingJobId(savedJobId);
       const response = await savedJobsService.unsaveJob(savedJobId);
       
       if (response.success) {
@@ -124,6 +131,8 @@ function DashboardContent() {
       }
     } catch (error) {
       console.error('Error removing saved job:', error);
+    } finally {
+      setRemovingJobId(null);
     }
   };
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import JobCard from '@/components/job/JobCard';
@@ -220,6 +221,8 @@ const mockJobs: JobListing[] = [
 
 export default function JobsPage() {
   const { isAuthenticated } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [jobs] = useState<JobListing[]>(mockJobs);
   const [filteredJobs, setFilteredJobs] = useState<JobListing[]>(mockJobs);
   const [filters, setFilters] = useState<JobFiltersType>({
@@ -230,9 +233,37 @@ export default function JobsPage() {
     experience: '',
     workMode: '',
   });
-  const [currentPage, setCurrentPage] = useState(1);
+  // Get initial page from URL or default to 1
+  const pageParam = searchParams.get('page');
+  const [currentPage, setCurrentPage] = useState(pageParam ? parseInt(pageParam, 10) : 1);
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
   const jobsPerPage = 6;
+  const [isRestoringScroll, setIsRestoringScroll] = useState(false);
+  const [savingJobId, setSavingJobId] = useState<string | null>(null);
+
+  // Restore scroll position when returning from job details
+  useEffect(() => {
+    const savedScrollPosition = sessionStorage.getItem('jobsListScrollPosition');
+    
+    if (savedScrollPosition && !isRestoringScroll) {
+      setIsRestoringScroll(true);
+      // Small delay to ensure content is rendered
+      setTimeout(() => {
+        window.scrollTo(0, parseInt(savedScrollPosition, 10));
+        sessionStorage.removeItem('jobsListScrollPosition');
+        setIsRestoringScroll(false);
+      }, 100);
+    }
+  }, []);
+
+  // Update URL when page changes
+  useEffect(() => {
+    if (currentPage > 1) {
+      router.replace(`/jobs?page=${currentPage}`, { scroll: false });
+    } else {
+      router.replace('/jobs', { scroll: false });
+    }
+  }, [currentPage, router]);
 
   // Fetch saved jobs when authenticated
   useEffect(() => {
@@ -294,6 +325,11 @@ export default function JobsPage() {
   };
 
   const handleSaveJob = async (jobId: string) => {
+    // Prevent duplicate calls
+    if (savingJobId === jobId) {
+      return;
+    }
+
     // Check if user is authenticated
     if (!isAuthenticated) {
       toast.error('Please login to save jobs');
@@ -312,6 +348,8 @@ export default function JobsPage() {
     const job = jobs.find(j => j.id === jobId);
 
     try {
+      setSavingJobId(jobId);
+      
       if (isSaved) {
         // Unsave the job
         const response = await savedJobsService.unsaveJob(jobId);
@@ -349,6 +387,8 @@ export default function JobsPage() {
     } catch (error) {
       console.error('Error saving job:', error);
       toast.error('An error occurred');
+    } finally {
+      setSavingJobId(null);
     }
   };
 

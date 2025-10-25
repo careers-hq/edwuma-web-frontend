@@ -22,6 +22,13 @@ const JobCard: React.FC<JobCardProps> = ({
     onSave?.(job.id);
   };
 
+  const handleJobClick = () => {
+    // Save current scroll position before navigating
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('jobsListScrollPosition', window.scrollY.toString());
+    }
+  };
+
   const formatCurrency = (min: number | null, max: number | null, currency: string | null) => {
     if (!min && !max) return null;
     const currencySymbol = currency?.toUpperCase() || '';
@@ -63,7 +70,7 @@ const JobCard: React.FC<JobCardProps> = ({
     <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl hover:border-gray-300 transition-all duration-300 group">
       {/* Header Section */}
       <div className="flex items-start justify-between mb-5 gap-3">
-        <Link href={`/jobs/${getJobSlug(job)}`} className="flex items-start space-x-4 flex-1 min-w-0 cursor-pointer">
+        <Link href={`/jobs/${getJobSlug(job)}`} onClick={handleJobClick} className="flex items-start space-x-4 flex-1 min-w-0 cursor-pointer">
             {/* Company Logo */}
             <div className="flex-shrink-0">
               <CompanyLogo
@@ -135,7 +142,7 @@ const JobCard: React.FC<JobCardProps> = ({
         </div>
       </div>
 
-      <Link href={`/jobs/${getJobSlug(job)}`} className="cursor-pointer">
+      <Link href={`/jobs/${getJobSlug(job)}`} onClick={handleJobClick} className="cursor-pointer">
         {/* Job Description */}
         {job.description && (
           <div className="mb-4">

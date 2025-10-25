@@ -40,6 +40,7 @@ const JobDetailsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [similarJobs, setSimilarJobs] = useState<JobListing[]>([]);
   const [isLoadingSimilar, setIsLoadingSimilar] = useState(false);
   const similarJobsLoadedRef = useRef(false);
@@ -47,14 +48,16 @@ const JobDetailsPage: React.FC = () => {
   const jobSlugOrId = params?.id as string;
   const jobId = extractJobId(jobSlugOrId);
 
-  // Handle back navigation with filters preserved
+  // Handle back navigation with scroll position preserved
   const handleBackToJobs = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Use browser back if coming from jobs page
+    // Use browser back to preserve state and scroll position
     if (typeof window !== 'undefined' && window.history.length > 1) {
+      // The scroll position is already stored in sessionStorage by JobCard
       router.back();
     } else {
-      router.push('/');
+      // Fallback to jobs page if no history
+      router.push('/jobs');
     }
   };
 
@@ -173,6 +176,11 @@ const JobDetailsPage: React.FC = () => {
   const handleSaveJob = async () => {
     if (!job) return;
 
+    // Prevent duplicate calls
+    if (isSaving) {
+      return;
+    }
+
     // Check if user is authenticated
     if (!isAuthenticated) {
       toast.error('Please login to save jobs');
@@ -188,6 +196,8 @@ const JobDetailsPage: React.FC = () => {
     }
 
     try {
+      setIsSaving(true);
+      
       if (isSaved) {
         // Unsave the job
         const response = await savedJobsService.unsaveJob(job.id);
@@ -219,6 +229,8 @@ const JobDetailsPage: React.FC = () => {
     } catch (error) {
       console.error('Error saving job:', error);
       toast.error('An error occurred');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -237,6 +249,15 @@ const JobDetailsPage: React.FC = () => {
     
     handleJobApplication(job.application.url, isAuthenticated);
   };
+
+  // Clear saved scroll position when viewing a new job
+  useEffect(() => {
+    // Clear the scroll position from sessionStorage when a job detail page loads
+    // This prevents unwanted scrolling when navigating between job details
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('jobsListScrollPosition');
+    }
+  }, [jobId]);
 
   if (isLoading) {
     return (

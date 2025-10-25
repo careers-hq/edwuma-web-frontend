@@ -59,16 +59,14 @@ export default function ForgotPasswordPage() {
     setErrors({});
     
     try {
-      // TODO: Implement actual forgot password API call
       const requestData: ForgotPasswordRequest = {
         ...formData,
         'cf-turnstile-response': turnstileToken,
       };
       
-      console.log('Forgot password request:', requestData);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Use authService directly instead of dynamic import
+      const { authService } = await import('@/lib/api');
+      await authService.forgotPassword(requestData);
       
       setIsSuccess(true);
     } catch (error: unknown) {

@@ -92,16 +92,14 @@ function ResetPasswordForm() {
     setErrors({});
     
     try {
-      // TODO: Implement actual reset password API call
       const requestData: ResetPasswordRequest = {
         ...formData,
         'cf-turnstile-response': turnstileToken,
       };
       
-      console.log('Reset password request:', requestData);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Use authService to reset password
+      const { authService } = await import('@/lib/api');
+      await authService.resetPassword(requestData);
       
       // Redirect to login with success message
       router.push('/auth/login?reset=success');

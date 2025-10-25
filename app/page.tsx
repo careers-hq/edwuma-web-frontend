@@ -35,6 +35,7 @@ function AfricaJobsContent() {
   // Removed unused jobs state
   const [filteredJobs, setFilteredJobs] = useState<JobListing[]>([]);
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
+  const [savingJobId, setSavingJobId] = useState<string | null>(null);
   
   // Initialize filters from URL search params
   const [filters, setFilters] = useState<AfricanJobFiltersType>(() => {
@@ -205,6 +206,11 @@ function AfricaJobsContent() {
   };
 
   const handleSaveJob = async (jobId: string) => {
+    // Prevent duplicate calls
+    if (savingJobId === jobId) {
+      return;
+    }
+
     // Check if user is authenticated
     if (!isAuthenticated) {
       toast.error('Please login to save jobs');
@@ -222,6 +228,8 @@ function AfricaJobsContent() {
     const job = filteredJobs.find(j => j.id === jobId);
 
     try {
+      setSavingJobId(jobId);
+      
       if (isSaved) {
         // Unsave the job
         const response = await savedJobsService.unsaveJob(jobId);
@@ -259,6 +267,8 @@ function AfricaJobsContent() {
     } catch (error) {
       console.error('Error saving job:', error);
       toast.error('An error occurred');
+    } finally {
+      setSavingJobId(null);
     }
   };
 

@@ -328,11 +328,11 @@ export default function RegisterPage() {
                 <div className="ml-3 text-sm">
                   <label htmlFor="agreeToTerms" className="text-[rgba(0,0,0,0.7)]">
                     I agree to the{' '}
-                    <Link href="/terms" className="text-primary hover:text-success transition-colors underline">
+                    <Link href="#" className="text-primary hover:text-success transition-colors underline">
                       Terms of Service
                     </Link>{' '}
                     and{' '}
-                    <Link href="/privacy" className="text-primary hover:text-success transition-colors underline">
+                    <Link href="#" className="text-primary hover:text-success transition-colors underline">
                       Privacy Policy
                     </Link>
                   </label>
