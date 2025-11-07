@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Turnstile } from '@/components/ui/Turnstile';
+import { Turnstile, TurnstileHandle } from '@/components/ui/Turnstile';
 import type { ForgotPasswordRequest } from '@/lib/api';
 
 export default function ForgotPasswordPage() {
@@ -20,6 +20,7 @@ export default function ForgotPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string>('');
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -81,6 +82,10 @@ export default function ForgotPasswordPage() {
       }
     } finally {
       setIsSubmitting(false);
+      if (turnstileRef.current) {
+        turnstileRef.current.reset();
+      }
+      setTurnstileToken('');
     }
   };
 
@@ -197,6 +202,7 @@ export default function ForgotPasswordPage() {
 
               {/* Cloudflare Turnstile */}
               <Turnstile
+                ref={turnstileRef}
                 onSuccess={(token) => {
                   setTurnstileToken(token);
                   setErrors(prev => ({ ...prev, turnstile: '' }));

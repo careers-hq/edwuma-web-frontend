@@ -10,12 +10,16 @@ interface TurnstileProps {
   className?: string;
 }
 
-export const Turnstile: React.FC<TurnstileProps> = ({
+export interface TurnstileHandle {
+  reset: () => void;
+}
+
+export const Turnstile = React.forwardRef<TurnstileHandle, TurnstileProps>(({
   onSuccess,
   onError,
   onExpire,
   className = '',
-}) => {
+}, ref) => {
   const turnstileRef = React.useRef<TurnstileInstance>(null);
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '';
 
@@ -25,6 +29,14 @@ export const Turnstile: React.FC<TurnstileProps> = ({
       console.warn('⚠️ NEXT_PUBLIC_TURNSTILE_SITE_KEY is not set in environment variables');
     }
   }, [siteKey]);
+
+  React.useImperativeHandle(ref, () => ({
+    reset: () => {
+      if (turnstileRef.current) {
+        turnstileRef.current.reset();
+      }
+    },
+  }), []);
 
   const handleSuccess = (token: string) => {
     onSuccess(token);
@@ -69,7 +81,9 @@ export const Turnstile: React.FC<TurnstileProps> = ({
       />
     </div>
   );
-};
+});
+
+Turnstile.displayName = 'Turnstile';
 
 export default Turnstile;
 

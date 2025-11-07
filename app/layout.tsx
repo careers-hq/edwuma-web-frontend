@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import { WebSiteSchema } from "@/components/seo";
+import ToastProvider from "@/components/providers/ToastProvider";
 import "@/lib/api/debug-auth"; // Debug utility for authentication
 
 const geistSans = Geist({
@@ -134,6 +135,7 @@ export default function RootLayout({
         </Script>
 
         <AuthProvider>
+          <ToastProvider />
           {children}
         </AuthProvider>
       </body>

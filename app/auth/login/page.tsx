@@ -1,21 +1,23 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Turnstile } from '@/components/ui/Turnstile';
+import { Turnstile, TurnstileHandle } from '@/components/ui/Turnstile';
 import { useAuth } from '@/lib/auth';
 import type { LoginRequest } from '@/lib/api';
 import { processPostLoginRedirect } from '@/lib/utils/jobApplication';
+import { userActivitiesService } from '@/lib/api/activities';
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, isAuthenticated, isLoading: authLoading } = useAuth();
+  const turnstileRef = useRef<TurnstileHandle>(null);
   
   const [formData, setFormData] = useState<LoginRequest>({
     email: '',
@@ -46,6 +48,14 @@ function LoginForm() {
       const redirect = processPostLoginRedirect();
       const rawReturnTo = searchParams.get('returnTo');
       const safeReturnTo = rawReturnTo && rawReturnTo.startsWith('/') && !rawReturnTo.startsWith('//') ? rawReturnTo : null;
+
+      if (redirect.pendingApplyActivity?.jobId) {
+        void userActivitiesService.trackActivity(
+          'apply_click',
+          redirect.pendingApplyActivity.jobId,
+          redirect.pendingApplyActivity.metadata
+        );
+      }
 
       if (redirect.shouldRedirectToJob && redirect.jobUrl) {
         // Open the job application URL in a new tab
@@ -119,6 +129,14 @@ function LoginForm() {
       const rawReturnTo = searchParams.get('returnTo');
       const safeReturnTo = rawReturnTo && rawReturnTo.startsWith('/') && !rawReturnTo.startsWith('//') ? rawReturnTo : null;
 
+      if (redirect.pendingApplyActivity?.jobId) {
+        void userActivitiesService.trackActivity(
+          'apply_click',
+          redirect.pendingApplyActivity.jobId,
+          redirect.pendingApplyActivity.metadata
+        );
+      }
+
       if (redirect.shouldRedirectToJob && redirect.jobUrl) {
         // Open the job application URL in a new tab
         window.open(redirect.jobUrl, '_blank', 'noopener,noreferrer');
@@ -150,6 +168,10 @@ function LoginForm() {
       }
     } finally {
       setIsSubmitting(false);
+      if (turnstileRef.current) {
+        turnstileRef.current.reset();
+      }
+      setTurnstileToken('');
     }
   };
 
@@ -294,6 +316,7 @@ function LoginForm() {
 
               {/* Cloudflare Turnstile */}
               <Turnstile
+                ref={turnstileRef}
                 onSuccess={(token) => {
                   setTurnstileToken(token);
                   setErrors(prev => ({ ...prev, turnstile: '' }));

@@ -20,11 +20,52 @@ import toast from 'react-hot-toast';
 
 // Removed mock data - now using real API data
 
+const DEFAULT_FILTERS: AfricanJobFiltersType = {
+  search: '',
+  location: '',
+  workMode: '',
+  experience: '',
+  visaSponsorship: '',
+  datePosted: ''
+};
+
+const parseFiltersFromSearch = (searchString: string): AfricanJobFiltersType => {
+  const params = new URLSearchParams(searchString);
+  return {
+    search: params.get('search') || '',
+    location: params.get('location') || '',
+    workMode: params.get('workMode') || '',
+    experience: params.get('experience') || '',
+    visaSponsorship: params.get('visaSponsorship') || '',
+    datePosted: params.get('datePosted') || ''
+  };
+};
+
+const parsePageFromSearch = (searchString: string): number => {
+  const params = new URLSearchParams(searchString);
+  const pageParam = params.get('page');
+  const parsed = pageParam ? parseInt(pageParam, 10) : 1;
+  return Number.isNaN(parsed) || parsed < 1 ? 1 : parsed;
+};
+
+const areFiltersEqual = (a: AfricanJobFiltersType, b: AfricanJobFiltersType) =>
+  a.search === b.search &&
+  a.location === b.location &&
+  a.workMode === b.workMode &&
+  a.experience === b.experience &&
+  a.visaSponsorship === b.visaSponsorship &&
+  a.datePosted === b.datePosted;
+
 function AfricaJobsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
   const jobListingsRef = useRef<HTMLDivElement>(null);
+  const hasRestoredScrollRef = useRef(false);
+
+  const searchParamsString = React.useMemo(() => searchParams.toString(), [searchParams]);
+  const filtersFromUrl = React.useMemo(() => parseFiltersFromSearch(searchParamsString), [searchParamsString]);
+  const initialPageFromUrl = React.useMemo(() => parsePageFromSearch(searchParamsString), [searchParamsString]);
   
   // Client-side only state to prevent hydration issues
   const [isClient, setIsClient] = useState(false);
@@ -34,42 +75,42 @@ function AfricaJobsContent() {
   
   // Removed unused jobs state
   const [filteredJobs, setFilteredJobs] = useState<JobListing[]>([]);
-  const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
+  const [savedJobIds, setSavedJobIds] = useState<Set<string>>(() => new Set());
+  const [savedJobsMap, setSavedJobsMap] = useState<Map<string, string>>(() => new Map());
   const [savingJobId, setSavingJobId] = useState<string | null>(null);
   
   // Initialize filters from URL search params
-  const [filters, setFilters] = useState<AfricanJobFiltersType>(() => {
-    if (typeof window === 'undefined') {
-      return {
-        search: '',
-        location: '',
-        workMode: '',
-        experience: '',
-        visaSponsorship: '',
-        datePosted: ''
-      };
-    }
-    
-    return {
-      search: searchParams.get('search') || '',
-      location: searchParams.get('location') || '',
-      workMode: searchParams.get('workMode') || '',
-      experience: searchParams.get('experience') || '',
-      visaSponsorship: searchParams.get('visaSponsorship') || '',
-      datePosted: searchParams.get('datePosted') || ''
-    };
-  });
+  const [filters, setFilters] = useState<AfricanJobFiltersType>(filtersFromUrl);
   // Removed showFilters state since filters are now always visible at the top
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
-    current_page: 1,
+    current_page: initialPageFromUrl,
     last_page: 1,
     per_page: 20,
     total: 0,
     from: null as number | null,
     to: null as number | null
   });
+
+  const syncURLWithState = React.useCallback((nextFilters: AfricanJobFiltersType, page: number) => {
+    if (typeof window === 'undefined') return;
+
+    const params = new URLSearchParams();
+
+    Object.entries(nextFilters).forEach(([key, value]) => {
+      if (value) {
+        params.set(key, value);
+      }
+    });
+
+    if (page > 1) {
+      params.set('page', page.toString());
+    }
+
+    const newURL = params.toString() ? `/?${params.toString()}` : '/';
+    router.replace(newURL, { scroll: false });
+  }, [router]);
 
   const loadJobs = React.useCallback(async (resetPagination = false) => {
     // Only run on client side to avoid hydration issues
@@ -146,6 +187,23 @@ function AfricaJobsContent() {
     }
   }, [filters, pagination.current_page, pagination.per_page]);
 
+  useEffect(() => {
+    if (!isClient) {
+      return;
+    }
+
+    setFilters(prev => (areFiltersEqual(prev, filtersFromUrl) ? prev : filtersFromUrl));
+
+    setPagination(prev => {
+      const nextPage = initialPageFromUrl;
+      if (prev.current_page === nextPage) {
+        return prev;
+      }
+
+      return { ...prev, current_page: nextPage };
+    });
+  }, [filtersFromUrl, initialPageFromUrl, isClient]);
+
   // Set client-side flag
   useEffect(() => {
     setIsClient(true);
@@ -155,7 +213,8 @@ function AfricaJobsContent() {
   useEffect(() => {
     const fetchSavedJobs = async () => {
       if (!isAuthenticated) {
-        setSavedJobIds(new Set());
+        setSavedJobIds(() => new Set());
+        setSavedJobsMap(() => new Map());
         return;
       }
 
@@ -163,8 +222,18 @@ function AfricaJobsContent() {
         const response = await savedJobsService.getSavedJobs(1, 100);
         
         if (response.success && response.data) {
-          const savedIds = new Set(response.data.data.map(savedJob => savedJob.job.id));
-          setSavedJobIds(savedIds);
+          const savedIds = new Set<string>();
+          const savedMap = new Map<string, string>();
+
+          response.data.data.forEach(savedJob => {
+            if (savedJob.job?.id) {
+              savedIds.add(savedJob.job.id);
+              savedMap.set(savedJob.job.id, savedJob.id);
+            }
+          });
+
+          setSavedJobIds(() => savedIds);
+          setSavedJobsMap(() => savedMap);
         }
       } catch (error) {
         console.error('Error fetching saved jobs:', error);
@@ -188,22 +257,21 @@ function AfricaJobsContent() {
       return () => clearTimeout(timeoutId);
     }
   }, [isClient, filters, loadJobs]);
-  
-  // Update URL params when filters change
-  const updateURLParams = (newFilters: AfricanJobFiltersType) => {
-    if (typeof window === 'undefined') return;
-    
-    const params = new URLSearchParams();
-    
-    Object.entries(newFilters).forEach(([key, value]) => {
-      if (value) {
-        params.set(key, value);
-      }
-    });
-    
-    const newURL = params.toString() ? `/?${params.toString()}` : '/';
-    router.replace(newURL, { scroll: false });
-  };
+
+  useEffect(() => {
+    if (!isClient || isLoading || hasRestoredScrollRef.current) {
+      return;
+    }
+
+    const savedScrollPosition = sessionStorage.getItem('jobsListScrollPosition');
+    if (savedScrollPosition) {
+      hasRestoredScrollRef.current = true;
+      setTimeout(() => {
+        window.scrollTo(0, parseInt(savedScrollPosition, 10));
+        sessionStorage.removeItem('jobsListScrollPosition');
+      }, 100);
+    }
+  }, [isClient, isLoading, filteredJobs.length]);
 
   const handleSaveJob = async (jobId: string) => {
     // Prevent duplicate calls
@@ -226,19 +294,25 @@ function AfricaJobsContent() {
 
     const isSaved = savedJobIds.has(jobId);
     const job = filteredJobs.find(j => j.id === jobId);
+    const savedJobRecordId = savedJobsMap.get(jobId);
 
     try {
       setSavingJobId(jobId);
       
       if (isSaved) {
         // Unsave the job
-        const response = await savedJobsService.unsaveJob(jobId);
+        const response = await savedJobsService.unsaveJob(savedJobRecordId || jobId);
         
         if (response.success) {
           setSavedJobIds(prev => {
             const newSet = new Set(prev);
             newSet.delete(jobId);
             return newSet;
+          });
+          setSavedJobsMap(prev => {
+            const next = new Map(prev);
+            next.delete(jobId);
+            return next;
           });
           toast.success('Job removed from saved');
         } else {
@@ -249,7 +323,19 @@ function AfricaJobsContent() {
         const response = await savedJobsService.saveJob(jobId);
         
         if (response.success) {
-          setSavedJobIds(prev => new Set(prev).add(jobId));
+          setSavedJobIds(prev => {
+            const next = new Set(prev);
+            next.add(jobId);
+            return next;
+          });
+          const savedRecordId = response.data?.id;
+          if (savedRecordId) {
+            setSavedJobsMap(prev => {
+              const next = new Map(prev);
+              next.set(jobId, savedRecordId);
+              return next;
+            });
+          }
           toast.success('Job saved successfully');
           
           // Track save activity with metadata
@@ -273,10 +359,11 @@ function AfricaJobsContent() {
   };
 
   const handleFiltersChange = (newFilters: AfricanJobFiltersType) => {
+    const nextPage = 1;
     setFilters(newFilters);
-    updateURLParams(newFilters);
+    setPagination(prev => ({ ...prev, current_page: nextPage }));
+    syncURLWithState(newFilters, nextPage);
     // Reset pagination when filters change
-    setPagination(prev => ({ ...prev, current_page: 1 }));
     
     // Scroll to job listings when filters change
     setTimeout(() => {
@@ -290,18 +377,11 @@ function AfricaJobsContent() {
   };
 
   const clearFilters = () => {
-    const clearedFilters = {
-      search: '',
-      location: '',
-      workMode: '',
-      experience: '',
-      visaSponsorship: '',
-      datePosted: ''
-    };
+    const clearedFilters = { ...DEFAULT_FILTERS };
     setFilters(clearedFilters);
-    updateURLParams(clearedFilters);
-    // Reset pagination when clearing filters
     setPagination(prev => ({ ...prev, current_page: 1 }));
+    syncURLWithState(clearedFilters, 1);
+    // Reset pagination when clearing filters
     
     // Scroll to job listings when clearing filters
     setTimeout(() => {
@@ -329,6 +409,7 @@ function AfricaJobsContent() {
 
   const handlePageChange = (newPage: number) => {
     setPagination(prev => ({ ...prev, current_page: newPage }));
+    syncURLWithState(filters, newPage);
     setShouldScrollToJobs(true);
   };
 

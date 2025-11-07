@@ -120,12 +120,10 @@ const JobDetailsPage: React.FC = () => {
         if (response.success && response.data) {
           setJob(response.data);
           
-          // Track job view activity (only if authenticated)
+          // Track job view activity for analytics
           // Use the actual job ID (UUID) from the response, not the slug
-          if (isAuthenticated && response.data.id) {
+          if (response.data.id) {
             userActivitiesService.trackActivity('view', response.data.id);
-            
-            // Check if job is saved
             await checkSavedStatus(response.data.id);
           }
         } else {
@@ -238,26 +236,21 @@ const JobDetailsPage: React.FC = () => {
     e.preventDefault();
     if (!job?.application.url) return;
     
+    const applyMetadata = {
+      job_title: job.title,
+      company: job.companies[0]?.name,
+      application_url: job.application.url,
+    };
+
     // Track apply click activity (only if authenticated)
     if (isAuthenticated && job.id) {
-      userActivitiesService.trackActivity('apply_click', job.id, {
-        job_title: job.title,
-        company: job.companies[0]?.name,
-        application_url: job.application.url,
-      });
+      userActivitiesService.trackActivity('apply_click', job.id, applyMetadata);
     }
     
-    handleJobApplication(job.application.url, isAuthenticated);
+    handleJobApplication(job.application.url, isAuthenticated, {
+      activity: !isAuthenticated && job?.id ? { jobId: job.id, metadata: applyMetadata } : undefined,
+    });
   };
-
-  // Clear saved scroll position when viewing a new job
-  useEffect(() => {
-    // Clear the scroll position from sessionStorage when a job detail page loads
-    // This prevents unwanted scrolling when navigating between job details
-    if (typeof window !== 'undefined') {
-      sessionStorage.removeItem('jobsListScrollPosition');
-    }
-  }, [jobId]);
 
   if (isLoading) {
     return (

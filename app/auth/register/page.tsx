@@ -1,19 +1,20 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Turnstile } from '@/components/ui/Turnstile';
+import { Turnstile, TurnstileHandle } from '@/components/ui/Turnstile';
 import { useAuth } from '@/lib/auth';
 import type { RegisterRequest } from '@/lib/api';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { register, isAuthenticated, isLoading: authLoading } = useAuth();
+  const turnstileRef = useRef<TurnstileHandle>(null);
   
   const [formData, setFormData] = useState<RegisterRequest>({
     first_name: '',
@@ -133,6 +134,10 @@ export default function RegisterPage() {
       }
     } finally {
       setIsSubmitting(false);
+      if (turnstileRef.current) {
+        turnstileRef.current.reset();
+      }
+      setTurnstileToken('');
     }
   };
 
@@ -344,6 +349,7 @@ export default function RegisterPage() {
 
               {/* Cloudflare Turnstile */}
               <Turnstile
+                ref={turnstileRef}
                 onSuccess={(token) => {
                   setTurnstileToken(token);
                   setErrors(prev => ({ ...prev, turnstile: '' }));
