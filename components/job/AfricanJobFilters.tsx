@@ -40,8 +40,10 @@ const AfricanJobFilters: React.FC<AfricanJobFiltersProps> = ({ onFiltersChange, 
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [showLocationSuggestion, setShowLocationSuggestion] = useState(true);
 
-  // Show location suggestion instead of auto-filtering
-  const shouldShowSuggestion = autoDetectedCountry && !filters.location && showLocationSuggestion;
+  // Only suggest countries the filter list can apply. An IP result such as
+  // "united-kingdom" has no matching option and must not be shown.
+  const isSupportedCountry = AFRICAN_LOCATIONS.some((loc) => loc.value === autoDetectedCountry);
+  const shouldShowSuggestion = isSupportedCountry && !filters.location && showLocationSuggestion;
 
   const handleFilterChange = (key: keyof AfricanJobFilters, value: string | string[] | { min: number; max: number }) => {
     const newFilters = { ...filters, [key]: value };

@@ -10,7 +10,8 @@ interface UseGeolocationReturn {
 }
 
 /**
- * Hook to get user's location based on IP address
+ * Hook to suggest a job-filter country from the browser timezone,
+ * falling back to IP only when the timezone cannot be read.
  */
 export const useGeolocation = (): UseGeolocationReturn => {
   const [location, setLocation] = useState<GeolocationData | null>(null);
@@ -33,16 +34,9 @@ export const useGeolocation = (): UseGeolocationReturn => {
       setIsLoading(true);
       setError(null);
 
-      const userLocation = await geolocationService.getUserLocation();
-      setLocation(userLocation);
-
-      if (userLocation) {
-        const country = await geolocationService.getCountryForFiltering();
-        setCountryCode(country);
-      } else {
-        // If geolocation fails, don't treat it as an error - just continue without auto-detection
-        console.warn('Geolocation failed, continuing without auto-detection');
-      }
+      const country = await geolocationService.getCountryForFiltering();
+      setCountryCode(country);
+      setLocation(geolocationService.getResolvedLocation());
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to detect location';
       setError(errorMessage);

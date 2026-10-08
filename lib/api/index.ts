@@ -7,6 +7,7 @@ export { apiClient, ApiClient } from './client';
 export { authService, AuthService } from './auth';
 export { savedJobsService } from './savedJobs';
 export { userActivitiesService } from './activities';
+export { jobAlertsService } from './jobAlerts';
 export { API_CONFIG, API_ENDPOINTS, STORAGE_KEYS, HTTP_STATUS } from './config';
 export type {
   // Base types
@@ -53,3 +54,9 @@ export type {
   ActivitySummary,
   ActivitiesResponse,
 } from './activities';
+
+export type {
+  JobAlertSubscription,
+  CreateJobAlertRequest,
+  UpdateJobAlertRequest,
+} from './jobAlerts';

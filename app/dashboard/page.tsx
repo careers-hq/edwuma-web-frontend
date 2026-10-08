@@ -6,10 +6,17 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import JobAlertModal from '@/components/job/JobAlertModal';
 import { ProtectedRoute, useAuth } from '@/lib/auth';
-import { savedJobsService, userActivitiesService } from '@/lib/api';
-import type { SavedJob, ActivityStatistics, ActivitySummary } from '@/lib/api';
+import { jobAlertsService, savedJobsService, userActivitiesService } from '@/lib/api';
+import type {
+  SavedJob,
+  ActivityStatistics,
+  ActivitySummary,
+  JobAlertSubscription as JobAlertSubscriptionType,
+} from '@/lib/api';
 import { getJobSlug } from '@/lib/utils/slug';
+import toast from 'react-hot-toast';
 
 // Types are now imported from the API module
 
@@ -30,6 +37,10 @@ function DashboardContent() {
   const [isLoadingActivity, setIsLoadingActivity] = useState(true);
   const [isLoadingSavedJobs, setIsLoadingSavedJobs] = useState(true);
   const [removingJobId, setRemovingJobId] = useState<string | null>(null);
+  const [isJobAlertModalOpen, setIsJobAlertModalOpen] = useState(false);
+  const [jobAlertModalMode, setJobAlertModalMode] = useState<'create' | 'update'>('create');
+  const [jobAlert, setJobAlert] = useState<JobAlertSubscriptionType | null>(null);
+  const [isLoadingJobAlert, setIsLoadingJobAlert] = useState(true);
 
   // Fetch statistics
   useEffect(() => {
@@ -60,6 +71,26 @@ function DashboardContent() {
     };
 
     fetchStats();
+  }, []);
+
+  useEffect(() => {
+    const fetchJobAlert = async () => {
+      try {
+        setIsLoadingJobAlert(true);
+        const response = await jobAlertsService.getMine();
+
+        if (response.success) {
+          setJobAlert(response.data.subscription);
+          setJobAlertModalMode(response.data.subscription ? 'update' : 'create');
+        }
+      } catch (error) {
+        console.error('Error fetching job alert subscription:', error);
+      } finally {
+        setIsLoadingJobAlert(false);
+      }
+    };
+
+    fetchJobAlert();
   }, []);
 
   // Fetch recent activity
@@ -136,6 +167,37 @@ function DashboardContent() {
     }
   };
 
+  const openCreateJobAlertModal = () => {
+    setJobAlertModalMode('create');
+    setIsJobAlertModalOpen(true);
+  };
+
+  const openEditJobAlertModal = () => {
+    setJobAlertModalMode('update');
+    setIsJobAlertModalOpen(true);
+  };
+
+  const closeJobAlertModal = () => {
+    setIsJobAlertModalOpen(false);
+  };
+
+  const handleDeleteJobAlert = async () => {
+    try {
+      const response = await jobAlertsService.deleteMine();
+
+      if (response.success) {
+        toast.success('Job alert deleted successfully.');
+        setJobAlert(null);
+        setJobAlertModalMode('create');
+      } else {
+        toast.error(response.message ?? 'Unable to delete job alert.');
+      }
+    } catch (error) {
+      console.error('Error deleting job alert subscription:', error);
+      toast.error('An unexpected error occurred while deleting your job alert.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f8fafc]">
       <Header />
@@ -196,6 +258,12 @@ function DashboardContent() {
                     }`}
                   >
                     Profile Settings
+                  </button>
+                  <button
+                    onClick={() => (jobAlert ? openEditJobAlertModal() : openCreateJobAlertModal())}
+                    className="w-full text-left px-4 py-3 rounded-md transition-colors text-[#244034] border border-[#244034]/20 hover:bg-[#f0f7f4]"
+                  >
+                    {jobAlert ? 'Manage Job Alert' : 'Create Job Alert'}
                   </button>
                   <button
                     onClick={() => logout()}
@@ -304,6 +372,72 @@ function DashboardContent() {
                     </CardContent>
                   </Card>
                 </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-xl font-semibold text-[#244034]">Weekly Job Alert</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingJobAlert ? (
+                      <div className="space-y-3">
+                        <div className="h-4 w-48 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-3 w-64 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-3 w-40 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="flex gap-3 mt-4">
+                          <div className="h-10 w-28 bg-gray-200 rounded animate-pulse"></div>
+                          <div className="h-10 w-28 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
+                      </div>
+                    ) : jobAlert ? (
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-sm font-medium text-[#244034] mb-2">Job Titles</p>
+                          <div className="flex flex-wrap gap-2">
+                            {jobAlert.job_titles.map((title) => (
+                              <span
+                                key={title}
+                                className="rounded-full bg-[#d2f34c]/70 text-[#244034] text-xs font-medium px-3 py-1"
+                              >
+                                {title}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-[#244034] mb-2">Countries</p>
+                          <div className="flex flex-wrap gap-2">
+                            {jobAlert.countries.map((country) => (
+                              <span
+                                key={country}
+                                className="rounded-full border border-[#244034]/20 text-[#244034] text-xs font-medium px-3 py-1"
+                              >
+                                {country}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="primary" onClick={openEditJobAlertModal}>
+                            Edit Alert
+                          </Button>
+                          <Button variant="outline" onClick={handleDeleteJobAlert}>
+                            Delete Alert
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <p className="text-[rgba(0,0,0,0.7)]">
+                          Stay ahead of new roles. Create a weekly job alert tailored to your preferred titles and
+                          countries.
+                        </p>
+                        <Button variant="primary" onClick={openCreateJobAlertModal}>
+                          Create Job Alert
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
 
                 {/* Recent Activity */}
                 <Card>
@@ -576,6 +710,16 @@ function DashboardContent() {
       </main>
 
       <Footer />
+      <JobAlertModal
+        isOpen={isJobAlertModalOpen}
+        onClose={closeJobAlertModal}
+        mode={jobAlertModalMode}
+        initialData={jobAlertModalMode === 'update' ? jobAlert ?? undefined : undefined}
+        onSuccess={(subscription) => {
+          setJobAlert(subscription);
+          setJobAlertModalMode('update');
+        }}
+      />
     </div>
   );
 }

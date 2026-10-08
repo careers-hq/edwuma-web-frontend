@@ -1,4 +1,39 @@
-// Geolocation service to detect user's country from IP address
+// Geolocation service to detect user's country.
+// The browser timezone is preferred over IP lookup, because VPNs and
+// private relays often report a different country than where the user is.
+
+/** Countries the job filters can apply. Other detections are ignored. */
+const SUPPORTED_FILTER_COUNTRIES = new Set([
+  'ghana',
+  'nigeria',
+  'kenya',
+  'south-africa',
+]);
+
+/** IANA timezones for the countries users can filter by. */
+const TIMEZONE_TO_COUNTRY: Record<string, string> = {
+  'Africa/Accra': 'ghana',
+  'Africa/Lagos': 'nigeria',
+  'Africa/Nairobi': 'kenya',
+  'Africa/Johannesburg': 'south-africa',
+};
+
+const SLUG_TO_COUNTRY: Record<string, { name: string; code: string }> = {
+  ghana: { name: 'Ghana', code: 'GH' },
+  nigeria: { name: 'Nigeria', code: 'NG' },
+  kenya: { name: 'Kenya', code: 'KE' },
+  'south-africa': { name: 'South Africa', code: 'ZA' },
+};
+
+const ISO_TO_SLUG: Record<string, string> = {
+  GH: 'ghana',
+  NG: 'nigeria',
+  KE: 'kenya',
+  ZA: 'south-africa',
+};
+
+const LOCATION_CACHE_KEY = 'user-location-v2';
+const LEGACY_LOCATION_CACHE_KEY = 'user-location';
 
 export interface GeolocationData {
   country: string;
@@ -16,6 +51,7 @@ export interface GeolocationError {
 
 class GeolocationService {
   private cache: Map<string, GeolocationData> = new Map();
+  private resolvedLocation: GeolocationData | null = null;
   private readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
   private readonly API_ENDPOINTS = [
     'https://ipinfo.io/json',
@@ -145,7 +181,11 @@ class GeolocationService {
    * Get cached location data
    */
   private getCachedLocation(): GeolocationData | null {
-    const cached = localStorage.getItem('user-location');
+    // Drop the previous cache so a stale IP result (for example United Kingdom)
+    // is not reused after detection switched to the browser timezone.
+    localStorage.removeItem(LEGACY_LOCATION_CACHE_KEY);
+
+    const cached = localStorage.getItem(LOCATION_CACHE_KEY);
     if (!cached) return null;
 
     try {
@@ -158,11 +198,11 @@ class GeolocationService {
       }
       
       // Remove expired cache
-      localStorage.removeItem('user-location');
+      localStorage.removeItem(LOCATION_CACHE_KEY);
       return null;
     } catch (error) {
       console.error('Error reading cached location:', error);
-      localStorage.removeItem('user-location');
+      localStorage.removeItem(LOCATION_CACHE_KEY);
       return null;
     }
   }
@@ -176,130 +216,86 @@ class GeolocationService {
         location: data,
         timestamp: Date.now()
       };
-      localStorage.setItem('user-location', JSON.stringify(cacheData));
+      localStorage.setItem(LOCATION_CACHE_KEY, JSON.stringify(cacheData));
     } catch (error) {
       console.error('Error caching location:', error);
     }
   }
 
   /**
-   * Get country code for API filtering
+   * Country slug for job filters.
+   * Uses the browser timezone when it is available, because that follows the
+   * computer's clock rather than the public IP. IP lookup is only used when
+   * the timezone cannot be read, and only for countries the filters support.
    */
   async getCountryForFiltering(): Promise<string | null> {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(LEGACY_LOCATION_CACHE_KEY);
+    }
+
+    const timezone = this.getBrowserTimezone();
+    if (timezone) {
+      const slug = TIMEZONE_TO_COUNTRY[timezone] ?? null;
+      this.resolvedLocation = slug ? this.locationFromSlug(slug, timezone) : null;
+      return slug;
+    }
+
     const location = await this.getUserLocation();
-    if (!location || !location.countryCode) {
+    if (!location?.countryCode) {
+      this.resolvedLocation = null;
       return null;
     }
 
-    // Map ISO country codes (2-letter) to API-compatible slugified format
-    const countryCodeMapping: Record<string, string> = {
-      // African Countries
-      'GH': 'ghana',
-      'NG': 'nigeria',
-      'KE': 'kenya',
-      'ZA': 'south-africa',
-      'SN': 'senegal',
-      'CI': 'ivory-coast',
-      'SL': 'sierra-leone',
-      'LR': 'liberia',
-      'GN': 'guinea',
-      'GW': 'guinea-bissau',
-      'GM': 'gambia',
-      'CV': 'cape-verde',
-      'ML': 'mali',
-      'BF': 'burkina-faso',
-      'NE': 'niger',
-      'TD': 'chad',
-      'MR': 'mauritania',
-      'BJ': 'benin',
-      'TG': 'togo',
-      'ET': 'ethiopia',
-      'TZ': 'tanzania',
-      'UG': 'uganda',
-      'RW': 'rwanda',
-      'BI': 'burundi',
-      'DJ': 'djibouti',
-      'ER': 'eritrea',
-      'SO': 'somalia',
-      'SS': 'south-sudan',
-      'SD': 'sudan',
-      'BW': 'botswana',
-      'NA': 'namibia',
-      'ZM': 'zambia',
-      'ZW': 'zimbabwe',
-      'MW': 'malawi',
-      'MZ': 'mozambique',
-      'LS': 'lesotho',
-      'SZ': 'swaziland',
-      'AO': 'angola',
-      'EG': 'egypt',
-      'MA': 'morocco',
-      'DZ': 'algeria',
-      'TN': 'tunisia',
-      'LY': 'libya',
-      'CD': 'democratic-republic-of-congo',
-      'CG': 'republic-of-congo',
-      'CM': 'cameroon',
-      'CF': 'central-african-republic',
-      'GA': 'gabon',
-      'GQ': 'equatorial-guinea',
-      'ST': 'sao-tome-and-principe',
-      'MG': 'madagascar',
-      'MU': 'mauritius',
-      'SC': 'seychelles',
-      'KM': 'comoros',
-      'RE': 'reunion',
-      'YT': 'mayotte',
-      
-      // Diaspora Countries
-      'US': 'united-states',
-      'CA': 'canada',
-      'GB': 'united-kingdom',
-      'FR': 'france',
-      'DE': 'germany',
-      'NL': 'netherlands',
-      'BE': 'belgium',
-      'CH': 'switzerland',
-      'SE': 'sweden',
-      'NO': 'norway',
-      'DK': 'denmark',
-      'AU': 'australia',
-      'NZ': 'new-zealand',
-      'BR': 'brazil',
-      'AR': 'argentina',
-      'VN': 'vietnam',
-      'TH': 'thailand',
-      'PH': 'philippines',
-      'MY': 'malaysia',
-      'SG': 'singapore',
-      'ID': 'indonesia',
-      'KR': 'south-korea',
-      'JP': 'japan',
-      'CN': 'china',
-      'IN': 'india',
-      'AE': 'uae',
-      'SA': 'saudi-arabia',
-      'QA': 'qatar',
-      'KW': 'kuwait',
-      'BH': 'bahrain',
-      'OM': 'oman',
-      'JO': 'jordan',
-      'LB': 'lebanon',
-      'TR': 'turkey',
-      'IL': 'israel'
-    };
+    const slug = ISO_TO_SLUG[location.countryCode.toUpperCase()] ?? null;
+    if (!slug || !SUPPORTED_FILTER_COUNTRIES.has(slug)) {
+      this.resolvedLocation = null;
+      return null;
+    }
 
-    // Convert country code to uppercase to ensure consistency
-    const upperCode = location.countryCode.toUpperCase();
-    return countryCodeMapping[upperCode] || null;
+    this.resolvedLocation = { ...location, source: location.source ?? 'ip' };
+    return slug;
+  }
+
+  /**
+   * Location resolved by the latest getCountryForFiltering call.
+   */
+  getResolvedLocation(): GeolocationData | null {
+    return this.resolvedLocation;
+  }
+
+  /**
+   * Browser IANA timezone. Returns null on the server so a hosted
+   * machine's timezone is never treated as the visitor's location.
+   */
+  private getBrowserTimezone(): string | null {
+    if (typeof window === 'undefined') return null;
+
+    try {
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      return timeZone || null;
+    } catch {
+      return null;
+    }
+  }
+
+  private locationFromSlug(slug: string, timezone: string): GeolocationData {
+    const details = SLUG_TO_COUNTRY[slug];
+    return {
+      country: details?.name ?? slug,
+      countryCode: details?.code ?? '',
+      timezone,
+      source: 'timezone',
+    };
   }
 
   /**
    * Clear cached location data
    */
   clearCache(): void {
-    localStorage.removeItem('user-location');
+    localStorage.removeItem(LOCATION_CACHE_KEY);
+    localStorage.removeItem(LEGACY_LOCATION_CACHE_KEY);
     this.cache.clear();
+    this.resolvedLocation = null;
   }
 
   /**

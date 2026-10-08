@@ -11,6 +11,7 @@ import JobCard from '@/components/job/JobCard';
 import { jobsApiService, type JobListing, type JobSearchFilters } from '@/lib/api/jobs';
 import { useGeolocation } from '@/lib/hooks/useGeolocation';
 import HeroSection from '@/components/home/HeroSection';
+import JobAlertModal from '@/components/job/JobAlertModal';
 import { useAuth } from '@/lib/auth';
 import { savedJobsService } from '@/lib/api/savedJobs';
 import { userActivitiesService } from '@/lib/api/activities';
@@ -92,6 +93,7 @@ function AfricaJobsContent() {
     from: null as number | null,
     to: null as number | null
   });
+  const [isJobAlertModalOpen, setIsJobAlertModalOpen] = useState(false);
 
   const syncURLWithState = React.useCallback((nextFilters: AfricanJobFiltersType, page: number) => {
     if (typeof window === 'undefined') return;
@@ -500,7 +502,7 @@ function AfricaJobsContent() {
         <section className="py-12 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Results Header */}
-                <div className="mb-6">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <p className="text-gray-600">
                 {!isClient ? 'Loading...' : isLoading ? 'Searching...' : `Found ${pagination.total.toLocaleString()} jobs`}
                 {getActiveFiltersCount() > 0 && (
@@ -513,8 +515,15 @@ function AfricaJobsContent() {
                     🌍 Your location
                   </span>
                 )}
-                  </p>
-                </div>
+              </p>
+              <Button
+                variant="primary"
+                className="bg-primary px-5 py-2 text-sm font-semibold text-white hover:bg-[#6d28d9]"
+                onClick={() => setIsJobAlertModalOpen(true)}
+              >
+                Create Job Alert
+              </Button>
+            </div>
 
             {/* Jobs List */}
             {!isClient ? (
@@ -626,6 +635,11 @@ function AfricaJobsContent() {
       </main>
 
       <Footer />
+      <JobAlertModal
+        isOpen={isJobAlertModalOpen}
+        onClose={() => setIsJobAlertModalOpen(false)}
+        mode="create"
+      />
     </div>
   );
 }
