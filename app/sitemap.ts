@@ -5,6 +5,7 @@
 
 import { MetadataRoute } from 'next';
 import { jobsApiService } from '@/lib/api/jobs';
+import { blogService } from '@/lib/api/blog';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://edwuma.com';
@@ -18,10 +19,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
-      url: `${baseUrl}/jobs`,
+      url: `${baseUrl}/about`,
       lastModified: new Date(),
-      changeFrequency: 'hourly',
-      priority: 0.9,
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/help`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/terms`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.3,
     },
     {
       url: `${baseUrl}/blog`,
@@ -134,31 +153,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-    // Extract unique companies
-    const uniqueCompanies = new Set<string>();
-    jobsResponse.data.jobs.forEach((job) => {
-      if (job.companies && Array.isArray(job.companies)) {
-        job.companies.forEach((company) => {
-          if (company.id) {
-            uniqueCompanies.add(company.id);
-          }
-        });
-      }
-    });
+    let blogPages: MetadataRoute.Sitemap = [];
 
-    const companyPages: MetadataRoute.Sitemap = Array.from(uniqueCompanies).slice(0, 100).map((companyId) => ({
-      url: `${baseUrl}/companies/${companyId}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
-    }));
+    try {
+      const blogResponse = await blogService.listPosts({ per_page: 50 });
+      blogPages = blogResponse.data.posts.map((post) => ({
+        url: `${baseUrl}/blog/${post.slug}`,
+        lastModified: post.updated_at ? new Date(post.updated_at) : new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+      }));
+    } catch (blogError) {
+      console.error('Error adding blog posts to sitemap:', blogError);
+    }
 
     return [
       ...staticPages,
       ...jobPages,
+      ...blogPages,
       ...locationPages,
       ...categoryPages,
-      ...companyPages,
     ];
   } catch (error) {
     console.error('Error generating sitemap:', error);

@@ -69,6 +69,12 @@ export const API_ENDPOINTS = {
     COUNT: '/saved-jobs/count',
   },
   
+  // Blog
+  BLOG: {
+    BASE: '/blog-posts',
+    CATEGORIES: '/blog-posts/categories',
+  },
+
   // User Activities
   ACTIVITIES: {
     BASE: '/activities',

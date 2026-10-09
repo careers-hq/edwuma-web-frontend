@@ -13,9 +13,7 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
     services: {
       title: 'Services',
       links: [
-        { name: 'Browse Jobs', href: '/jobs' },
-        { name: 'Post Jobs', href: '/employers' },
-        { name: 'Company Profiles', href: '/companies' },
+        { name: 'Browse Jobs', href: '/' },
       ],
     },
     company: {
@@ -23,7 +21,6 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
       links: [
         { name: 'About Us', href: '/about' },
         { name: 'Careers', href: '/careers' },
-        { name: 'Press', href: '/press' },
         { name: 'Contact', href: '/contact' },
       ],
     },
@@ -111,7 +108,7 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
         <div className="mt-12 pt-8 border-t border-white/20">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-sm text-white/80">
-              © {currentYear} <Link href="https://careershqafrica.com" target="_blank" className="text-white/80 hover:text-white transition-colors underline" rel="noopener noreferrer">Careers HQ Africa</Link>. All rights reserved.
+              © {currentYear} <Link href="https://edwuma.com/contact"  className="text-white/80 hover:text-white transition-colors underline" rel="noopener noreferrer">Edwuma.com</Link>. All rights reserved.
             </div>
             
             {/* Social Links */}

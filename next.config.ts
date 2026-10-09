@@ -43,6 +43,15 @@ const nextConfig: NextConfig = {
   compress: true,
   // Generate sitemap automatically
   // Sitemap is generated via app/sitemap.ts
+  async redirects() {
+    return [
+      {
+        source: '/jobs',
+        destination: '/',
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return [
       {
