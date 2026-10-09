@@ -4,7 +4,7 @@
  */
 
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://api-prod.edwuma.com',
   VERSION: 'v1',
   TIMEOUT: 30000, // 30 seconds
   RETRY_ATTEMPTS: 3,
@@ -15,7 +15,7 @@ export const API_CONFIG = {
 export const getApiUrl = (): string => {
   // In production on Vercel, use the production API URL
   if (process.env.NODE_ENV === 'production' && process.env.VERCEL) {
-    return process.env.NEXT_PUBLIC_API_URL || 'https://api.edwuma.com';
+    return process.env.NEXT_PUBLIC_API_URL || 'https://api-prod.edwuma.com';
   }
   
   // In development, use localhost or the configured URL
