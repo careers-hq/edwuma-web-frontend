@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Turnstile } from '@/components/ui/Turnstile';
+import { Turnstile, TurnstileHandle } from '@/components/ui/Turnstile';
+import { contactService } from '@/lib/api';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -19,6 +20,7 @@ export default function ContactPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string>('');
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -69,20 +71,38 @@ export default function ContactPage() {
     }
 
     setIsLoading(true);
-    
+    setErrors({});
+
     try {
-      // TODO: Implement actual contact form submission
-      console.log('Contact form submission:', formData);
-      console.log('Turnstile token:', turnstileToken);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await contactService.send({
+        ...formData,
+        'cf-turnstile-response': turnstileToken,
+      });
+
       setIsSubmitted(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
+      setTurnstileToken('');
     } catch (error) {
-      console.error('Contact form error:', error);
-      setErrors({ general: 'Failed to send message. Please try again.' });
+      const apiError = error as { message?: string; errors?: Record<string, string[]> };
+      const fieldErrors: Record<string, string> = {};
+
+      if (apiError.errors) {
+        Object.entries(apiError.errors).forEach(([field, messages]) => {
+          if (field === 'cf-turnstile-response') {
+            fieldErrors.turnstile = messages[0];
+          } else if (messages[0]) {
+            fieldErrors[field] = messages[0];
+          }
+        });
+      }
+
+      if (Object.keys(fieldErrors).length === 0) {
+        fieldErrors.general = apiError.message || 'Failed to send message. Please try again.';
+      }
+
+      setErrors(fieldErrors);
+      turnstileRef.current?.reset();
+      setTurnstileToken('');
     } finally {
       setIsLoading(false);
     }
@@ -196,6 +216,7 @@ export default function ContactPage() {
 
                   {/* Cloudflare Turnstile */}
                   <Turnstile
+                    ref={turnstileRef}
                     onSuccess={(token) => {
                       setTurnstileToken(token);
                       setErrors(prev => ({ ...prev, turnstile: '' }));

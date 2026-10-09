@@ -5,7 +5,7 @@ import ContentPage, { ContentSection } from '@/components/layout/ContentPage';
 export const metadata: Metadata = {
   title: 'Terms of Use',
   description:
-    'Terms for using Edwuma, the African job search site operated by Careers HQ Africa.',
+    'Terms for using Edwuma, the African job search site.',
 };
 
 const UPDATED = '9 October 2026';
@@ -19,7 +19,7 @@ export default function TermsPage() {
     >
       <ContentSection title="Who we are">
         <p>
-          Edwuma is operated by Careers HQ Africa (&quot;we&quot;, &quot;us&quot;). The site is at edwuma.com. You can reach us at <a href="mailto:hello@edwuma.com" className="text-[#244034] underline">hello@edwuma.com</a>.
+          Edwuma (&quot;we&quot;, &quot;us&quot;) operates the site at edwuma.com. You can reach us at <a href="mailto:hello@edwuma.com" className="text-[#244034] underline">hello@edwuma.com</a>.
         </p>
         <p>
           These terms are governed by the laws of the Republic of Ghana. If a mandatory consumer or data-protection right applies to you where you live, including under the EU or UK GDPR, that right still applies.
@@ -81,7 +81,7 @@ export default function TermsPage() {
 
       <ContentSection title="Our content and yours">
         <p>
-          The Edwuma name, logo, and the design of the site belong to Careers HQ Africa or its licensors. Job descriptions, company names, and logos belong to the employers or sources that published them. You may use the site for your own job search. You may not copy the site or its collection of listings to build a competing service.
+          The Edwuma name, logo, and the design of the site belong to us or our licensors. Job descriptions, company names, and logos belong to the employers or sources that published them. You may use the site for your own job search. You may not copy the site or its collection of listings to build a competing service.
         </p>
         <p>
           Information you submit, such as your name, email, saved jobs, and alert preferences, stays yours. You give us permission to use it only to run the service, as described in the Privacy Policy.
@@ -93,7 +93,7 @@ export default function TermsPage() {
           The site is provided as it is available. Listings can be incomplete or out of date because they come from other organisations. We do not warrant that the site will be uninterrupted or error-free.
         </p>
         <p>
-          To the extent the law allows, Careers HQ Africa is not liable for decisions you or an employer make after using a listing, for the content of a third-party application page, or for loss of data, income, or opportunity arising from use of the site. Nothing in these terms limits liability that cannot legally be limited, including liability for fraud, or for death or personal injury caused by negligence.
+          To the extent the law allows, we are not liable for decisions you or an employer make after using a listing, for the content of a third-party application page, or for loss of data, income, or opportunity arising from use of the site. Nothing in these terms limits liability that cannot legally be limited, including liability for fraud, or for death or personal injury caused by negligence.
         </p>
       </ContentSection>
 

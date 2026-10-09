@@ -5,7 +5,7 @@ import ContentPage, { ContentSection } from '@/components/layout/ContentPage';
 export const metadata: Metadata = {
   title: 'Privacy Policy',
   description:
-    'How Careers HQ Africa collects and uses personal data on Edwuma, under Ghana’s Data Protection Act, 2012 (Act 843) and the GDPR.',
+    'How Edwuma collects and uses personal data, under Ghana’s Data Protection Act, 2012 (Act 843) and the GDPR.',
 };
 
 const UPDATED = '9 October 2026';
@@ -19,7 +19,7 @@ export default function PrivacyPage() {
     >
       <ContentSection title="Who is responsible">
         <p>
-          Careers HQ Africa is the data controller for personal data processed through Edwuma. We are based in Ghana and operate the site at edwuma.com.
+          We are the data controller for personal data processed through Edwuma. We are based in Ghana and operate the site at edwuma.com.
         </p>
         <p>
           Privacy requests go to <a href="mailto:hello@edwuma.com" className="text-[#244034] underline">hello@edwuma.com</a>. You can also use the <Link href="/contact" className="text-[#244034] underline">contact form</Link>.

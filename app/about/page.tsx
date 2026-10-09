@@ -5,7 +5,7 @@ import ContentPage, { ContentSection } from '@/components/layout/ContentPage';
 export const metadata: Metadata = {
   title: 'About Us',
   description:
-    'Edwuma is a job search site for Africa, operated by Careers HQ Africa. Search roles in Ghana, Nigeria, Kenya, and South Africa, save jobs, and get a weekly alert.',
+    'Edwuma is a job search site for Africa. Search roles in Ghana, Nigeria, Kenya, and South Africa, save jobs, and get a weekly alert.',
 };
 
 export default function AboutPage() {
@@ -16,7 +16,7 @@ export default function AboutPage() {
     >
       <ContentSection title="What Edwuma is">
         <p>
-          Edwuma is a job search site operated by Careers HQ Africa. It is built for job seekers, with a focus on roles in Ghana, Nigeria, Kenya, and South Africa, including remote and on-site work.
+          Edwuma is a job search site for job seekers, with a focus on roles in Ghana, Nigeria, Kenya, and South Africa, including remote and on-site work.
         </p>
         <p>
           Searching is free. You can browse without an account. An account lets you save jobs, see your recent activity, and subscribe to a weekly job alert.
@@ -44,7 +44,7 @@ export default function AboutPage() {
 
       <ContentSection title="Who we are">
         <p>
-          Edwuma is a product of Careers HQ Africa. Questions about the site, your account, or your personal data can be sent to{' '}
+          Edwuma is the job search site at edwuma.com. Questions about the site, your account, or your personal data can be sent to{' '}
           <a href="mailto:hello@edwuma.com" className="text-[#244034] underline">hello@edwuma.com</a>
           {' '}or through the <Link href="/contact" className="text-[#244034] underline">contact form</Link>.
         </p>

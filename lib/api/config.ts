@@ -75,6 +75,8 @@ export const API_ENDPOINTS = {
     CATEGORIES: '/blog-posts/categories',
   },
 
+  CONTACT: '/contact',
+
   // User Activities
   ACTIVITIES: {
     BASE: '/activities',

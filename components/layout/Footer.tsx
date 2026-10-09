@@ -20,7 +20,6 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
       title: 'Company',
       links: [
         { name: 'About Us', href: '/about' },
-        { name: 'Careers', href: '/careers' },
         { name: 'Contact', href: '/contact' },
       ],
     },
