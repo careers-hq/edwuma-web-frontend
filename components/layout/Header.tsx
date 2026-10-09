@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/lib/auth';
+import { useAuth, useIsAdmin } from '@/lib/auth';
 
 interface HeaderProps {
   className?: string;
@@ -16,6 +16,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { isAuthenticated, user, logout, getUserDisplayName } = useAuth();
+  const isAdmin = useIsAdmin();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -106,6 +107,15 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                 {/* Dropdown Menu */}
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                    {isAdmin ? (
+                      <Link
+                        href="/admin"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Admin
+                      </Link>
+                    ) : null}
                     <Link
                       href="/dashboard"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -233,6 +243,13 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                         <p className="text-sm text-gray-300">{user?.email}</p>
                       </div>
                     </div>
+                    {isAdmin ? (
+                      <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Button variant="outline" size="sm" className="w-full justify-start bg-white text-primary">
+                          Admin
+                        </Button>
+                      </Link>
+                    ) : null}
                     <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button variant="outline" size="sm" className="w-full justify-start bg-white text-primary">
                         Dashboard

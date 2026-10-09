@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Turnstile, TurnstileHandle } from '@/components/ui/Turnstile';
 import { useAuth } from '@/lib/auth';
-import type { LoginRequest } from '@/lib/api';
+import { authService, type LoginRequest } from '@/lib/api';
 import { processPostLoginRedirect } from '@/lib/utils/jobApplication';
 import { userActivitiesService } from '@/lib/api/activities';
 
@@ -60,12 +60,11 @@ function LoginForm() {
       if (redirect.shouldRedirectToJob && redirect.jobUrl) {
         // Open the job application URL in a new tab
         window.open(redirect.jobUrl, '_blank', 'noopener,noreferrer');
-        // Then redirect to dashboard
-        router.push(redirect.dashboardUrl);
+        router.push(authService.hasRole('admin') ? '/admin' : redirect.dashboardUrl);
       } else if (safeReturnTo) {
         router.push(safeReturnTo);
       } else {
-        router.push(redirect.dashboardUrl);
+        router.push(authService.hasRole('admin') ? '/admin' : redirect.dashboardUrl);
       }
     }
   }, [isAuthenticated, authLoading, router, searchParams]);
@@ -137,16 +136,16 @@ function LoginForm() {
         );
       }
 
+      const homeUrl = authService.hasRole('admin') ? '/admin' : redirect.dashboardUrl;
+
       if (redirect.shouldRedirectToJob && redirect.jobUrl) {
         // Open the job application URL in a new tab
         window.open(redirect.jobUrl, '_blank', 'noopener,noreferrer');
-        // Then redirect to dashboard
-        router.push(redirect.dashboardUrl);
+        router.push(homeUrl);
       } else if (safeReturnTo) {
         router.push(safeReturnTo);
       } else {
-        // Normal redirect to dashboard
-        router.push(redirect.dashboardUrl);
+        router.push(homeUrl);
       }
     } catch (error: unknown) {
       console.error('Login error:', error);

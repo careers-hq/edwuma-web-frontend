@@ -77,7 +77,7 @@ const faqData: FAQItem[] = [
   {
     id: '11',
     question: 'How do I contact support?',
-    answer: 'You can reach our support team through the contact form on our website, email us at support@edwuma.com, or use the live chat feature. We typically respond within 24 hours.',
+    answer: 'You can reach our support team through the contact form on our website, email us at hello@edwuma.com, or use the live chat feature. We typically respond within 24 hours.',
     category: 'Support'
   },
   {
@@ -270,7 +270,7 @@ export default function FAQPage() {
                 Contact Support
               </a>
               <a
-                href="mailto:support@edwuma.com"
+                href="mailto:hello@edwuma.com"
                 className="inline-flex items-center justify-center px-6 py-3 border border-[#244034] text-base font-medium rounded-md text-[#244034] bg-white hover:bg-[#f8fafc] transition-colors"
               >
                 Email Us

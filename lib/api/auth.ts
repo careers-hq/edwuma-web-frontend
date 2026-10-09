@@ -248,8 +248,18 @@ class AuthService {
    * Check if user has specific role
    */
   hasRole(role: string): boolean {
-    const userRole = this.getUserRole();
-    return userRole === role;
+    const user = this.getStoredUserData();
+    if (!user) return false;
+
+    if (user.roles && user.roles.length > 0) {
+      return user.roles[0].name === role;
+    }
+
+    if (role === 'admin') return Boolean(user.is_admin);
+    if (role === 'recruiter') return Boolean(user.is_recruiter);
+    if (role === 'user') return Boolean(user.is_user);
+
+    return false;
   }
 
   /**

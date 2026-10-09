@@ -23,6 +23,9 @@ export interface User {
   updated_at: string;
   profile?: UserProfile;
   roles?: Role[];
+  is_admin?: boolean;
+  is_user?: boolean;
+  is_recruiter?: boolean;
 }
 
 export interface UserProfile {
