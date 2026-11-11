@@ -232,6 +232,40 @@ export interface JobSearchResponse {
   };
 }
 
+export interface MorningListSalary {
+  min: number | string | null;
+  max: number | string | null;
+  currency: string | null;
+}
+
+export interface MorningListJob {
+  id: string;
+  title: string;
+  company: string | null;
+  place: string | null;
+  years_experience: number | null;
+  salary: MorningListSalary | null;
+  badges: string[];
+  summary: string | null;
+  application_url: string | null;
+  posted_at: string | null;
+  stretch?: boolean;
+}
+
+export interface MorningListLeftOff {
+  title: string;
+  company: string | null;
+}
+
+export interface MorningListResponse {
+  country: string;
+  subscription: boolean;
+  open: number;
+  matched: number | null;
+  left_off: MorningListLeftOff | null;
+  jobs: MorningListJob[];
+}
+
 class JobsApiService {
   private apiClient: ApiClient;
 
@@ -269,11 +303,39 @@ class JobsApiService {
   }
 
   /**
+   * Open jobs for one country, newest first. Five is a full morning.
+   */
+  async morningList(
+    country: string,
+    perPage = 5,
+    person?: { kindOfWork: string; years: number },
+  ): Promise<ApiResponse<MorningListResponse>> {
+    return this.apiClient.get<MorningListResponse>('/jobs/morning-list', {
+      country,
+      per_page: perPage,
+      ...(person ? { kind_of_work: person.kindOfWork, years: person.years } : {}),
+    });
+  }
+
+  /**
    * Get a single job by ID
    */
   async getJob(jobId: string): Promise<ApiResponse<JobListing>> {
     const response = await this.apiClient.get<JobListing>(`/jobs/${jobId}`);
     return response;
+  }
+
+  async reportProblem(
+    jobId: string,
+    reason: string,
+    note: string | null,
+    turnstileToken?: string,
+  ): Promise<ApiResponse<{ reason: string }>> {
+    return this.apiClient.post<{ reason: string }>(`/jobs/${jobId}/reports`, {
+      reason,
+      note,
+      ...(turnstileToken ? { 'cf-turnstile-response': turnstileToken } : {}),
+    });
   }
 
   /**

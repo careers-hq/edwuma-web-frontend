@@ -111,7 +111,7 @@ export default function ContactPage() {
   if (isSubmitted) {
     return (
       <div className="min-h-screen bg-white">
-        <Header />
+        <Header plain />
         
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
@@ -133,14 +133,14 @@ export default function ContactPage() {
           </div>
         </main>
 
-        <Footer />
+        <Footer plain />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
+      <Header plain />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
@@ -262,26 +262,11 @@ export default function ContactPage() {
                 </div>
               </CardContent>
             </Card>
-
-            <Card className="bg-[#f8fafc]">
-              <CardContent className="p-6 text-center">
-                <h3 className="text-lg font-semibold text-[#244034] mb-2">Need Immediate Help?</h3>
-                <p className="text-[rgba(0,0,0,0.7)] mb-4">
-                  Check out our FAQ section for quick answers to common questions.
-                </p>
-                <a
-                  href="/faq"
-                  className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#244034] hover:bg-[#1a2f26] transition-colors"
-                >
-                  View FAQ
-                </a>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </main>
 
-      <Footer />
+      <Footer plain />
     </div>
   );
 }

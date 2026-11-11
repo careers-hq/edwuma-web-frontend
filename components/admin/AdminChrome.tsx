@@ -11,9 +11,11 @@ import { cn } from '@/lib/utils';
 const NAV_ITEMS = [
   { href: '/admin', label: 'Overview', exact: true },
   { href: '/admin/users', label: 'Users' },
+  { href: '/admin/access', label: 'Roles' },
   { href: '/admin/invitations', label: 'Invitations' },
   { href: '/admin/blog', label: 'Blog' },
   { href: '/admin/sync', label: 'Job sync' },
+  { href: '/admin/audit-log', label: 'Audit log' },
 ];
 
 function isNavActive(pathname: string, href: string, exact?: boolean): boolean {

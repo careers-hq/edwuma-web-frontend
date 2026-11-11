@@ -174,10 +174,12 @@ export default function AdminOverviewPage() {
           <CardContent className="p-6">
             <h2 className="text-lg font-semibold text-[#244034]">Manage</h2>
             <div className="mt-4 space-y-2">
-              <ManageLink href="/admin/users" title="Users" detail="Roles and account status" />
+              <ManageLink href="/admin/users" title="Users" detail="Create accounts and change roles" />
+              <ManageLink href="/admin/access" title="Roles" detail="Create roles and permissions" />
               <ManageLink href="/admin/invitations" title="Invitations" detail="Invite recruiters and admins" />
               <ManageLink href="/admin/blog" title="Blog" detail="Drafts and published posts" />
               <ManageLink href="/admin/sync" title="Job sync" detail="Sources and recent runs" />
+              <ManageLink href="/admin/audit-log" title="Audit log" detail="Sign-ins, role changes, and status updates" />
             </div>
           </CardContent>
         </Card>

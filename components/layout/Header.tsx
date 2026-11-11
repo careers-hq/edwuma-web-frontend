@@ -10,9 +10,10 @@ import { useAuth, useIsAdmin } from '@/lib/auth';
 
 interface HeaderProps {
   className?: string;
+  plain?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ className }) => {
+const Header: React.FC<HeaderProps> = ({ className, plain = false }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { isAuthenticated, user, logout, getUserDisplayName } = useAuth();
@@ -21,9 +22,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   const router = useRouter();
 
   const navigation = [
-    { name: 'Browse Jobs', href: '/' },
-    { name: 'Blog', href: '/blog' },
-    { name: 'FAQ', href: '/faq' },
+    { name: 'About', href: '/about' },
     { name: 'Contact', href: '/contact' },
   ];
 
@@ -54,6 +53,29 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
     const lastInitial = lastName.charAt(0) || '';
     return (firstInitial + lastInitial).toUpperCase() || user.email.charAt(0).toUpperCase();
   };
+
+  if (plain) {
+    return (
+      <header className={cn('h-14 border-b border-gray-200 bg-white', className)}>
+        <div className="mx-auto flex h-full max-w-2xl items-center justify-between px-4 sm:px-6">
+          <Link href="/" className="text-lg font-semibold tracking-tight text-[#244034]">
+            edwuma
+          </Link>
+          <nav className="hidden items-center gap-6 text-sm text-gray-600 sm:flex">
+            <Link href="/about">About</Link>
+            <Link href="/contact">Contact</Link>
+          </nav>
+          <details className="relative text-sm sm:hidden">
+            <summary className="cursor-pointer list-none text-gray-600">More</summary>
+            <div className="absolute right-0 z-10 mt-2 w-36 rounded-md border border-gray-200 bg-white py-1 shadow-sm">
+              <Link href="/about" className="block px-3 py-2 text-gray-900">About</Link>
+              <Link href="/contact" className="block px-3 py-2 text-gray-900">Contact</Link>
+            </div>
+          </details>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className={cn('bg-primary shadow-sm', className)}>
@@ -155,20 +177,9 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                 )}
               </div>
             ) : (
-              <>
-                <Link href="/auth/login" className="text-white hover:text-accent font-semibold transition-colors">
-                  Login
-                </Link>
-                <Link href="/auth/register">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="bg-[#B8F23E] text-[#2D4A43] hover:bg-[#A5D936] font-medium"
-                  >
-                    Sign Up
-                  </Button>
-                </Link>
-              </>
+              <Link href="/auth/login" className="text-white hover:text-accent font-semibold transition-colors">
+                Login
+              </Link>
             )}
           </div>
 
@@ -268,18 +279,11 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                     </button>
                   </div>
                 ) : (
-                  <div className="flex flex-col space-y-2">
-                    <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button variant="success" size="sm" className="w-full justify-start">
-                        Login
-                      </Button>
-                    </Link>
-                    <Link href="/auth/register" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button variant="secondary" size="sm" className="w-full bg-accent text-primary hover:bg-primary">
-                        Sign Up
-                      </Button>
-                    </Link>
-                  </div>
+                  <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="outline" size="sm" className="w-full justify-start bg-white text-primary">
+                      Login
+                    </Button>
+                  </Link>
                 )}
               </div>
             </div>

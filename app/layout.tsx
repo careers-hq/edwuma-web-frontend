@@ -24,10 +24,10 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://edwuma.com';
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "Edwuma - Jobs in Africa | Ghana, Nigeria, Kenya & South Africa",
+    default: "Jobs you can apply to today | Edwuma",
     template: "%s | Edwuma"
   },
-  description: "Find jobs across Africa with Edwuma, the leading job portal for Ghana, Nigeria, Kenya, and South Africa. Browse thousands of career opportunities, from tech to finance, remote work to on-site positions. Start your African career journey today.",
+  description: "A short list of open jobs in Ghana, Nigeria, Kenya, and South Africa. No fee. One link to apply.",
   keywords: [
     "jobs in Africa",
     "jobs in Ghana",
@@ -67,21 +67,21 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: baseUrl,
     siteName: "Edwuma",
-    title: "Edwuma - Jobs in Africa | Find Your Dream Career",
-    description: "Discover thousands of job opportunities across Africa. Connect with top employers in Ghana, Nigeria, Kenya, and South Africa.",
+    title: "Jobs you can apply to today | Edwuma",
+    description: "A short list of open jobs in Ghana, Nigeria, Kenya, and South Africa. No fee. One link to apply.",
     images: [
       {
         url: "/edwuma-logo-2023.png",
         width: 1200,
         height: 630,
-        alt: "Edwuma - African Job Portal",
+        alt: "Edwuma",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Edwuma - Jobs in Africa",
-    description: "Find jobs across Ghana, Nigeria, Kenya, and South Africa. Your African career starts here.",
+    title: "Jobs you can apply to today | Edwuma",
+    description: "A short list of open jobs in Ghana, Nigeria, Kenya, and South Africa. No fee. One link to apply.",
     images: ["/edwuma-logo-2023.png"],
     creator: "@edwuma",
     site: "@edwuma",

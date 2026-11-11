@@ -3,53 +3,45 @@ import Link from 'next/link';
 import ContentPage, { ContentSection } from '@/components/layout/ContentPage';
 
 export const metadata: Metadata = {
-  title: 'About Us',
+  title: 'About',
   description:
-    'Edwuma is a job search site for Africa. Search roles in Ghana, Nigeria, Kenya, and South Africa, save jobs, and get a weekly alert.',
+    'Edwuma shows a few open jobs in Ghana, Nigeria, Kenya, and South Africa. No fee. One link to apply.',
 };
 
 export default function AboutPage() {
   return (
     <ContentPage
       title="About Edwuma"
-      description="Edwuma helps people in Africa find work. Search open roles, save the ones you want, and get a weekly email when new jobs match what you are looking for."
+      description="A short list of jobs you can apply to today in Ghana, Nigeria, Kenya, and South Africa."
     >
       <ContentSection title="What Edwuma is">
         <p>
-          Edwuma is a job search site for job seekers, with a focus on roles in Ghana, Nigeria, Kenya, and South Africa, including remote and on-site work.
-        </p>
-        <p>
-          Searching is free. You can browse without an account. An account lets you save jobs, see your recent activity, and subscribe to a weekly job alert.
+          Edwuma shows a few open roles in Ghana, Nigeria, Kenya, and South Africa. Each role is still open, someone in that country can apply, and none of them ask for a fee.
         </p>
       </ContentSection>
 
       <ContentSection title="Where the jobs come from">
         <p>
-          Edwuma does not take job posts from employers on this site. Listings are gathered from public and employer career sources, including JobData, Greenhouse, and ReliefWeb, and shown in one place so you can search and filter them.
+          Listings are gathered from public employer sources, including JobData, Greenhouse, and ReliefWeb. Edwuma does not take job posts from employers on this site.
         </p>
         <p>
-          When you apply, Edwuma opens the employer&apos;s own application page. We do not receive your application, CV, or cover letter. The employer you apply to is responsible for that process.
+          When you apply, the link opens the employer&apos;s own application page. Edwuma does not receive your application or your CV. It does not promise a visa or an interview.
         </p>
       </ContentSection>
 
-      <ContentSection title="What you can do">
-        <ul className="list-disc pl-5 space-y-2">
-          <li>Search by keyword, country, work mode, and date posted.</li>
-          <li>Open a listing to read the role, location, and how to apply.</li>
-          <li>Create a free account with your name, email, and a password.</li>
-          <li>Save jobs and review them later from your dashboard.</li>
-          <li>Set one weekly email alert for job titles and countries you choose.</li>
-        </ul>
+      <ContentSection title="The morning message">
+        <p>
+          You can pay for a week and receive the morning on WhatsApp and by email. The week is GHS 15 in Ghana, NGN 2,000 in Nigeria, KES 200 in Kenya, or ZAR 25 in South Africa. The message uses your country, the kind of work you choose, and the years you have worked. Reply STOP to end WhatsApp. The email has its own stop link.
+        </p>
       </ContentSection>
 
       <ContentSection title="Who we are">
         <p>
-          Edwuma is the job search site at edwuma.com. Questions about the site, your account, or your personal data can be sent to{' '}
+          Edwuma is the site at edwuma.com. Questions about the site or your personal data can be sent to{' '}
           <a href="mailto:hello@edwuma.com" className="text-[#244034] underline">hello@edwuma.com</a>
           {' '}or through the <Link href="/contact" className="text-[#244034] underline">contact form</Link>.
         </p>
         <p>
-          For how to use the site, see the <Link href="/help" className="text-[#244034] underline">Help Center</Link> and <Link href="/faq" className="text-[#244034] underline">FAQ</Link>.
           How we handle personal data is set out in the <Link href="/privacy" className="text-[#244034] underline">Privacy Policy</Link>, and use of the site is covered by the <Link href="/terms" className="text-[#244034] underline">Terms of Use</Link>.
         </p>
       </ContentSection>

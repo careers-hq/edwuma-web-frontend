@@ -16,26 +16,34 @@ import {
   userDisplayName,
   userRoleName,
   type AdminPagination as Pagination,
+  type AdminRole,
   type AdminUser,
 } from '@/lib/api/admin';
 
-const ROLE_OPTIONS = [
-  { value: '', label: 'All roles' },
-  { value: 'admin', label: 'Admin' },
-  { value: 'recruiter', label: 'Recruiter' },
+const FALLBACK_ROLES = [
   { value: 'user', label: 'Job seeker' },
+  { value: 'recruiter', label: 'Recruiter' },
+  { value: 'admin', label: 'Admin' },
 ];
+
+function roleLabel(name: string): string {
+  return FALLBACK_ROLES.find((role) => role.value === name)?.label ?? name;
+}
+
+const emptyCreateForm = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  password: '',
+  passwordConfirmation: '',
+  role: 'user',
+};
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Any status' },
   { value: 'active', label: 'Active' },
   { value: 'inactive', label: 'Inactive' },
-];
-
-const ASSIGN_ROLE_OPTIONS = [
-  { value: 'user', label: 'Job seeker' },
-  { value: 'recruiter', label: 'Recruiter' },
-  { value: 'admin', label: 'Admin' },
 ];
 
 export default function AdminUsersPage() {
@@ -47,9 +55,18 @@ export default function AdminUsersPage() {
   const [appliedSearch, setAppliedSearch] = useState('');
   const [role, setRole] = useState('');
   const [status, setStatus] = useState('');
+  const [roles, setRoles] = useState<AdminRole[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [busyUserId, setBusyUserId] = useState<string | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createForm, setCreateForm] = useState(emptyCreateForm);
+
+  const roleOptions = roles.length
+    ? roles.map((item) => ({ value: item.name, label: roleLabel(item.name) }))
+    : FALLBACK_ROLES;
+  const filterRoleOptions = [{ value: '', label: 'All roles' }, ...roleOptions];
 
   const loadUsers = useCallback(async () => {
     try {
@@ -74,6 +91,10 @@ export default function AdminUsersPage() {
   useEffect(() => {
     void loadUsers();
   }, [loadUsers]);
+
+  useEffect(() => {
+    void adminService.listRoles().then(setRoles).catch(() => setRoles([]));
+  }, []);
 
   const updateUser = (updated: AdminUser) => {
     setUsers((current) => current.map((user) => (user.id === updated.id ? updated : user)));
@@ -124,12 +145,108 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleCreate = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (createForm.password !== createForm.passwordConfirmation) {
+      toast.error('Password confirmation does not match.');
+      return;
+    }
+
+    try {
+      setIsCreating(true);
+      await adminService.createUser({
+        email: createForm.email.trim(),
+        phone: createForm.phone.trim(),
+        password: createForm.password,
+        password_confirmation: createForm.passwordConfirmation,
+        first_name: createForm.firstName.trim(),
+        last_name: createForm.lastName.trim(),
+        role: createForm.role,
+      });
+      toast.success('User created.');
+      setCreateForm(emptyCreateForm);
+      setShowCreate(false);
+      setPage(1);
+      await loadUsers();
+    } catch (createError) {
+      toast.error(getApiErrorMessage(createError, 'Unable to create user.'));
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   return (
     <div>
       <AdminPageHeader
         title="Users"
-        description="Search accounts, change roles, and turn access on or off."
+        description="Create accounts, change roles, and turn access on or off."
+        action={
+          <Button variant="primary" onClick={() => setShowCreate((open) => !open)}>
+            {showCreate ? 'Close' : 'Create user'}
+          </Button>
+        }
       />
+
+      {showCreate ? (
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <form className="grid grid-cols-1 gap-4 md:grid-cols-2" onSubmit={(event) => void handleCreate(event)}>
+              <Input
+                label="First name"
+                value={createForm.firstName}
+                onChange={(event) => setCreateForm((form) => ({ ...form, firstName: event.target.value }))}
+                required
+              />
+              <Input
+                label="Last name"
+                value={createForm.lastName}
+                onChange={(event) => setCreateForm((form) => ({ ...form, lastName: event.target.value }))}
+                required
+              />
+              <Input
+                label="Email"
+                type="email"
+                value={createForm.email}
+                onChange={(event) => setCreateForm((form) => ({ ...form, email: event.target.value }))}
+                required
+              />
+              <Input
+                label="Phone"
+                value={createForm.phone}
+                onChange={(event) => setCreateForm((form) => ({ ...form, phone: event.target.value }))}
+                required
+              />
+              <Input
+                label="Password"
+                type="password"
+                value={createForm.password}
+                onChange={(event) => setCreateForm((form) => ({ ...form, password: event.target.value }))}
+                minLength={8}
+                required
+              />
+              <Input
+                label="Confirm password"
+                type="password"
+                value={createForm.passwordConfirmation}
+                onChange={(event) => setCreateForm((form) => ({ ...form, passwordConfirmation: event.target.value }))}
+                minLength={8}
+                required
+              />
+              <Select
+                label="Role"
+                value={createForm.role}
+                options={roleOptions}
+                onChange={(event) => setCreateForm((form) => ({ ...form, role: event.target.value }))}
+              />
+              <div className="flex items-end">
+                <Button type="submit" variant="primary" loading={isCreating}>
+                  Save user
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card className="mb-6">
         <CardContent className="p-6">
@@ -152,7 +269,7 @@ export default function AdminUsersPage() {
             <Select
               label="Role"
               value={role}
-              options={ROLE_OPTIONS}
+              options={filterRoleOptions}
               onChange={(event) => {
                 setRole(event.target.value);
                 setPage(1);
@@ -219,7 +336,7 @@ export default function AdminUsersPage() {
                           <Select
                             aria-label={`Role for ${userDisplayName(user)}`}
                             value={userRoleName(user)}
-                            options={ASSIGN_ROLE_OPTIONS}
+                            options={roleOptions}
                             disabled={busy || isSelf}
                             onChange={(event) => void handleRoleChange(user, event.target.value)}
                           />

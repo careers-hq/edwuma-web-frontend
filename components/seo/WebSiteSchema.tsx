@@ -1,6 +1,6 @@
 /**
  * WebSite Structured Data Schema
- * Implements schema.org WebSite for site-wide search
+ * Implements schema.org WebSite for the morning list.
  */
 
 export function WebSiteSchema() {
@@ -10,16 +10,8 @@ export function WebSiteSchema() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "Edwuma",
-    "description": "Find jobs across Africa. The leading job portal for Ghana, Nigeria, Kenya, and South Africa.",
+    "description": "A short list of open jobs in Ghana, Nigeria, Kenya, and South Africa. No fee. One link to apply.",
     "url": baseUrl,
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": {
-        "@type": "EntryPoint",
-        "urlTemplate": `${baseUrl}/jobs?search={search_term_string}`
-      },
-      "query-input": "required name=search_term_string"
-    },
     "publisher": {
       "@type": "Organization",
       "name": "Edwuma",

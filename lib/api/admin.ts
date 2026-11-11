@@ -240,6 +240,55 @@ export interface BlogAdminListParams {
   per_page?: number;
 }
 
+export interface AdminAuditActor {
+  id: string;
+  email: string;
+}
+
+export interface AdminAuditLog {
+  id: string;
+  event: string;
+  category: string;
+  actor?: AdminAuditActor | null;
+  subject_type: string | null;
+  subject_id: string | null;
+  properties: Record<string, unknown>;
+  ip_address: string | null;
+  user_agent: string | null;
+  url: string | null;
+  created_at: string;
+}
+
+export interface AuditLogListParams {
+  event?: string;
+  category?: string;
+  page?: number;
+  per_page?: number;
+}
+
+export interface AdminPermission {
+  id: number | string;
+  name: string;
+  guard_name?: string;
+}
+
+export interface AdminRole {
+  id: number | string;
+  name: string;
+  guard_name?: string;
+  permissions?: AdminPermission[];
+}
+
+export interface CreateAdminUserPayload {
+  email: string;
+  phone: string;
+  password: string;
+  password_confirmation: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+}
+
 const emptyPagination = (perPage = 15): AdminPagination => ({
   current_page: 1,
   last_page: 1,
@@ -251,6 +300,19 @@ function compactParams(params: object): Record<string, string | number | boolean
   return Object.fromEntries(
     Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== '')
   ) as Record<string, string | number | boolean>;
+}
+
+function unwrapObject<T>(value: unknown): T | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+  if (record.data && typeof record.data === 'object' && !Array.isArray(record.data)) {
+    return record.data as T;
+  }
+
+  return value as T;
 }
 
 function unwrapList<T>(value: unknown): T[] {
@@ -323,6 +385,55 @@ class AdminService {
       throw new Error(response.message || 'Unable to update user status');
     }
     return response.data.user;
+  }
+
+  async createUser(payload: CreateAdminUserPayload): Promise<AdminUser> {
+    const response = await apiClient.post<{ user: unknown }>('/admin/users', payload);
+    const user = unwrapObject<AdminUser>(response.data?.user);
+    if (!response.success || !user) {
+      throw new Error(response.message || 'Unable to create user');
+    }
+    return user;
+  }
+
+  async listRoles(): Promise<AdminRole[]> {
+    const response = await apiClient.get<{ roles: unknown }>('/admin/roles');
+    return unwrapList<AdminRole>(response.data?.roles).map((role) => ({
+      ...role,
+      permissions: unwrapList<AdminPermission>(role.permissions),
+    }));
+  }
+
+  async createRole(name: string): Promise<AdminRole> {
+    const response = await apiClient.post<{ role: unknown }>('/admin/roles', { name });
+    const role = unwrapObject<AdminRole>(response.data?.role);
+    if (!response.success || !role) {
+      throw new Error(response.message || 'Unable to create role');
+    }
+    return { ...role, permissions: unwrapList<AdminPermission>(role.permissions) };
+  }
+
+  async updateRolePermissions(roleId: string | number, permissions: string[]): Promise<AdminRole> {
+    const response = await apiClient.put<{ role: unknown }>(`/admin/roles/${roleId}`, { permissions });
+    const role = unwrapObject<AdminRole>(response.data?.role);
+    if (!response.success || !role) {
+      throw new Error(response.message || 'Unable to update role permissions');
+    }
+    return { ...role, permissions: unwrapList<AdminPermission>(role.permissions) };
+  }
+
+  async listPermissions(): Promise<AdminPermission[]> {
+    const response = await apiClient.get<{ permissions: unknown }>('/admin/permissions');
+    return unwrapList<AdminPermission>(response.data?.permissions);
+  }
+
+  async createPermission(name: string): Promise<AdminPermission> {
+    const response = await apiClient.post<{ permission: unknown }>('/admin/permissions', { name });
+    const permission = unwrapObject<AdminPermission>(response.data?.permission);
+    if (!response.success || !permission) {
+      throw new Error(response.message || 'Unable to create permission');
+    }
+    return permission;
   }
 
   async updateUserRole(userId: string, role: string): Promise<AdminUser> {
@@ -415,6 +526,17 @@ class AdminService {
     if (!response.success) {
       throw new Error(response.message || 'Unable to delete blog post');
     }
+  }
+
+  async listAuditLogs(params: AuditLogListParams = {}): Promise<{ auditLogs: AdminAuditLog[]; pagination: AdminPagination }> {
+    const response = await apiClient.get<{ audit_logs: unknown; pagination: AdminPagination }>(
+      '/admin/audit-logs',
+      compactParams(params)
+    );
+    return {
+      auditLogs: unwrapList<AdminAuditLog>(response.data?.audit_logs),
+      pagination: response.data?.pagination ?? emptyPagination(params.per_page),
+    };
   }
 
   async getSyncSources(): Promise<SyncSource[]> {

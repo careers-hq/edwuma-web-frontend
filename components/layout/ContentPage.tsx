@@ -12,7 +12,7 @@ interface ContentPageProps {
 export default function ContentPage({ title, description, updated, children }: ContentPageProps) {
   return (
     <div className="min-h-screen bg-white">
-      <Header />
+      <Header plain />
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <header className="mb-10">
           <h1 className="text-4xl md:text-5xl font-bold text-[#244034] font-['Gordita'] mb-4">

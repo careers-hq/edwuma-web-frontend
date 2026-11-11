@@ -78,6 +78,7 @@ export type {
   AdminDashboardStats,
   AdminUser,
   AdminInvitation,
+  AdminAuditLog,
   SyncSource,
   SyncStatistics,
 } from './admin';
