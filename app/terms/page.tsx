@@ -28,7 +28,7 @@ export default function TermsPage() {
 
       <ContentSection title="The service">
         <p>
-          Edwuma is a search site for job seekers in Ghana, Nigeria, Kenya, and South Africa. You can read today's list for your country. A paid week sends the same kind of morning, matched to your kind of work and your years, on WhatsApp and by email. Employers cannot post jobs on Edwuma.
+          Edwuma is a search site for job seekers in Ghana, Nigeria, Kenya, and South Africa. You can read today&apos;s list for your country. A paid week sends the same kind of morning, matched to your kind of work and your years, on WhatsApp and by email. Employers cannot post jobs on Edwuma.
         </p>
         <p>
           Listings are collected from third-party sources, including JobData, Greenhouse, and ReliefWeb, and from employer career pages those sources expose. We do not guarantee that a listing is complete, current, or still open. A role may have been filled or withdrawn by the time you apply.

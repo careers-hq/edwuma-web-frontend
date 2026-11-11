@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 interface BlogCoverProps {
   title: string;
   category: string;

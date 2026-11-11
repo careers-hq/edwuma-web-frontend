@@ -14,7 +14,7 @@ export default function HelpPage() {
     >
       <ContentSection title="Today's list">
         <p>
-          Choose the country where you live. The page shows up to five open roles someone there can apply to, with no fee. One link opens the employer's application.
+          Choose the country where you live. The page shows up to five open roles someone there can apply to, with no fee. One link opens the employer&apos;s application.
         </p>
       </ContentSection>
       <ContentSection title="A week of mornings">
