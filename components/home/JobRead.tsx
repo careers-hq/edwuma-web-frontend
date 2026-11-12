@@ -131,17 +131,20 @@ function sectionsOf(text: string): { heading: string | null; body: string }[] {
   return [...named, ...intro];
 }
 
-function ApplyButton({ onClick, wide = false, tone = 'green' }: { onClick: () => void; wide?: boolean; tone?: 'green' | 'lime' }) {
+function ApplyButton({ href, onClick, wide = false, tone = 'green' }: { href: string; onClick: (event: React.MouseEvent<HTMLAnchorElement>) => void; wide?: boolean; tone?: 'green' | 'lime' }) {
   const colors = tone === 'lime' ? 'bg-[#d2f34c] text-[#244034]' : 'bg-[#244034] text-white';
+  const mailto = href.toLowerCase().startsWith('mailto:');
 
   return (
-    <button
-      type="button"
+    <a
+      href={href}
       onClick={onClick}
+      target={mailto ? undefined : '_blank'}
+      rel={mailto ? undefined : 'noopener noreferrer'}
       className={`inline-flex h-12 cursor-pointer items-center justify-center rounded-full px-6 text-base font-semibold ${colors} ${wide ? 'w-full' : 'w-full sm:w-auto'}`}
     >
       Apply for this role
-    </button>
+    </a>
   );
 }
 
@@ -512,31 +515,16 @@ const JobRead: React.FC<{ id: string; country?: string | null }> = ({ id, countr
     : [];
 
   const apply = () => {
-    if (!job || !applyUrl) {
+    if (!job || !applyUrl || !isAuthenticated) {
       return;
     }
 
-    const metadata = {
+    void userActivitiesService.trackActivity('apply_click', job.id, {
       job_title: job.title,
       company: job.companies?.[0]?.name,
       application_url: applyUrl,
       country: country ?? undefined,
-    };
-
-    if (!isAuthenticated) {
-      requireAccount({
-        action: 'apply',
-        jobId: job.id,
-        returnTo: `${window.location.pathname}${window.location.search}`,
-        applicationUrl: applyUrl,
-        country: country ?? undefined,
-        metadata,
-      });
-      return;
-    }
-
-    void userActivitiesService.trackActivity('apply_click', job.id, metadata);
-    window.open(applyUrl, '_blank', 'noopener,noreferrer');
+    });
   };
 
   return (
@@ -598,7 +586,7 @@ const JobRead: React.FC<{ id: string; country?: string | null }> = ({ id, countr
                 </ul>
               ) : null}
               <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-                {applyUrl ? <ApplyButton onClick={apply} tone="lime" /> : null}
+                {applyUrl ? <ApplyButton href={applyUrl} onClick={apply} tone="lime" /> : null}
                 <SaveRoleButton jobId={job.id} country={country} />
                 <Link href={listHref} className="text-center text-base font-semibold text-white sm:ms-2">
                   Today&apos;s list
@@ -635,7 +623,7 @@ const JobRead: React.FC<{ id: string; country?: string | null }> = ({ id, countr
                 <p className="text-base text-black/70">The description is not on this page.</p>
               )}
               <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-                {applyUrl ? <ApplyButton onClick={apply} /> : null}
+                {applyUrl ? <ApplyButton href={applyUrl} onClick={apply} /> : null}
                 <Link
                   href={listHref}
                   className="inline-flex h-12 items-center justify-center rounded-full bg-[#F4F2EE] px-6 text-base font-semibold text-[#244034]"
@@ -657,7 +645,7 @@ const JobRead: React.FC<{ id: string; country?: string | null }> = ({ id, countr
                     </div>
                   ))}
                 </dl>
-                {applyUrl ? <ApplyButton onClick={apply} wide /> : null}
+                {applyUrl ? <ApplyButton href={applyUrl} onClick={apply} wide /> : null}
                 <p className="text-sm leading-6 text-black/50">
                   The link opens the employer&apos;s own page. Edwuma does not take your application.
                 </p>

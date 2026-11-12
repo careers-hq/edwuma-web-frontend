@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import MorningJobCard from '@/components/home/MorningJobCard';
 import MorningPitch from '@/components/home/MorningPitch';
 import { jobsApiService, type MorningListJob } from '@/lib/api/jobs';
+import { useAuth } from '@/lib/auth';
 import { useGeolocation } from '@/lib/hooks/useGeolocation';
 import { MORNING_COUNTRIES, type MorningCountrySlug } from '@/lib/morning/countries';
 import { cn } from '@/lib/utils';
@@ -82,6 +83,7 @@ function CountryMark({ slug }: { slug: MorningCountrySlug }) {
 const MorningList: React.FC<{ initialCountry?: string | null }> = ({ initialCountry = null }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isAuthenticated, isInitialized } = useAuth();
   const { countryCode } = useGeolocation();
   const requested = searchParams.get('country') ?? initialCountry;
   const selected = COUNTRIES.some((country) => country.slug === requested) ? requested : null;
@@ -104,7 +106,7 @@ const MorningList: React.FC<{ initialCountry?: string | null }> = ({ initialCoun
   }, [selected, countryCode, router]);
 
   useEffect(() => {
-    if (!selected) {
+    if (!selected || !isInitialized) {
       return;
     }
 
@@ -113,7 +115,7 @@ const MorningList: React.FC<{ initialCountry?: string | null }> = ({ initialCoun
     setError(null);
 
     jobsApiService
-      .morningList(selected)
+      .morningList(selected, 5, undefined, isAuthenticated)
       .then((response) => {
         if (!cancelled) {
           setJobs(response.data.jobs ?? []);
@@ -138,7 +140,7 @@ const MorningList: React.FC<{ initialCountry?: string | null }> = ({ initialCoun
     return () => {
       cancelled = true;
     };
-  }, [selected, reloadKey]);
+  }, [selected, reloadKey, isInitialized, isAuthenticated]);
 
   const chooseCountry = (slug: string) => {
     router.replace(`/?country=${slug}`, { scroll: false });
@@ -148,11 +150,13 @@ const MorningList: React.FC<{ initialCountry?: string | null }> = ({ initialCoun
     document.getElementById('jobs')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const today = subscription ? jobs.slice(0, 5) : jobs;
+  const showPitch = subscription && !isAuthenticated;
+  const pending = isLoading || (Boolean(selected) && !isInitialized);
+  const today = showPitch ? jobs.slice(0, 5) : jobs;
   const name = selected ? countryName(selected) : null;
   const summary =
-    selected && !isLoading && !error
-      ? openLine(name ?? selected, openCount, today.length, subscription)
+    selected && !pending && !error
+      ? openLine(name ?? selected, openCount, today.length, showPitch)
       : selected
         ? `Still open. Someone in ${name} can apply. No fee.`
         : 'Still open. Someone where you live can apply. No fee.';
@@ -242,7 +246,7 @@ const MorningList: React.FC<{ initialCountry?: string | null }> = ({ initialCoun
           <div className="mt-8">
             {!selected ? (
               <p className="text-base text-black/70">Ghana, Nigeria, Kenya, and South Africa.</p>
-            ) : isLoading ? (
+            ) : pending ? (
               <div className="space-y-3" aria-hidden="true">
                 {[0, 1, 2].map((row) => (
                   <div key={row} className="rounded-[24px] bg-white px-5 py-6">
@@ -265,8 +269,8 @@ const MorningList: React.FC<{ initialCountry?: string | null }> = ({ initialCoun
             ) : today.length === 0 ? (
               <div>
                 <p className="text-lg font-semibold text-[#141414]">Nothing you can apply to today.</p>
-                {subscription ? (
-                  <MorningPitch country={selected} name={name ?? selected} open={openCount} shown={0} />
+                {showPitch ? (
+                  <MorningPitch name={name ?? selected} open={openCount} shown={0} />
                 ) : null}
               </div>
             ) : (
@@ -274,8 +278,8 @@ const MorningList: React.FC<{ initialCountry?: string | null }> = ({ initialCoun
                 {today.map((job) => (
                   <MorningJobCard key={job.id} job={job} country={selected} />
                 ))}
-                {subscription ? (
-                  <MorningPitch country={selected} name={name ?? selected} open={openCount} shown={today.length} />
+                {showPitch ? (
+                  <MorningPitch name={name ?? selected} open={openCount} shown={today.length} />
                 ) : null}
               </div>
             )}

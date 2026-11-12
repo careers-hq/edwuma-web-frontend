@@ -86,11 +86,10 @@ function PointIcon({ name }: { name: (typeof POINTS)[number]['icon'] }) {
 }
 
 const MorningPitch: React.FC<{
-  country: string;
   name: string;
   open: number;
   shown: number;
-}> = ({ country, name, open, shown }) => {
+}> = ({ name, open, shown }) => {
   return (
     <section className="mt-4 rounded-[28px] bg-white px-5 py-7 sm:px-7">
       <p className="text-center text-xl font-extrabold tracking-[-0.03em] text-[#141414]">
@@ -111,7 +110,7 @@ const MorningPitch: React.FC<{
         ))}
       </ul>
       <Link
-        href={`/morning?country=${country}`}
+        href="/start"
         className="mt-6 flex h-12 w-full items-center justify-center rounded-full bg-[#244034] text-sm font-semibold text-white"
       >
         Continue

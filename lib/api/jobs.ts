@@ -311,10 +311,12 @@ class JobsApiService {
     country: string,
     perPage = 5,
     person?: { kindOfWork: string; years: number },
+    full = false,
   ): Promise<ApiResponse<MorningListResponse>> {
     return this.apiClient.get<MorningListResponse>('/jobs/morning-list', {
       country,
       per_page: perPage,
+      ...(full ? { full: 1 } : {}),
       ...(person ? { kind_of_work: person.kindOfWork, years: person.years } : {}),
     });
   }

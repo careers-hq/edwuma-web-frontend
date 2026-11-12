@@ -65,6 +65,15 @@ export function takePendingJobAction(): PendingJobAction | null {
   return action;
 }
 
+export function openApplication(url: string): void {
+  if (url.toLowerCase().startsWith('mailto:')) {
+    window.location.assign(url);
+    return;
+  }
+
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
 export function requireAccount(action: PendingJobAction): void {
   if (typeof window === 'undefined') return;
 
@@ -90,7 +99,7 @@ export async function completePendingJobAction(fallback = '/dashboard', returnTo
   if (pending.action === 'apply') {
     void userActivitiesService.trackActivity('apply_click', pending.jobId, pending.metadata);
     if (pending.applicationUrl) {
-      window.open(pending.applicationUrl, '_blank', 'noopener,noreferrer');
+      openApplication(pending.applicationUrl);
     }
   }
 

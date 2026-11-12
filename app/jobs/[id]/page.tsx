@@ -13,7 +13,7 @@ import { isCompanyLogoUrl } from '@/components/ui/CompanyLogo';
 import { getJobSlug, extractJobId } from '@/lib/utils/slug';
 import { JobPostingSchema, BreadcrumbSchema } from '@/components/seo';
 import { useAuth } from '@/lib/auth';
-import { requireAccount } from '@/lib/utils/jobApplication';
+import { openApplication, requireAccount } from '@/lib/utils/jobApplication';
 import { MORNING_COUNTRIES } from '@/lib/morning/countries';
 import { userActivitiesService } from '@/lib/api/activities';
 import { savedJobsService } from '@/lib/api/savedJobs';
@@ -239,29 +239,19 @@ const JobDetailsPage: React.FC = () => {
   const handleApplyClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!job?.application.url) return;
-    
-    const country = countrySlug(job.locations?.[0]?.country);
-    const applyMetadata = {
-      job_title: job.title,
-      company: job.companies[0]?.name,
-      application_url: job.application.url,
-      country,
-    };
 
-    if (!isAuthenticated) {
-      requireAccount({
-        action: 'apply',
-        jobId: job.id,
-        returnTo: window.location.pathname + window.location.search,
-        applicationUrl: job.application.url,
+    const country = countrySlug(job.locations?.[0]?.country);
+
+    if (isAuthenticated) {
+      void userActivitiesService.trackActivity('apply_click', job.id, {
+        job_title: job.title,
+        company: job.companies[0]?.name,
+        application_url: job.application.url,
         country,
-        metadata: applyMetadata,
       });
-      return;
     }
 
-    void userActivitiesService.trackActivity('apply_click', job.id, applyMetadata);
-    window.open(job.application.url, '_blank', 'noopener,noreferrer');
+    openApplication(job.application.url);
   };
 
   if (isLoading) {
