@@ -47,8 +47,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         },
       };
     }
-  } catch {
-    // The page shows the failure itself.
+  } catch (error) {
+    console.error('Read metadata failed:', error);
   }
 
   return {

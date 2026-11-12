@@ -95,6 +95,10 @@ class ApiClient {
     const defaultHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      // Node's default agent is challenged by Cloudflare in front of the API.
+      // The share card is drawn on the server, so that challenge becomes an empty preview.
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
     };
 
     // Add auth header if token exists
@@ -102,6 +106,7 @@ class ApiClient {
     
     const config: RequestInit = {
       ...options,
+      cache: 'no-store',
       headers: {
         ...defaultHeaders,
         ...authHeader,

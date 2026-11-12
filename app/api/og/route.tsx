@@ -1,5 +1,7 @@
-import { morningOgImage, siteOgImage } from '@/lib/og/card';
+import { morningOgImage, siteOgImage, withOgCache } from '@/lib/og/card';
 import { loadMorningCard, morningCountryFromQuery } from '@/lib/og/morning';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   const country = morningCountryFromQuery(new URL(request.url).searchParams.get('country') ?? undefined);
@@ -10,11 +12,9 @@ export async function GET(request: Request) {
 
   try {
     const card = await loadMorningCard(country);
-    const image = morningOgImage(card);
-    image.headers.set('Cache-Control', 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400');
-    return image;
+    return withOgCache(morningOgImage(card), card.open !== null);
   } catch (error) {
     console.error('Error generating morning OG image:', error);
-    return siteOgImage();
+    return withOgCache(siteOgImage(), false);
   }
 }

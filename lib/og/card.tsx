@@ -39,6 +39,16 @@ function clip(value: string, max: number): string {
   return `${text.slice(0, max - 1).trim()}…`;
 }
 
+export function withOgCache(response: Response, fresh: boolean): Response {
+  response.headers.set(
+    'Cache-Control',
+    fresh
+      ? 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400'
+      : 'public, max-age=0, s-maxage=60',
+  );
+  return response;
+}
+
 export function siteOgImage() {
   return new ImageResponse(
     frame(

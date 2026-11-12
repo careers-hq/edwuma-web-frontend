@@ -4,6 +4,7 @@ import HomeShell from '@/components/home/HomeShell';
 import { MORNING_COUNTRIES, morningCountry } from '@/lib/morning/countries';
 import { morningShareMetadata } from '@/lib/og/morning';
 
+export const dynamic = 'force-dynamic';
 export const dynamicParams = false;
 
 export function generateStaticParams() {

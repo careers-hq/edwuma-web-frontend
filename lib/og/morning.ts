@@ -103,12 +103,17 @@ export async function loadMorningCard(country: MorningCountry): Promise<MorningC
     url.searchParams.set('per_page', '2');
 
     const response = await fetch(url, {
-      headers: { Accept: 'application/json' },
-      next: { revalidate: 3600 },
-      signal: AbortSignal.timeout(4000),
+      headers: {
+        Accept: 'application/json',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(12000),
     });
 
     if (!response.ok) {
+      console.error('Morning list for share image failed:', response.status, url.pathname);
       return base;
     }
 
