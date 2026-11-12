@@ -9,6 +9,7 @@ import type {
   LoginRequest,
   RegisterRequest,
   AuthResponse,
+  MorningFactsRequest,
   User,
   ForgotPasswordRequest,
   ResetPasswordRequest,
@@ -51,6 +52,74 @@ class AuthService {
       const errorMessage = error instanceof Error ? error.message : 'Login failed';
       throw new Error(errorMessage);
     }
+  }
+
+  /**
+   * Ask for a one-time code. The same call covers a new address and an existing account.
+   */
+  async sendEmailCode(email: string, turnstileToken?: string): Promise<void> {
+    await apiClient.post(API_ENDPOINTS.AUTH.EMAIL_CODE, {
+      email,
+      ...(turnstileToken ? { 'cf-turnstile-response': turnstileToken } : {}),
+    });
+  }
+
+  /**
+   * Confirm the code and store the session.
+   */
+  async verifyEmailCode(email: string, code: string): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>(API_ENDPOINTS.AUTH.EMAIL_CODE_VERIFY, {
+      email,
+      code,
+    });
+
+    if (response.success && response.data?.token) {
+      apiClient.setToken(response.data.token);
+      this.storeUserData(response.data.user);
+      return response.data;
+    }
+
+    throw new Error(response.message || 'That code is not valid.');
+  }
+
+  /**
+   * Save the country, kind of work, years, and WhatsApp number gathered after the code.
+   */
+  async saveMorning(facts: MorningFactsRequest): Promise<User | null> {
+    const response = await apiClient.patch<{ user: User }>(API_ENDPOINTS.AUTH.MORNING, facts);
+    if (response.data?.user) {
+      this.storeUserData(response.data.user);
+      return response.data.user;
+    }
+
+    return null;
+  }
+
+  async fetchProfile(): Promise<User> {
+    const response = await apiClient.get<{ user: User }>(API_ENDPOINTS.AUTH.PROFILE);
+    if (!response.success || !response.data?.user) {
+      throw new Error(response.message || 'Could not load the profile');
+    }
+
+    this.storeUserData(response.data.user);
+    return response.data.user;
+  }
+
+  async updateName(firstName: string, lastName: string): Promise<User> {
+    const response = await apiClient.put<{ user: User }>(API_ENDPOINTS.AUTH.PROFILE, {
+      first_name: firstName,
+      last_name: lastName,
+    });
+    if (!response.success || !response.data?.user) {
+      throw new Error(response.message || 'Could not save');
+    }
+
+    this.storeUserData(response.data.user);
+    return response.data.user;
+  }
+
+  remember(user: User): void {
+    this.storeUserData(user);
   }
 
   /**

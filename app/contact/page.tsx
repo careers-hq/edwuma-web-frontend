@@ -145,7 +145,7 @@ export default function ContactPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#244034] font-['Gordita'] mb-4">
+          <h1 className="mb-4 text-4xl font-extrabold tracking-[-0.045em] text-[#141414] md:text-5xl">
             Contact Us
           </h1>
           <p className="text-lg text-[rgba(0,0,0,0.7)] max-w-2xl mx-auto">

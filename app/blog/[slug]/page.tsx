@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { blogService } from '@/lib/api/blog';
 import type { BlogPost } from '@/lib/api/blog';
+import { blogCoverImage } from '@/lib/blog/covers';
+import { BlogPostingSchema, BreadcrumbSchema } from '@/components/seo';
 import { formatDate } from '@/lib/utils';
 
 interface BlogArticlePageProps {
@@ -45,21 +47,40 @@ export async function generateMetadata({ params }: BlogArticlePageProps): Promis
     };
   }
 
+  const canonical = `${baseUrl}/blog/${post.slug}`;
+  const image = blogCoverImage(post.slug, post.cover_image_url, post.title, baseUrl);
+
   return {
     title: {
       absolute: `${post.title} | Edwuma`,
     },
     description: post.excerpt,
     keywords: [post.category, ...post.tags],
+    authors: [{ name: post.author.name, url: baseUrl }],
+    alternates: {
+      canonical,
+    },
     openGraph: {
       title: post.title,
       description: post.excerpt,
       type: 'article',
-      url: `${baseUrl}/blog/${post.slug}`,
+      url: canonical,
       siteName: 'Edwuma',
+      locale: 'en_US',
+      publishedTime: post.published_at ?? undefined,
+      modifiedTime: post.updated_at ?? post.published_at ?? undefined,
+      authors: [post.author.name],
+      section: post.category,
+      tags: post.tags,
+      images: image ? [image] : undefined,
     },
-    alternates: {
-      canonical: `${baseUrl}/blog/${post.slug}`,
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.excerpt,
+      images: image ? [image.url] : undefined,
+      creator: '@edwuma',
+      site: '@edwuma',
     },
   };
 }
@@ -84,8 +105,18 @@ export default async function BlogArticlePage({ params }: BlogArticlePageProps) 
     console.error('Failed to load related articles:', error);
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://edwuma.com';
+
   return (
     <div className="min-h-screen bg-white">
+      <BlogPostingSchema post={post} baseUrl={baseUrl} />
+      <BreadcrumbSchema
+        items={[
+          { name: 'Edwuma', url: baseUrl },
+          { name: 'Blog', url: `${baseUrl}/blog` },
+          { name: post.title, url: `${baseUrl}/blog/${post.slug}` },
+        ]}
+      />
       <Header />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -116,6 +147,7 @@ export default async function BlogArticlePage({ params }: BlogArticlePageProps) 
           <BlogCover
             title={post.title}
             category={post.category}
+            slug={post.slug}
             imageUrl={post.cover_image_url}
             className="h-56 md:h-80 rounded-xl mb-8"
           />

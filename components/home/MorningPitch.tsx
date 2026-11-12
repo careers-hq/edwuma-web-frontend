@@ -92,32 +92,30 @@ const MorningPitch: React.FC<{
   shown: number;
 }> = ({ country, name, open, shown }) => {
   return (
-    <section className="mt-10 border-t border-gray-200 pt-10">
-      <p className="text-center text-xl font-semibold tracking-tight text-gray-900">
+    <section className="mt-4 rounded-[28px] bg-white px-5 py-7 sm:px-7">
+      <p className="text-center text-xl font-extrabold tracking-[-0.03em] text-[#141414]">
         {countLine(name, open, shown)}
       </p>
-      <div className="mt-6 rounded-xl border border-gray-200 px-4 py-6 sm:px-6">
-        <h2 className="text-lg font-semibold text-gray-900">Get this each morning</h2>
-        <ul className="mt-5 space-y-5">
-          {POINTS.map((point) => (
-            <li key={point.title} className="flex gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-800">
-                <PointIcon name={point.icon} />
-              </span>
-              <span>
-                <span className="block text-sm font-semibold text-gray-900">{point.title}</span>
-                <span className="mt-0.5 block text-sm leading-6 text-gray-600">{point.body}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
-        <Link
-          href={`/morning?country=${country}`}
-          className="mt-6 flex h-11 w-full items-center justify-center rounded-md bg-[#244034] text-sm font-medium text-white"
-        >
-          Continue
-        </Link>
-      </div>
+      <h2 className="mt-6 text-2xl font-extrabold tracking-[-0.04em] text-[#141414]">Get this each morning</h2>
+      <ul className="mt-5 space-y-5">
+        {POINTS.map((point) => (
+          <li key={point.title} className="flex gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#d2f34c] text-[#244034]">
+              <PointIcon name={point.icon} />
+            </span>
+            <span>
+              <span className="block text-sm font-semibold text-[#141414]">{point.title}</span>
+              <span className="mt-0.5 block text-sm leading-6 text-black/60">{point.body}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+      <Link
+        href={`/morning?country=${country}`}
+        className="mt-6 flex h-12 w-full items-center justify-center rounded-full bg-[#244034] text-sm font-semibold text-white"
+      >
+        Continue
+      </Link>
     </section>
   );
 };

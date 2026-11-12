@@ -15,10 +15,10 @@ export default function ContentPage({ title, description, updated, children }: C
       <Header plain />
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <header className="mb-10">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#244034] font-['Gordita'] mb-4">
+          <h1 className="mb-4 text-4xl font-extrabold tracking-[-0.045em] text-[#141414] md:text-5xl">
             {title}
           </h1>
-          <p className="text-lg text-[rgba(0,0,0,0.7)] leading-relaxed">
+          <p className="text-lg leading-relaxed text-black/70">
             {description}
           </p>
           {updated && (
@@ -35,7 +35,7 @@ export default function ContentPage({ title, description, updated, children }: C
 export function ContentSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-3">
-      <h2 className="text-xl font-semibold text-[#244034]">{title}</h2>
+      <h2 className="text-xl font-extrabold tracking-[-0.03em] text-[#244034]">{title}</h2>
       <div className="space-y-3 text-[rgba(0,0,0,0.75)] leading-relaxed">{children}</div>
     </section>
   );

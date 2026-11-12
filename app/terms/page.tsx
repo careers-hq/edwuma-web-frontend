@@ -93,7 +93,7 @@ export default function TermsPage() {
 
       <ContentSection title="Privacy">
         <p>
-          We process personal data under Ghana&apos;s Data Protection Act, 2012 (Act 843), and under the GDPR where it applies. The details are in the <Link href="/privacy" className="text-[#244034] underline">Privacy Policy</Link>.
+          We process personal data under Ghana&apos;s Data Protection Act, 2012 (Act 843), and under the GDPR where it applies. The details are in the <Link href="/privacy" className="text-[#244034] underline">Privacy Policy</Link>. Cookies are listed in the <Link href="/cookies" className="text-[#244034] underline">Cookies policy</Link>.
         </p>
       </ContentSection>
 

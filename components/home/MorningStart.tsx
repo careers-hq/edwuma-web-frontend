@@ -4,13 +4,9 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import MorningMessageForm from '@/components/home/MorningMessageForm';
 import { morningMessageService } from '@/lib/api/morningMessages';
+import { MORNING_COUNTRIES } from '@/lib/morning/countries';
 
-const COUNTRIES = [
-  { slug: 'ghana', name: 'Ghana' },
-  { slug: 'nigeria', name: 'Nigeria' },
-  { slug: 'kenya', name: 'Kenya' },
-  { slug: 'south-africa', name: 'South Africa' },
-] as const;
+const COUNTRIES = MORNING_COUNTRIES;
 
 export default function MorningStart() {
   const router = useRouter();

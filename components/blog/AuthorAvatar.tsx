@@ -1,3 +1,5 @@
+import { authorAvatarSrc } from '@/lib/blog/covers';
+
 interface AuthorAvatarProps {
   name: string;
   avatarUrl?: string | null;
@@ -6,6 +8,7 @@ interface AuthorAvatarProps {
 
 export default function AuthorAvatar({ name, avatarUrl, size = 'md' }: AuthorAvatarProps) {
   const dimension = size === 'sm' ? 'w-6 h-6 text-[10px]' : 'w-8 h-8 text-xs';
+  const src = authorAvatarSrc(name, avatarUrl);
   const initials = name
     .split(' ')
     .filter(Boolean)
@@ -13,11 +16,11 @@ export default function AuthorAvatar({ name, avatarUrl, size = 'md' }: AuthorAva
     .map((part) => part.charAt(0).toUpperCase())
     .join('') || 'E';
 
-  if (avatarUrl) {
+  if (src) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={avatarUrl}
+        src={src}
         alt=""
         className={`${dimension} rounded-full object-cover`}
       />

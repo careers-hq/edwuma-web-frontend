@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { jobsApiService } from '@/lib/api/jobs';
+import { jobShareTitle } from '@/lib/og/job';
 import { extractJobId } from '@/lib/utils/slug';
 
 type Props = {
@@ -27,8 +28,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const location = job.locations[0];
     const category = job.categories[0];
 
-    // Generate SEO-friendly title
-    const title = `${job.title} at ${company?.name || 'Top Company'} in ${location?.city || location?.country || 'Africa'}`;
+    const role = jobShareTitle(job.title, company?.name);
+    const place = location?.city || location?.country || 'Africa';
+    const title = company?.name ? `${role} at ${company.name} in ${place}` : `${role} in ${place}`;
     
     // Generate description - strip HTML tags
     const stripHtml = (html: string) => {
@@ -37,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     
     const description = job.description 
       ? `${stripHtml(job.description).substring(0, 155)}...` 
-      : `Apply for ${job.title} position at ${company?.name}. ${job.job_type.label} role in ${location?.city || location?.country}.`;
+      : `Apply for ${job.title} position at ${company?.name || 'the employer'}. ${job.job_type?.label || 'Open'} role in ${location?.city || location?.country || 'Africa'}.`;
 
     // Generate keywords
     const keywords = [
@@ -45,13 +47,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       location?.city,
       location?.country,
       company?.name,
-      job.job_type.label,
-      job.experience_level.label,
+      job.job_type?.label,
+      job.experience_level?.label,
       category?.name,
       `${job.title} jobs ${location?.country}`,
       `${category?.name} jobs ${location?.city}`,
-      job.work_mode.value === 'remote' ? 'remote jobs' : '',
-      ...job.skills.map(skill => skill.name),
+      job.work_mode?.value === 'remote' ? 'remote jobs' : '',
+      ...(job.skills ?? []).map(skill => skill.name),
     ].filter(Boolean).join(', ');
 
     // Use dynamic OG image instead of company logo
@@ -90,7 +92,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         canonical: `${baseUrl}/jobs/${job.slug}`,
       },
       robots: {
-        index: job.status.value === 'active',
+        index: job.status?.value === 'active',
         follow: true,
       },
     };

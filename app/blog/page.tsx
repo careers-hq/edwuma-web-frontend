@@ -1,4 +1,6 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import { cache } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import BlogCover from '@/components/blog/BlogCover';
@@ -6,9 +8,14 @@ import AuthorAvatar from '@/components/blog/AuthorAvatar';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { BlogListingSchema } from '@/components/seo';
 import { blogService } from '@/lib/api/blog';
 import type { BlogPost } from '@/lib/api/blog';
+import { blogCoverImage } from '@/lib/blog/covers';
 import { formatRelativeTime } from '@/lib/utils';
+
+const BLOG_NAME = 'Career Insights & Tips';
+const BLOG_DESCRIPTION = 'Career advice, hiring trends, and job search guides for roles across Ghana, Nigeria, Kenya, and South Africa.';
 
 interface BlogPageProps {
   searchParams: Promise<{
@@ -37,11 +44,91 @@ function blogHref(filters: { search?: string; category?: string; page?: number }
   return qs ? `/blog?${qs}` : '/blog';
 }
 
+const loadBlogPage = cache(async (search: string, category: string, page: number) => {
+  const [postsResponse, categoriesResponse] = await Promise.all([
+    blogService.listPosts({
+      search: search || undefined,
+      category: category || undefined,
+      page,
+      per_page: 12,
+    }),
+    blogService.listCategories(),
+  ]);
+
+  return {
+    posts: postsResponse.data.posts,
+    categories: categoriesResponse.data.categories,
+    currentPage: postsResponse.data.pagination.current_page,
+    lastPage: postsResponse.data.pagination.last_page,
+  };
+});
+
+export async function generateMetadata({ searchParams }: BlogPageProps): Promise<Metadata> {
+  const params = await searchParams;
+  const search = params.search?.trim() || '';
+  const category = params.category?.trim() || '';
+  const page = Math.max(1, Number(params.page) || 1);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://edwuma.com';
+  const title = category
+    ? (page > 1 ? `${category}, page ${page}` : category)
+    : (page > 1 ? `${BLOG_NAME}, page ${page}` : BLOG_NAME);
+  const description = category
+    ? `${category} for job seekers in Ghana, Nigeria, Kenya, and South Africa.`
+    : BLOG_DESCRIPTION;
+  const canonical = search
+    ? `${baseUrl}/blog`
+    : `${baseUrl}${blogHref({ category, page })}`;
+
+  let image = null;
+
+  if (!search) {
+    try {
+      const data = await loadBlogPage('', category, page);
+      const lead = (!category && page === 1
+        ? data.posts.find((post) => post.is_featured)
+        : null) ?? data.posts[0];
+
+      if (lead) {
+        image = blogCoverImage(lead.slug, lead.cover_image_url, lead.title, baseUrl);
+      }
+    } catch (error) {
+      console.error('Failed to build blog metadata:', error);
+    }
+  }
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    robots: search
+      ? { index: false, follow: true }
+      : { index: true, follow: true },
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: canonical,
+      siteName: 'Edwuma',
+      locale: 'en_US',
+      images: image ? [image] : undefined,
+    },
+    twitter: {
+      card: image ? 'summary_large_image' : 'summary',
+      title,
+      description,
+      images: image ? [image.url] : undefined,
+      creator: '@edwuma',
+      site: '@edwuma',
+    },
+  };
+}
+
 export default async function BlogPage({ searchParams }: BlogPageProps) {
   const params = await searchParams;
   const search = params.search?.trim() || '';
   const category = params.category?.trim() || '';
   const page = Math.max(1, Number(params.page) || 1);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://edwuma.com';
 
   let posts: BlogPost[] = [];
   let categories: string[] = [];
@@ -50,20 +137,11 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   let loadError = false;
 
   try {
-    const [postsResponse, categoriesResponse] = await Promise.all([
-      blogService.listPosts({
-        search: search || undefined,
-        category: category || undefined,
-        page,
-        per_page: 12,
-      }),
-      blogService.listCategories(),
-    ]);
-
-    posts = postsResponse.data.posts;
-    currentPage = postsResponse.data.pagination.current_page;
-    lastPage = postsResponse.data.pagination.last_page;
-    categories = categoriesResponse.data.categories;
+    const data = await loadBlogPage(search, category, page);
+    posts = data.posts;
+    categories = data.categories;
+    currentPage = data.currentPage;
+    lastPage = data.lastPage;
   } catch (error) {
     console.error('Failed to load blog posts:', error);
     loadError = true;
@@ -73,8 +151,23 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   const featured = showFeatured ? posts.find((post) => post.is_featured) ?? null : null;
   const gridPosts = featured ? posts.filter((post) => post.id !== featured.id) : posts;
 
+  const listingName = category ? category : BLOG_NAME;
+  const listingDescription = category
+    ? `${category} for job seekers in Ghana, Nigeria, Kenya, and South Africa.`
+    : BLOG_DESCRIPTION;
+  const listingUrl = `${baseUrl}${blogHref({ category, page: currentPage })}`;
+
   return (
     <div className="min-h-screen bg-white">
+      {!loadError && !search && posts.length > 0 ? (
+        <BlogListingSchema
+          posts={posts}
+          url={listingUrl}
+          name={listingName}
+          description={listingDescription}
+          baseUrl={baseUrl}
+        />
+      ) : null}
       <Header />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -147,6 +240,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                       <BlogCover
                         title={featured.title}
                         category={featured.category}
+                        slug={featured.slug}
                         imageUrl={featured.cover_image_url}
                         className="h-64 md:h-full min-h-64"
                       />
@@ -195,6 +289,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                       <BlogCover
                         title={post.title}
                         category={post.category}
+                        slug={post.slug}
                         imageUrl={post.cover_image_url}
                         className="h-48"
                       />

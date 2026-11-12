@@ -22,7 +22,7 @@ export function ProtectedRoute({
   requiredRole,
   requiredRoles,
   fallback,
-  redirectTo = '/auth/login',
+  redirectTo = '/',
 }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, isInitialized, hasRole, hasAnyRole } = useAuth();
 

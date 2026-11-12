@@ -10,8 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Turnstile, TurnstileHandle } from '@/components/ui/Turnstile';
 import { useAuth } from '@/lib/auth';
 import { authService, type LoginRequest } from '@/lib/api';
-import { processPostLoginRedirect } from '@/lib/utils/jobApplication';
-import { userActivitiesService } from '@/lib/api/activities';
+import { completePendingJobAction, peekPendingJobAction, safeReturnPath } from '@/lib/utils/jobApplication';
 
 function LoginForm() {
   const router = useRouter();
@@ -29,6 +28,11 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string>('');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [intent, setIntent] = useState<'apply' | 'save' | null>(null);
+
+  useEffect(() => {
+    setIntent(peekPendingJobAction()?.action ?? null);
+  }, []);
 
   // Check for password reset success
   useEffect(() => {
@@ -42,31 +46,24 @@ function LoginForm() {
     }
   }, [searchParams]);
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated, finishing a saved apply or save on the way.
   useEffect(() => {
-    if (isAuthenticated && !authLoading) {
-      const redirect = processPostLoginRedirect();
-      const rawReturnTo = searchParams.get('returnTo');
-      const safeReturnTo = rawReturnTo && rawReturnTo.startsWith('/') && !rawReturnTo.startsWith('//') ? rawReturnTo : null;
-
-      if (redirect.pendingApplyActivity?.jobId) {
-        void userActivitiesService.trackActivity(
-          'apply_click',
-          redirect.pendingApplyActivity.jobId,
-          redirect.pendingApplyActivity.metadata
-        );
-      }
-
-      if (redirect.shouldRedirectToJob && redirect.jobUrl) {
-        // Open the job application URL in a new tab
-        window.open(redirect.jobUrl, '_blank', 'noopener,noreferrer');
-        router.push(authService.hasRole('admin') ? '/admin' : redirect.dashboardUrl);
-      } else if (safeReturnTo) {
-        router.push(safeReturnTo);
-      } else {
-        router.push(authService.hasRole('admin') ? '/admin' : redirect.dashboardUrl);
-      }
+    if (!isAuthenticated || authLoading) {
+      return;
     }
+
+    let cancelled = false;
+    const fallback = authService.hasRole('admin') ? '/admin' : '/dashboard';
+
+    completePendingJobAction(fallback, safeReturnPath(searchParams.get('returnTo'))).then((path) => {
+      if (!cancelled) {
+        router.push(path);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [isAuthenticated, authLoading, router, searchParams]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,30 +120,6 @@ function LoginForm() {
       };
       
       await login(loginData);
-      // Check if there's a job URL to redirect to after login
-      const redirect = processPostLoginRedirect();
-      const rawReturnTo = searchParams.get('returnTo');
-      const safeReturnTo = rawReturnTo && rawReturnTo.startsWith('/') && !rawReturnTo.startsWith('//') ? rawReturnTo : null;
-
-      if (redirect.pendingApplyActivity?.jobId) {
-        void userActivitiesService.trackActivity(
-          'apply_click',
-          redirect.pendingApplyActivity.jobId,
-          redirect.pendingApplyActivity.metadata
-        );
-      }
-
-      const homeUrl = authService.hasRole('admin') ? '/admin' : redirect.dashboardUrl;
-
-      if (redirect.shouldRedirectToJob && redirect.jobUrl) {
-        // Open the job application URL in a new tab
-        window.open(redirect.jobUrl, '_blank', 'noopener,noreferrer');
-        router.push(homeUrl);
-      } else if (safeReturnTo) {
-        router.push(safeReturnTo);
-      } else {
-        router.push(homeUrl);
-      }
     } catch (error: unknown) {
       console.error('Login error:', error);
       
@@ -189,15 +162,14 @@ function LoginForm() {
             />
           </Link>
           <h2 className="mt-6 text-3xl font-bold text-[#244034]">
-            Sign in to your account
+            {intent === 'apply' ? 'Sign in to apply' : intent === 'save' ? 'Sign in to save this role' : 'Sign in to your account'}
           </h2>
           <p className="mt-2 text-sm text-[rgba(0,0,0,0.7)]">
-            Don&apos;t have an account?{' '}
             <Link
-              href="/auth/register"
+              href={searchParams.toString() ? `/start?${searchParams.toString()}` : '/start'}
               className="font-medium text-[#244034] hover:text-[#1a2f26] transition-colors underline"
             >
-              Create account here
+              Continue with email
             </Link>
           </p>
         </div>

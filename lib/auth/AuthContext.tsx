@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react';
 import { authService } from '@/lib/api';
 import type { User, LoginRequest, RegisterRequest } from '@/lib/api';
 
@@ -21,8 +21,10 @@ interface AuthState {
 interface AuthActions {
   login: (credentials: LoginRequest) => Promise<void>;
   register: (userData: RegisterRequest) => Promise<void>;
+  signInWithEmailCode: (email: string, code: string) => Promise<boolean>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  rememberUser: (user: User) => void;
   hasRole: (role: string) => boolean;
   hasAnyRole: (roles: string[]) => boolean;
   getUserDisplayName: () => string;
@@ -88,6 +90,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoading: false,
         isInitialized: true,
       });
+    } catch (error) {
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+      throw error;
+    }
+  };
+
+  const signInWithEmailCode = async (email: string, code: string) => {
+    try {
+      setAuthState(prev => ({ ...prev, isLoading: true }));
+
+      const authResponse = await authService.verifyEmailCode(email, code);
+
+      setAuthState({
+        user: authResponse.user,
+        isAuthenticated: true,
+        isLoading: false,
+        isInitialized: true,
+      });
+
+      return Boolean(authResponse.created);
     } catch (error) {
       setAuthState(prev => ({ ...prev, isLoading: false }));
       throw error;
@@ -169,12 +191,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return authService.getUserDisplayName();
   };
 
+  const rememberUser = useCallback((user: User) => {
+    authService.remember(user);
+    setAuthState((prev) => ({
+      ...prev,
+      user,
+      isAuthenticated: true,
+    }));
+  }, []);
+
   const contextValue: AuthContextType = {
     ...authState,
     login,
     register,
+    signInWithEmailCode,
     logout,
     refreshUser,
+    rememberUser,
     hasRole,
     hasAnyRole,
     getUserDisplayName,

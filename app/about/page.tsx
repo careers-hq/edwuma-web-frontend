@@ -42,7 +42,7 @@ export default function AboutPage() {
           {' '}or through the <Link href="/contact" className="text-[#244034] underline">contact form</Link>.
         </p>
         <p>
-          How we handle personal data is set out in the <Link href="/privacy" className="text-[#244034] underline">Privacy Policy</Link>, and use of the site is covered by the <Link href="/terms" className="text-[#244034] underline">Terms of Use</Link>.
+          How we handle personal data is set out in the <Link href="/privacy" className="text-[#244034] underline">Privacy Policy</Link>. Cookies are listed in the <Link href="/cookies" className="text-[#244034] underline">Cookies policy</Link>. Use of the site is covered by the <Link href="/terms" className="text-[#244034] underline">Terms of Use</Link>.
         </p>
       </ContentSection>
     </ContentPage>

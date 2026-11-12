@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
+import { Geist, Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import { WebSiteSchema } from "@/components/seo";
 import ToastProvider from "@/components/providers/ToastProvider";
+import CookieConsent from "@/components/cookies/CookieConsent";
 import "@/lib/api/debug-auth"; // Debug utility for authentication
 
 const geistSans = Geist({
@@ -17,6 +17,13 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
   display: 'swap',
+});
+
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://edwuma.com';
@@ -69,20 +76,11 @@ export const metadata: Metadata = {
     siteName: "Edwuma",
     title: "Jobs you can apply to today | Edwuma",
     description: "A short list of open jobs in Ghana, Nigeria, Kenya, and South Africa. No fee. One link to apply.",
-    images: [
-      {
-        url: "/edwuma-logo-2023.png",
-        width: 1200,
-        height: 630,
-        alt: "Edwuma",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Jobs you can apply to today | Edwuma",
     description: "A short list of open jobs in Ghana, Nigeria, Kenya, and South Africa. No fee. One link to apply.",
-    images: ["/edwuma-logo-2023.png"],
     creator: "@edwuma",
     site: "@edwuma",
   },
@@ -118,25 +116,12 @@ export default function RootLayout({
         <WebSiteSchema />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
+        className={`${geistSans.variable} ${geistMono.variable} ${jakarta.variable} ${jakarta.className} antialiased font-sans`}
       >
-        {/* Google Analytics */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-REZ4R5TQBW"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-REZ4R5TQBW');
-          `}
-        </Script>
-
         <AuthProvider>
           <ToastProvider />
           {children}
+          <CookieConsent />
         </AuthProvider>
       </body>
     </html>

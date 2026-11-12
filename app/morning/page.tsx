@@ -14,7 +14,7 @@ export default function MorningPage() {
     <div className="min-h-screen bg-white">
       <Header plain />
       <main className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
-        <h1 className="!text-[28px] font-semibold !leading-tight tracking-tight !text-gray-900 sm:!text-[32px]">
+        <h1 className="text-[40px] font-extrabold leading-[1.05] tracking-[-0.045em] text-[#141414]">
           Continue
         </h1>
         <div className="mt-8">

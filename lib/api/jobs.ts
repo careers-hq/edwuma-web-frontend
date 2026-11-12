@@ -242,6 +242,7 @@ export interface MorningListJob {
   id: string;
   title: string;
   company: string | null;
+  logo_url?: string | null;
   place: string | null;
   years_experience: number | null;
   salary: MorningListSalary | null;
@@ -249,6 +250,7 @@ export interface MorningListJob {
   summary: string | null;
   application_url: string | null;
   posted_at: string | null;
+  closes_at?: string | null;
   stretch?: boolean;
 }
 

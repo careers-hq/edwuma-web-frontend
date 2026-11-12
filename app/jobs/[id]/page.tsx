@@ -9,10 +9,12 @@ import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import ShareButton from '@/components/ui/ShareButton';
 import { jobsApiService, type JobListing } from '@/lib/api/jobs';
+import { isCompanyLogoUrl } from '@/components/ui/CompanyLogo';
 import { getJobSlug, extractJobId } from '@/lib/utils/slug';
 import { JobPostingSchema, BreadcrumbSchema } from '@/components/seo';
 import { useAuth } from '@/lib/auth';
-import { handleJobApplication } from '@/lib/utils/jobApplication';
+import { requireAccount } from '@/lib/utils/jobApplication';
+import { MORNING_COUNTRIES } from '@/lib/morning/countries';
 import { userActivitiesService } from '@/lib/api/activities';
 import { savedJobsService } from '@/lib/api/savedJobs';
 import toast from 'react-hot-toast';
@@ -32,10 +34,16 @@ type CompanyWithLinks = {
   };
 };
 
+function countrySlug(name?: string | null): string | undefined {
+  const place = name?.toLowerCase();
+  return MORNING_COUNTRIES.find((item) => item.name.toLowerCase() === place || item.slug === place)?.slug;
+}
+
 const JobDetailsPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const logoSrc = (url?: string) => (url && isCompanyLogoUrl(url) ? url : undefined);
   const [job, setJob] = useState<JobListing | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -179,17 +187,13 @@ const JobDetailsPage: React.FC = () => {
       return;
     }
 
-    // Check if user is authenticated
     if (!isAuthenticated) {
-      toast.error('Please login to save jobs');
-      try {
-        const loginUrl = new URL('/auth/login', window.location.origin);
-        // Return to the same job details URL after login
-        loginUrl.searchParams.set('returnTo', window.location.pathname + window.location.search + window.location.hash);
-        window.location.href = loginUrl.toString();
-      } catch {
-        window.location.href = '/auth/login';
-      }
+      requireAccount({
+        action: 'save',
+        jobId: job.id,
+        returnTo: window.location.pathname + window.location.search,
+        country: countrySlug(job.locations?.[0]?.country),
+      });
       return;
     }
 
@@ -236,20 +240,28 @@ const JobDetailsPage: React.FC = () => {
     e.preventDefault();
     if (!job?.application.url) return;
     
+    const country = countrySlug(job.locations?.[0]?.country);
     const applyMetadata = {
       job_title: job.title,
       company: job.companies[0]?.name,
       application_url: job.application.url,
+      country,
     };
 
-    // Track apply click activity (only if authenticated)
-    if (isAuthenticated && job.id) {
-      userActivitiesService.trackActivity('apply_click', job.id, applyMetadata);
+    if (!isAuthenticated) {
+      requireAccount({
+        action: 'apply',
+        jobId: job.id,
+        returnTo: window.location.pathname + window.location.search,
+        applicationUrl: job.application.url,
+        country,
+        metadata: applyMetadata,
+      });
+      return;
     }
-    
-    handleJobApplication(job.application.url, isAuthenticated, {
-      activity: !isAuthenticated && job?.id ? { jobId: job.id, metadata: applyMetadata } : undefined,
-    });
+
+    void userActivitiesService.trackActivity('apply_click', job.id, applyMetadata);
+    window.open(job.application.url, '_blank', 'noopener,noreferrer');
   };
 
   if (isLoading) {
@@ -309,6 +321,7 @@ const JobDetailsPage: React.FC = () => {
     text: `Check out this job opportunity: ${job.title} at ${job.companies[0]?.name} in ${job.locations[0]?.city || job.locations[0]?.country}`,
     url: `${baseUrl}/jobs/${job.slug}`,
   };
+  const companyLogo = logoSrc(job.companies[0]?.logo_url);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -345,9 +358,9 @@ const JobDetailsPage: React.FC = () => {
             <div className="flex items-start space-x-4 sm:space-x-6 flex-1 min-w-0">
               {/* Company Logo */}
               <div className="flex-shrink-0">
-                {job.companies[0]?.logo_url ? (
+                {companyLogo ? (
                   <Image
-                    src={job.companies[0].logo_url}
+                    src={companyLogo}
                     alt={`${job.companies[0].name} logo`}
                     width={80}
                     height={80}
@@ -360,7 +373,7 @@ const JobDetailsPage: React.FC = () => {
                     }}
                   />
                 ) : null}
-                <div className={`w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-2xl flex items-center justify-center shadow-sm ${job.companies[0]?.logo_url ? 'hidden' : ''}`}>
+                <div className={`w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-2xl flex items-center justify-center shadow-sm ${companyLogo ? 'hidden' : ''}`}>
                   <span className="text-white font-bold text-lg sm:text-xl">
                     {getCompanyInitials(job.companies[0]?.name || 'Company')}
                   </span>
@@ -479,9 +492,9 @@ const JobDetailsPage: React.FC = () => {
         <div className="lg:hidden bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">About the Company</h3>
           <div className="flex items-center space-x-4 mb-4">
-            {job.companies[0]?.logo_url ? (
+            {companyLogo ? (
               <Image
-                src={job.companies[0].logo_url}
+                src={companyLogo}
                 alt={`${job.companies[0].name} logo`}
                 width={48}
                 height={48}
@@ -493,7 +506,7 @@ const JobDetailsPage: React.FC = () => {
                 }}
               />
             ) : null}
-            <div className={`w-12 h-12 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-lg flex items-center justify-center ${job.companies[0]?.logo_url ? 'hidden' : ''}`}>
+            <div className={`w-12 h-12 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-lg flex items-center justify-center ${companyLogo ? 'hidden' : ''}`}>
               <span className="text-white font-bold text-sm">
                 {getCompanyInitials(job.companies[0]?.name || 'Company')}
               </span>
@@ -663,7 +676,9 @@ const JobDetailsPage: React.FC = () => {
                 </div>
               ) : similarJobs.length > 0 ? (
                 <div className="space-y-4">
-                  {similarJobs.map((similarJob) => (
+                  {similarJobs.map((similarJob) => {
+                    const similarLogo = logoSrc(similarJob.companies[0]?.logo_url);
+                    return (
                     <Link
                       key={similarJob.id}
                       href={`/jobs/${getJobSlug(similarJob)}`}
@@ -672,9 +687,9 @@ const JobDetailsPage: React.FC = () => {
                       <div className="flex items-start space-x-4">
                         {/* Company Logo */}
                         <div className="flex-shrink-0">
-                          {similarJob.companies[0]?.logo_url ? (
+                          {similarLogo ? (
                             <Image
-                              src={similarJob.companies[0].logo_url}
+                              src={similarLogo}
                               alt={`${similarJob.companies[0].name} logo`}
                               width={48}
                               height={48}
@@ -686,7 +701,7 @@ const JobDetailsPage: React.FC = () => {
                               }}
                             />
                           ) : null}
-                          <div className={`w-12 h-12 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-lg flex items-center justify-center ${similarJob.companies[0]?.logo_url ? 'hidden' : ''}`}>
+                          <div className={`w-12 h-12 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-lg flex items-center justify-center ${similarLogo ? 'hidden' : ''}`}>
                             <span className="text-white font-bold text-xs">
                               {getCompanyInitials(similarJob.companies[0]?.name || 'Company')}
                             </span>
@@ -719,7 +734,8 @@ const JobDetailsPage: React.FC = () => {
                         </div>
                       </div>
                     </Link>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-8">
@@ -739,9 +755,9 @@ const JobDetailsPage: React.FC = () => {
               <div className="hidden lg:block bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">About the Company</h3>
                 <div className="flex items-center space-x-4 mb-4">
-                  {job.companies[0]?.logo_url ? (
+                  {companyLogo ? (
                     <Image
-                      src={job.companies[0].logo_url}
+                      src={companyLogo}
                       alt={`${job.companies[0].name} logo`}
                       width={48}
                       height={48}
@@ -753,7 +769,7 @@ const JobDetailsPage: React.FC = () => {
                       }}
                     />
                   ) : null}
-                  <div className={`w-12 h-12 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-lg flex items-center justify-center ${job.companies[0]?.logo_url ? 'hidden' : ''}`}>
+                  <div className={`w-12 h-12 bg-gradient-to-br from-[#244034] to-[#1a2f26] rounded-lg flex items-center justify-center ${companyLogo ? 'hidden' : ''}`}>
                     <span className="text-white font-bold text-sm">
                       {getCompanyInitials(job.companies[0]?.name || 'Company')}
                     </span>

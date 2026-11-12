@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     'How Edwuma collects and uses personal data, under Ghana’s Data Protection Act, 2012 (Act 843) and the GDPR.',
 };
 
-const UPDATED = '11 November 2026';
+const UPDATED = '12 November 2026';
 
 export default function PrivacyPage() {
   return (
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
 
       <ContentSection title="Data we collect">
         <p>We collect only what the current product uses.</p>
-        <p><strong className="text-[#244034]">Account.</strong> If you register, we store your first name, last name, email address, and a hashed password. You must confirm that you accept these terms and this policy. Optional profile fields exist in our systems, including phone number, address, city, gender, and date of birth, but the public registration form does not ask for them today. We do not ask you to upload a CV.</p>
+        <p><strong className="text-[#244034]">Account.</strong> If you create an account, we store your email address and send a one-time code to it. We do not ask you to choose a password. After the code, we store the name you give us, the country, the kind of work, and the years you have worked. Continuing agrees to these terms and this policy. Optional profile fields exist in our systems, including address, city, gender, date of birth, and a WhatsApp number, but this flow does not ask for them. We do not ask you to upload a CV. We do not take a payment when you create the account.</p>
         <p><strong className="text-[#244034]">Sign-in.</strong> A session token and a copy of your account details are stored in your browser so you stay signed in. Password reset emails contain a link tied to your email address.</p>
         <p><strong className="text-[#244034]">Morning message.</strong> If you pay for a week, we store your WhatsApp number, email address, country, kind of work, years of experience, an optional first name, the week you have paid for, and whether each channel is still on. Payment is handled by Paystack. WhatsApp messages are sent through Meta. The email includes a link that stops further emails.</p>
         <p><strong className="text-[#244034]">Activity.</strong> When you are signed in, we record views, saves, apply clicks, searches, and profile updates. A record can include the job, the time, your IP address, your browser type, and a short note of what you did. This is what the dashboard activity view is built from.</p>
@@ -51,8 +51,8 @@ export default function PrivacyPage() {
         <p>Under the GDPR, we rely on the following reasons. The same uses meet the lawfulness and purpose principles in Act 843.</p>
         <ul className="list-disc pl-5 space-y-2">
           <li><strong className="text-[#244034]">Contract.</strong> Sending the morning message you paid for, on WhatsApp and by email, and keeping the week paid through Paystack.</li>
-          <li><strong className="text-[#244034]">Legitimate interests.</strong> Keeping the site secure, preventing abuse, understanding which pages are used, fixing errors, and showing a relevant country filter. You can object to processing based on legitimate interests.</li>
-          <li><strong className="text-[#244034]">Consent.</strong> Where a use is optional and we ask you first. You can withdraw consent at any time. Withdrawal does not affect use that was already lawful.</li>
+          <li><strong className="text-[#244034]">Legitimate interests.</strong> Keeping the site secure, preventing abuse, and showing a relevant country filter. You can object to processing based on legitimate interests.</li>
+          <li><strong className="text-[#244034]">Consent.</strong> Analytics and error reports from Google Analytics and PostHog, which run only after you accept them in the cookie banner. You can withdraw that consent at any time. Withdrawal does not affect use that was already lawful.</li>
           <li><strong className="text-[#244034]">Legal obligation.</strong> Where Ghanaian law, or another law that applies to us, requires us to keep or disclose a record.</li>
         </ul>
         <p>
@@ -131,13 +131,13 @@ export default function PrivacyPage() {
 
       <ContentSection title="Cookies and similar storage">
         <p>
-          Edwuma uses cookies and browser storage for three purposes: to keep you signed in, to remember a country suggestion, and to measure how the site is used through Google Analytics and PostHog. Session storage is used briefly to return you to a job after you sign in, and to record an apply click that was waiting on login.
+          Edwuma uses cookies and browser storage to keep you signed in, to remember a country suggestion, to store your cookie choice, and, if you allow it, to measure how the site is used through Google Analytics and PostHog. Session storage is used briefly to return you to a job after you sign in, and to record an apply click that was waiting on login.
         </p>
         <p>
-          The sign-in storage is needed to provide the account you created. Analytics cookies help us see which parts of the site work. You can block or delete cookies in your browser. If you block the sign-in storage, you will need to log in again, and some account features will not work. Blocking analytics cookies does not stop you from searching jobs.
+          A banner asks before analytics cookies are set. Essential storage stays on. You can refuse analytics, or change the choice later from Cookie settings in the footer. The categories, names, and retention are listed in the <Link href="/cookies" className="text-[#244034] underline">Cookies policy</Link>.
         </p>
         <p>
-          We do not currently show a separate cookie banner. If you are in the EEA or the UK and want to object to analytics, email us or use your browser controls, and we will treat that as an objection.
+          Blocking the sign-in storage means you will need to log in again. Blocking analytics cookies does not stop you from searching jobs.
         </p>
       </ContentSection>
 

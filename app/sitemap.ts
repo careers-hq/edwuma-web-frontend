@@ -6,6 +6,7 @@
 import { MetadataRoute } from 'next';
 import { jobsApiService } from '@/lib/api/jobs';
 import { blogService } from '@/lib/api/blog';
+import { blogCoverSrc } from '@/lib/blog/covers';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://edwuma.com';
@@ -38,6 +39,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${baseUrl}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/cookies`,
       lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 0.3,
@@ -157,12 +164,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     try {
       const blogResponse = await blogService.listPosts({ per_page: 50 });
-      blogPages = blogResponse.data.posts.map((post) => ({
-        url: `${baseUrl}/blog/${post.slug}`,
-        lastModified: post.updated_at ? new Date(post.updated_at) : new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.6,
-      }));
+      blogPages = blogResponse.data.posts.map((post) => {
+        const cover = blogCoverSrc(post.slug, post.cover_image_url);
+
+        return {
+          url: `${baseUrl}/blog/${post.slug}`,
+          lastModified: post.updated_at ? new Date(post.updated_at) : new Date(),
+          changeFrequency: 'weekly' as const,
+          priority: 0.6,
+          images: cover ? [cover.startsWith('http') ? cover : `${baseUrl}${cover}`] : undefined,
+        };
+      });
     } catch (blogError) {
       console.error('Error adding blog posts to sitemap:', blogError);
     }

@@ -45,54 +45,26 @@
   --color-surface: var(--surface);
   --color-border-light: var(--border-light);
   --color-border-medium: var(--border-medium);
-  --font-sans: 'Gordita', 'EB Garamond', serif, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: #F4F2EE;
-  color: var(--foreground);
-  font-family: 'Gordita', 'EB Garamond', serif, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px;
-  line-height: 28px;
-  font-weight: 400;
-}
-
-/* Typography Scale */
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Gordita', 'EB Garamond', serif;
-  color: var(--primary);
-  font-weight: 400;
-}
-
-h1 {
-  font-size: 32px;
-  line-height: 64px;
-}
-
-h2 {
-  font-size: 28px;
-  line-height: 56px;
-}
-
-h3 {
-  /* font-size: 24px; */
-  /* line-height: 48px; */
-}
-
-h4 {
-  font-size: 20px;
-  line-height: 40px;
-}
-
-h5 {
-  font-size: 18px;
-  line-height: 36px;
-}
-
-h6 {
+  color: #141414;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   font-size: 16px;
-  line-height: 32px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: inherit;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+  }
 }
 
 /* Utility Classes */

@@ -8,4 +8,5 @@ export { OrganizationSchema } from './OrganizationSchema';
 export { BreadcrumbSchema, BreadcrumbNavigation } from './BreadcrumbSchema';
 export { FAQSchema } from './FAQSchema';
 export { WebSiteSchema } from './WebSiteSchema';
+export { BlogPostingSchema, BlogListingSchema } from './BlogSchema';
 

@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
@@ -13,7 +12,14 @@ interface HeaderProps {
   plain?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ className, plain = false }) => {
+const NAV = [
+  { name: 'About', href: '/about' },
+  { name: 'Blog', href: '/blog' },
+  { name: 'FAQ', href: '/faq' },
+  { name: 'Contact', href: '/contact' },
+];
+
+const Header: React.FC<HeaderProps> = ({ className }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { isAuthenticated, user, logout, getUserDisplayName } = useAuth();
@@ -21,12 +27,6 @@ const Header: React.FC<HeaderProps> = ({ className, plain = false }) => {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const navigation = [
-    { name: 'About', href: '/about' },
-    { name: 'Contact', href: '/contact' },
-  ];
-
-  // Close user menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
@@ -46,7 +46,6 @@ const Header: React.FC<HeaderProps> = ({ className, plain = false }) => {
 
   const getUserInitials = () => {
     if (!user) return 'U';
-    // Check profile first, then fall back to user object properties
     const firstName = user.profile?.first_name || user.first_name || '';
     const lastName = user.profile?.last_name || user.last_name || '';
     const firstInitial = firstName.charAt(0) || '';
@@ -54,243 +53,149 @@ const Header: React.FC<HeaderProps> = ({ className, plain = false }) => {
     return (firstInitial + lastInitial).toUpperCase() || user.email.charAt(0).toUpperCase();
   };
 
-  if (plain) {
-    return (
-      <header className={cn('h-14 border-b border-gray-200 bg-white', className)}>
-        <div className="mx-auto flex h-full max-w-2xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="text-lg font-semibold tracking-tight text-[#244034]">
-            edwuma
+  const account = isAuthenticated ? (
+    <div className="relative" ref={userMenuRef}>
+      <button
+        onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+        className="flex items-center gap-2 text-sm font-semibold text-[#244034]"
+      >
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#d2f34c] text-sm font-bold text-[#244034]">
+          {getUserInitials()}
+        </span>
+        <span className="hidden lg:inline">{getUserDisplayName()}</span>
+        <svg className={cn('h-4 w-4 transition-transform', isUserMenuOpen && 'rotate-180')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {isUserMenuOpen ? (
+        <div className="absolute right-0 z-50 mt-2 w-52 rounded-2xl bg-white py-1 shadow-lg ring-1 ring-black/5">
+          {isAdmin ? (
+            <Link href="/admin" className="block px-4 py-2 text-sm text-[#141414] hover:bg-[#F4F2EE]" onClick={() => setIsUserMenuOpen(false)}>
+              Admin
+            </Link>
+          ) : null}
+          <Link href="/dashboard" className="block px-4 py-2 text-sm text-[#141414] hover:bg-[#F4F2EE]" onClick={() => setIsUserMenuOpen(false)}>
+            Dashboard
           </Link>
-          <nav className="hidden items-center gap-6 text-sm text-gray-600 sm:flex">
-            <Link href="/about">About</Link>
-            <Link href="/contact">Contact</Link>
-          </nav>
-          <details className="relative text-sm sm:hidden">
-            <summary className="cursor-pointer list-none text-gray-600">More</summary>
-            <div className="absolute right-0 z-10 mt-2 w-36 rounded-md border border-gray-200 bg-white py-1 shadow-sm">
-              <Link href="/about" className="block px-3 py-2 text-gray-900">About</Link>
-              <Link href="/contact" className="block px-3 py-2 text-gray-900">Contact</Link>
-            </div>
-          </details>
+          <Link href="/profile" className="block px-4 py-2 text-sm text-[#141414] hover:bg-[#F4F2EE]" onClick={() => setIsUserMenuOpen(false)}>
+            Profile
+          </Link>
+          <Link href="/dashboard#saved" className="block px-4 py-2 text-sm text-[#141414] hover:bg-[#F4F2EE]" onClick={() => setIsUserMenuOpen(false)}>
+            Saved jobs
+          </Link>
+          <button onClick={handleLogout} className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50">
+            Log out
+          </button>
         </div>
-      </header>
-    );
-  }
+      ) : null}
+    </div>
+  ) : (
+    <Link href="/start" className="text-sm font-semibold text-[#244034]">
+      Log in
+    </Link>
+  );
 
   return (
-    <header className={cn('bg-primary shadow-sm', className)}>
-      <div className="max-w-12xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center">
-              <Image
-                src="/assets/images/logo/logo_01.png"
-                alt="Edwuma Logo"
-                width={120}
-                height={32}
-                className="h-8 w-auto"
-                style={{ width: "auto" }}
-                priority
-              />
-            </Link>
-          </div>
+    <div className={className}>
+      <header className="sticky top-0 z-40 border-b border-black/5 bg-white">
+        <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between gap-6 px-4 sm:px-6">
+          <Link href="/" className="text-[28px] font-extrabold leading-none tracking-[-0.05em] text-[#244034]">
+            edwuma
+          </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            {navigation.map((item) => (
+          <nav className="hidden items-center gap-8 md:flex">
+            {NAV.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-sm font-medium text-white hover:text-accent transition-colors"
+                className="text-[15px] font-bold text-[#141414] hover:text-[#244034]"
               >
                 {item.name}
               </Link>
             ))}
           </nav>
 
-          {/* Desktop Auth/User Section */}
-          <div className="hidden md:flex items-center space-x-4">
-            {isAuthenticated ? (
-              <div className="relative" ref={userMenuRef}>
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-3 text-white hover:text-accent transition-colors"
-                >
-                  <div className="w-8 h-8 rounded-full bg-[#B8F23E] text-[#2D4A43] flex items-center justify-center font-semibold text-sm">
-                    {getUserInitials()}
-                  </div>
-                  <span className="font-medium">{getUserDisplayName()}</span>
-                  <svg className={`w-4 h-4 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
+          <div className="hidden items-center gap-4 md:flex">
+            {account}
+          </div>
 
-                {/* Dropdown Menu */}
-                {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                    {isAdmin ? (
-                      <Link
-                        href="/admin"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        Admin
-                      </Link>
-                    ) : null}
-                    <Link
-                      href="/dashboard"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      Dashboard
-                    </Link>
-                    <Link
-                      href="/dashboard?tab=profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      Profile Settings
-                    </Link>
-                    <Link
-                      href="/dashboard?tab=applications"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      My Applications
-                    </Link>
-                    <Link
-                      href="/dashboard?tab=saved"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setIsUserMenuOpen(false)}
-                    >
-                      Saved Jobs
-                    </Link>
-                    <hr className="my-1" />
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
+          <button
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-[#244034] md:hidden"
+            onClick={() => setIsMobileMenuOpen((open) => !open)}
+            aria-expanded={isMobileMenuOpen}
+          >
+            <span className="sr-only">Menu</span>
+            {isMobileMenuOpen ? (
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
             ) : (
-              <Link href="/auth/login" className="text-white hover:text-accent font-semibold transition-colors">
-                Login
-              </Link>
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
             )}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-[#B8F23E] hover:bg-[#3A5A53] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#B8F23E]"
-              aria-expanded="false"
-            >
-              <span className="sr-only">Open main menu</span>
-              {!isMobileMenuOpen ? (
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              )}
-            </button>
-          </div>
+          </button>
         </div>
 
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-primary border-t border-[#3A5A53]">
-              {navigation.map((item) => (
+        {isMobileMenuOpen ? (
+          <div className="border-t border-black/5 px-4 py-4 md:hidden">
+            <div className="flex flex-col gap-1">
+              {NAV.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="block px-3 py-2 text-base font-medium text-white hover:text-accent hover:bg-primary rounded-md"
+                  className="rounded-xl px-3 py-3 text-base font-bold text-[#141414]"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.name}
                 </Link>
               ))}
-              <div className="pt-4 pb-3 border-t border-primary">
-                {isAuthenticated ? (
-                  <div className="space-y-2">
-                    <div className="px-3 py-2 flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-full bg-[#B8F23E] text-[#2D4A43] flex items-center justify-center font-semibold">
-                        {getUserInitials()}
-                      </div>
-                      <div className="text-white">
-                        <p className="font-medium">{getUserDisplayName()}</p>
-                        <p className="text-sm text-gray-300">{user?.email}</p>
-                      </div>
-                    </div>
-                    {isAdmin ? (
-                      <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)}>
-                        <Button variant="outline" size="sm" className="w-full justify-start bg-white text-primary">
-                          Admin
-                        </Button>
-                      </Link>
-                    ) : null}
-                    <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button variant="outline" size="sm" className="w-full justify-start bg-white text-primary">
-                        Dashboard
-                      </Button>
-                    </Link>
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="w-full"
-                    >
-                      <Button variant="outline" size="sm" className="w-full justify-start bg-red-50 text-red-600 border-red-200">
-                        Logout
-                      </Button>
-                    </button>
+            </div>
+            <div className="mt-3 flex flex-col gap-3 border-t border-black/5 pt-4">
+              {isAuthenticated ? (
+                <>
+                  <div className="flex items-center gap-3 px-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#d2f34c] font-bold text-[#244034]">
+                      {getUserInitials()}
+                    </span>
+                    <span>
+                      <span className="block text-sm font-semibold text-[#141414]">{getUserDisplayName()}</span>
+                      <span className="block text-sm text-black/50">{user?.email}</span>
+                    </span>
                   </div>
-                ) : (
-                  <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="outline" size="sm" className="w-full justify-start bg-white text-primary">
-                      Login
-                    </Button>
+                  {isAdmin ? (
+                    <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="outline" size="sm" className="w-full justify-start rounded-full">Admin</Button>
+                    </Link>
+                  ) : null}
+                  <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="outline" size="sm" className="w-full justify-start rounded-full">Dashboard</Button>
                   </Link>
-                )}
-              </div>
+                  <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="outline" size="sm" className="w-full justify-start rounded-full">Profile</Button>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    <Button variant="outline" size="sm" className="w-full justify-start rounded-full border-red-200 bg-red-50 text-red-600">
+                      Log out
+                    </Button>
+                  </button>
+                </>
+              ) : (
+                <Link href="/start" onClick={() => setIsMobileMenuOpen(false)} className="px-3 text-sm font-semibold text-[#244034]">
+                  Log in
+                </Link>
+              )}
             </div>
           </div>
-        )}
-      </div>
-    </header>
+        ) : null}
+      </header>
+    </div>
   );
 };
 

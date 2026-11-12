@@ -1,5 +1,45 @@
 import type { NextConfig } from "next";
 
+type StoredLogoPattern = NonNullable<
+  NonNullable<NextConfig["images"]>["remotePatterns"]
+>[number];
+
+function storedLogoPatterns(): StoredLogoPattern[] {
+  const patterns: StoredLogoPattern[] = [
+    {
+      protocol: "https",
+      hostname: "api-prod.edwuma.com",
+      pathname: "/storage/company-logos/**",
+    },
+    {
+      protocol: "https",
+      hostname: "api-test.edwuma.com",
+      pathname: "/storage/company-logos/**",
+    },
+  ];
+
+  try {
+    const api = new URL(process.env.NEXT_PUBLIC_API_URL || "https://api-prod.edwuma.com");
+    const protocol = api.protocol === "http:" ? "http" : "https";
+    const alreadyListed = patterns.some(
+      (pattern) => pattern.hostname === api.hostname && pattern.protocol === protocol && pattern.port === (api.port || undefined),
+    );
+
+    if (!alreadyListed) {
+      patterns.push({
+        protocol,
+        hostname: api.hostname,
+        pathname: "/storage/company-logos/**",
+        ...(api.port ? { port: api.port } : {}),
+      });
+    }
+  } catch {
+    // The production hosts above still accept stored logos.
+  }
+
+  return patterns;
+}
+
 const nextConfig: NextConfig = {
   /* config options here */
   experimental: {
@@ -28,6 +68,7 @@ const nextConfig: NextConfig = {
         hostname: 'api-test.edwuma.com',
         pathname: '/**',
       },
+      ...storedLogoPatterns(),
     ],
     // Block localhost proxy URLs completely
     dangerouslyAllowSVG: true,

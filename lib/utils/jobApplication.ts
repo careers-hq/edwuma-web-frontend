@@ -1,135 +1,112 @@
 /**
- * Job Application Utilities
- * Utilities for handling protected job applications with authentication flow
+ * Account gate for apply and save.
+ * The list stays open. An account starts when someone applies or saves a role.
  */
 
-const REDIRECT_URL_KEY = 'edwuma_redirect_after_login';
-const PENDING_APPLY_ACTIVITY_KEY = 'edwuma_pending_apply_activity';
+import { userActivitiesService } from '@/lib/api/activities';
+import { savedJobsService } from '@/lib/api/savedJobs';
+import { rememberSaved } from '@/lib/savedJobsState';
 
-export type PendingApplyActivity = {
-  jobId?: string;
+const PENDING_JOB_ACTION_KEY = 'edwuma_pending_job_action';
+
+export type PendingJobAction = {
+  action: 'apply' | 'save';
+  jobId: string;
+  returnTo: string;
+  applicationUrl?: string;
+  country?: string;
   metadata?: Record<string, unknown>;
 };
 
-/**
- * Store the intended job application URL for redirect after login
- */
-export function storeIntendedJobUrl(jobUrl: string): void {
-  if (typeof window === 'undefined') return;
-  
-  try {
-    sessionStorage.setItem(REDIRECT_URL_KEY, jobUrl);
-  } catch (error) {
-    console.error('Error storing intended job URL:', error);
-  }
-}
-
-/**
- * Get and clear the stored job URL for redirect
- */
-export function getAndClearIntendedJobUrl(): string | null {
-  if (typeof window === 'undefined') return null;
-  
-  try {
-    const url = sessionStorage.getItem(REDIRECT_URL_KEY);
-    if (url) {
-      sessionStorage.removeItem(REDIRECT_URL_KEY);
-    }
-    return url;
-  } catch (error) {
-    console.error('Error retrieving intended job URL:', error);
+export function safeReturnPath(path: string | null | undefined): string | null {
+  if (!path || !path.startsWith('/') || path.startsWith('//') || path.startsWith('/\\')) {
     return null;
   }
+
+  return path;
 }
 
-/**
- * Clear the stored job URL
- */
-export function clearIntendedJobUrl(): void {
-  if (typeof window === 'undefined') return;
-  
-  try {
-    sessionStorage.removeItem(REDIRECT_URL_KEY);
-  } catch (error) {
-    console.error('Error clearing intended job URL:', error);
-  }
-}
-
-/**
- * Handle job application click with authentication check
- * If user is authenticated, open the job URL
- * If not authenticated, store URL and redirect to login
- */
-export function handleJobApplication(
-  jobUrl: string,
-  isAuthenticated: boolean,
-  options: {
-    loginPath?: string;
-    activity?: PendingApplyActivity | null;
-  } = {}
-): void {
-  if (typeof window === 'undefined') return;
-  
-  const { loginPath = '/auth/login', activity } = options;
-
-  if (isAuthenticated) {
-    // User is authenticated, open the job application URL
-    window.open(jobUrl, '_blank', 'noopener,noreferrer');
-  } else {
-    // User is not authenticated, store URL and redirect to login
-    storeIntendedJobUrl(jobUrl);
-    if (activity && (activity.jobId || activity.metadata)) {
-      storePendingApplyActivity(activity);
-    }
-    window.location.href = loginPath;
-  }
-}
-
-export function storePendingApplyActivity(activity: PendingApplyActivity): void {
+export function storePendingJobAction(action: PendingJobAction): void {
   if (typeof window === 'undefined') return;
 
   try {
-    sessionStorage.setItem(PENDING_APPLY_ACTIVITY_KEY, JSON.stringify(activity));
+    sessionStorage.setItem(PENDING_JOB_ACTION_KEY, JSON.stringify(action));
   } catch (error) {
-    console.error('Error storing pending activity:', error);
+    console.error('Error storing pending job action:', error);
   }
 }
 
-export function getAndClearPendingApplyActivity(): PendingApplyActivity | null {
+export function peekPendingJobAction(): PendingJobAction | null {
   if (typeof window === 'undefined') return null;
 
   try {
-    const stored = sessionStorage.getItem(PENDING_APPLY_ACTIVITY_KEY);
+    const stored = sessionStorage.getItem(PENDING_JOB_ACTION_KEY);
     if (!stored) {
       return null;
     }
 
-    sessionStorage.removeItem(PENDING_APPLY_ACTIVITY_KEY);
-    return JSON.parse(stored) as PendingApplyActivity;
+    return JSON.parse(stored) as PendingJobAction;
   } catch (error) {
-    console.error('Error retrieving pending activity:', error);
+    console.error('Error reading pending job action:', error);
     return null;
   }
 }
 
-/**
- * Process redirect after successful login
- * Opens the stored job URL if exists, otherwise returns the default dashboard URL
- */
-export function processPostLoginRedirect(defaultUrl: string = '/dashboard'): {
-  shouldRedirectToJob: boolean;
-  jobUrl: string | null;
-  dashboardUrl: string;
-  pendingApplyActivity: PendingApplyActivity | null;
-} {
-  const jobUrl = getAndClearIntendedJobUrl();
-  const pendingApplyActivity = getAndClearPendingApplyActivity();
-  
-  return {
-    shouldRedirectToJob: !!jobUrl,
-    jobUrl,
-    dashboardUrl: defaultUrl,
-    pendingApplyActivity,
-  };
+export function takePendingJobAction(): PendingJobAction | null {
+  const action = peekPendingJobAction();
+  if (typeof window === 'undefined') return action;
+
+  try {
+    sessionStorage.removeItem(PENDING_JOB_ACTION_KEY);
+  } catch (error) {
+    console.error('Error clearing pending job action:', error);
+  }
+
+  return action;
 }
 
+export function requireAccount(action: PendingJobAction): void {
+  if (typeof window === 'undefined') return;
+
+  storePendingJobAction(action);
+  const params = new URLSearchParams();
+  const returnTo = safeReturnPath(action.returnTo);
+  if (returnTo) {
+    params.set('returnTo', returnTo);
+  }
+
+  const query = params.toString();
+  window.location.href = query ? `/start?${query}` : '/start';
+}
+
+export async function completePendingJobAction(fallback = '/dashboard', returnTo?: string | null): Promise<string> {
+  const pending = takePendingJobAction();
+  const destination = safeReturnPath(pending?.returnTo) ?? safeReturnPath(returnTo) ?? fallback;
+
+  if (!pending?.jobId) {
+    return destination;
+  }
+
+  if (pending.action === 'apply') {
+    void userActivitiesService.trackActivity('apply_click', pending.jobId, pending.metadata);
+    if (pending.applicationUrl) {
+      window.open(pending.applicationUrl, '_blank', 'noopener,noreferrer');
+    }
+  }
+
+  if (pending.action === 'save') {
+    try {
+      const response = await savedJobsService.saveJob(pending.jobId);
+      if (response.data?.id) {
+        rememberSaved(pending.jobId, response.data.id);
+      }
+    } catch (error) {
+      const status = error && typeof error === 'object' && 'status' in error ? error.status : null;
+      if (status !== 400) {
+        console.error('Error saving job after account:', error);
+      }
+    }
+  }
+
+  return destination;
+}

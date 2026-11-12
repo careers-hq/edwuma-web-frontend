@@ -6,13 +6,10 @@ import MorningJobCard from '@/components/home/MorningJobCard';
 import MorningPitch from '@/components/home/MorningPitch';
 import { jobsApiService, type MorningListJob } from '@/lib/api/jobs';
 import { useGeolocation } from '@/lib/hooks/useGeolocation';
+import { MORNING_COUNTRIES, type MorningCountrySlug } from '@/lib/morning/countries';
+import { cn } from '@/lib/utils';
 
-const COUNTRIES = [
-  { slug: 'ghana', name: 'Ghana' },
-  { slug: 'nigeria', name: 'Nigeria' },
-  { slug: 'kenya', name: 'Kenya' },
-  { slug: 'south-africa', name: 'South Africa' },
-] as const;
+const COUNTRIES = MORNING_COUNTRIES;
 
 function countryName(slug: string): string {
   return COUNTRIES.find((country) => country.slug === slug)?.name ?? slug;
@@ -46,11 +43,47 @@ function openLine(name: string, open: number, shown: number, subscription: boole
   return `${open} open in ${name}. These are ${shown}.`;
 }
 
-const MorningList: React.FC = () => {
+function CountryMark({ slug }: { slug: MorningCountrySlug }) {
+  const common = 'h-6 w-6';
+
+  if (slug === 'ghana') {
+    return (
+      <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  if (slug === 'nigeria') {
+    return (
+      <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+        <path d="M4 20V9l8-5 8 5v11" strokeLinejoin="round" />
+        <path d="M9 20v-6h6v6" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+
+  if (slug === 'kenya') {
+    return (
+      <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+        <path d="M3 18l5.5-8 3.5 4 3-5L21 18" strokeLinejoin="round" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M12 3l7 9-7 9-7-9 7-9z" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+const MorningList: React.FC<{ initialCountry?: string | null }> = ({ initialCountry = null }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { countryCode } = useGeolocation();
-  const requested = searchParams.get('country');
+  const requested = searchParams.get('country') ?? initialCountry;
   const selected = COUNTRIES.some((country) => country.slug === requested) ? requested : null;
 
   const [jobs, setJobs] = useState<MorningListJob[]>([]);
@@ -111,82 +144,145 @@ const MorningList: React.FC = () => {
     router.replace(`/?country=${slug}`, { scroll: false });
   };
 
+  const seeJobs = () => {
+    document.getElementById('jobs')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const today = subscription ? jobs.slice(0, 5) : jobs;
+  const name = selected ? countryName(selected) : null;
+  const summary =
+    selected && !isLoading && !error
+      ? openLine(name ?? selected, openCount, today.length, subscription)
+      : selected
+        ? `Still open. Someone in ${name} can apply. No fee.`
+        : 'Still open. Someone where you live can apply. No fee.';
 
   return (
-    <div>
-      <p className="mt-3 text-base text-gray-700">
-        {selected && !isLoading && !error
-          ? openLine(countryName(selected), openCount, today.length, subscription)
-          : selected
-            ? `Still open. Someone in ${countryName(selected)} can apply. No fee.`
-            : 'Still open. Someone where you live can apply. No fee.'}
-      </p>
+    <>
+      <section className="relative overflow-hidden bg-[#244034] lg:min-h-[760px]">
+        <img
+          src="/images/home-hero.jpg"
+          alt=""
+          className="absolute inset-x-0 top-0 h-80 w-full object-cover object-[center_28%] sm:h-96 lg:inset-y-0 lg:left-auto lg:right-0 lg:h-full lg:w-[46%] lg:object-[center_18%]"
+        />
+        <div className="relative mx-auto flex max-w-6xl px-4 pb-12 pt-52 sm:px-6 sm:pt-64 lg:min-h-[760px] lg:items-center lg:py-16">
+          <div className="w-full max-w-[560px] rounded-[28px] bg-white px-5 py-6 shadow-[0_24px_80px_rgba(0,0,0,0.22)] sm:px-8 sm:py-8">
+            <div className="grid grid-cols-4 border-b border-[#244034]/15" role="tablist" aria-label="Country">
+              {COUNTRIES.map((country) => {
+                const isSelected = selected === country.slug;
+                return (
+                  <button
+                    key={country.slug}
+                    type="button"
+                    role="tab"
+                    aria-selected={isSelected}
+                    onClick={() => chooseCountry(country.slug)}
+                    className={cn(
+                      'flex flex-col items-center gap-2 border-b-2 px-1 pb-3 pt-1 text-center text-[11px] font-semibold leading-tight sm:text-sm',
+                      isSelected
+                        ? 'border-[#244034] text-[#244034]'
+                        : 'border-transparent text-[#141414]'
+                    )}
+                  >
+                    <CountryMark slug={country.slug} />
+                    {country.name}
+                  </button>
+                );
+              })}
+            </div>
 
-      <div className="mt-8">
-        <p className="text-sm font-medium text-gray-900">Where do you live?</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {COUNTRIES.map((country) => {
-            const isSelected = selected === country.slug;
-            return (
-              <button
-                key={country.slug}
-                type="button"
-                aria-pressed={isSelected}
-                onClick={() => chooseCountry(country.slug)}
-                className={
-                  isSelected
-                    ? 'inline-flex h-8 items-center whitespace-nowrap rounded-full bg-[#244034] px-3 text-sm text-white'
-                    : 'inline-flex h-8 items-center whitespace-nowrap rounded-full border border-gray-300 bg-white px-3 text-sm text-gray-900'
-                }
-              >
-                {country.name}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+            <h1 className="mt-7 text-[40px] font-extrabold leading-[1.05] tracking-[-0.045em] text-[#141414] sm:text-5xl">
+              Jobs you can apply to today
+            </h1>
+            <p className="mt-4 text-base leading-7 text-[#141414] sm:text-lg">{summary}</p>
 
-      <div className="mt-8">
-        {!selected ? null : isLoading ? (
-          <div className="space-y-6" aria-hidden="true">
-            {[0, 1, 2].map((row) => (
-              <div key={row} className="border-b border-gray-200 py-6">
-                <div className="h-5 w-2/3 rounded bg-gray-100" />
-                <div className="mt-3 h-4 w-1/3 rounded bg-gray-100" />
-              </div>
-            ))}
-          </div>
-        ) : error ? (
-          <div>
-            <p className="text-sm text-gray-700">{error}</p>
             <button
               type="button"
-              onClick={() => setReloadKey((key) => key + 1)}
-              className="mt-3 text-sm font-medium text-[#244034] underline underline-offset-4"
+              onClick={seeJobs}
+              className="mt-7 inline-flex h-12 items-center rounded-full bg-[#244034] px-6 text-base font-semibold text-white"
             >
-              Try again
+              {name ? `See jobs in ${name}` : 'See today’s jobs'}
             </button>
           </div>
-        ) : today.length === 0 ? (
-          <div>
-            <p className="text-base text-gray-900">Nothing you can apply to today.</p>
-            {subscription ? (
-              <MorningPitch country={selected} name={countryName(selected)} open={openCount} shown={0} />
-            ) : null}
+        </div>
+      </section>
+
+      <section id="jobs" className="scroll-mt-24 bg-[#F4F2EE] px-4 py-16 sm:px-6 sm:py-24">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="text-[36px] font-extrabold leading-[1.05] tracking-[-0.045em] text-[#141414] sm:text-5xl">
+            {name ? (
+              <>
+                Open in <span className="text-[#244034]">{name}</span>
+              </>
+            ) : (
+              'Where you live'
+            )}
+          </h2>
+
+          <div className="mt-8 inline-flex max-w-full flex-wrap gap-1 rounded-full border-2 border-[#244034] p-1.5">
+            {COUNTRIES.map((country) => {
+              const isSelected = selected === country.slug;
+              return (
+                <button
+                  key={country.slug}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => chooseCountry(country.slug)}
+                  className={cn(
+                    'inline-flex h-11 items-center rounded-full px-5 text-sm font-semibold',
+                    isSelected ? 'bg-[#244034] text-white' : 'text-[#244034]'
+                  )}
+                >
+                  {country.name}
+                </button>
+              );
+            })}
           </div>
-        ) : (
-          <div>
-            {today.map((job) => (
-              <MorningJobCard key={job.id} job={job} country={selected} />
-            ))}
-            {subscription ? (
-              <MorningPitch country={selected} name={countryName(selected)} open={openCount} shown={today.length} />
-            ) : null}
+
+          <div className="mt-8">
+            {!selected ? (
+              <p className="text-base text-black/70">Ghana, Nigeria, Kenya, and South Africa.</p>
+            ) : isLoading ? (
+              <div className="space-y-3" aria-hidden="true">
+                {[0, 1, 2].map((row) => (
+                  <div key={row} className="rounded-[24px] bg-white px-5 py-6">
+                    <div className="h-5 w-2/3 rounded-full bg-[#F4F2EE]" />
+                    <div className="mt-3 h-4 w-1/3 rounded-full bg-[#F4F2EE]" />
+                  </div>
+                ))}
+              </div>
+            ) : error ? (
+              <div>
+                <p className="text-base text-[#141414]">{error}</p>
+                <button
+                  type="button"
+                  onClick={() => setReloadKey((key) => key + 1)}
+                  className="mt-3 text-sm font-semibold text-[#244034] underline underline-offset-4"
+                >
+                  Try again
+                </button>
+              </div>
+            ) : today.length === 0 ? (
+              <div>
+                <p className="text-lg font-semibold text-[#141414]">Nothing you can apply to today.</p>
+                {subscription ? (
+                  <MorningPitch country={selected} name={name ?? selected} open={openCount} shown={0} />
+                ) : null}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {today.map((job) => (
+                  <MorningJobCard key={job.id} job={job} country={selected} />
+                ))}
+                {subscription ? (
+                  <MorningPitch country={selected} name={name ?? selected} open={openCount} shown={today.length} />
+                ) : null}
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      </section>
+    </>
   );
 };
 

@@ -17,7 +17,7 @@ export function WebSiteSchema() {
       "name": "Edwuma",
       "logo": {
         "@type": "ImageObject",
-        "url": `${baseUrl}/edwuma-logo-2023.png`
+        "url": `${baseUrl}/opengraph-image`
       }
     }
   };

@@ -8,6 +8,59 @@ interface CompanyLogoProps {
   className?: string;
 }
 
+const STORED_LOGO_PATH = '/storage/company-logos/';
+
+/**
+ * Job Data logos and logos we stored from a company website.
+ * Other hosts, including the old logo proxy, stay on the initials mark.
+ */
+export function isCompanyLogoUrl(url: string): boolean {
+  let parsed: URL;
+
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+
+  if (parsed.pathname.includes('/api/v1/logos/proxy/')) {
+    return false;
+  }
+
+  if (
+    parsed.protocol === 'https:' &&
+    parsed.hostname === 'jobdataapi.com' &&
+    parsed.pathname.startsWith('/media/company/logo/')
+  ) {
+    return true;
+  }
+
+  if (!parsed.pathname.startsWith(STORED_LOGO_PATH)) {
+    return false;
+  }
+
+  if (
+    parsed.protocol === 'https:' &&
+    (parsed.hostname === 'api-test.edwuma.com' || parsed.hostname === 'api-prod.edwuma.com')
+  ) {
+    return true;
+  }
+
+  const configured = process.env.NEXT_PUBLIC_API_URL;
+
+  if (!configured) {
+    return false;
+  }
+
+  try {
+    const api = new URL(configured);
+
+    return parsed.protocol === api.protocol && parsed.host === api.host;
+  } catch {
+    return false;
+  }
+}
+
 export const CompanyLogo: React.FC<CompanyLogoProps> = ({
   logoUrl,
   companyName,
@@ -16,42 +69,21 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
 }) => {
   const defaultLogo = '/images/default-company-logo.svg';
   const [imageError, setImageError] = useState(false);
-  
-  // Validate logo URL - reject any proxy URLs immediately
-  const isValidLogoUrl = (url: string) => {
-    // Only allow HTTPS URLs from trusted domains
-    if (!url.startsWith('https://')) return false;
-    
-    // Block any localhost or proxy URLs
-    if (url.includes('localhost') || url.includes('127.0.0.1') || url.includes('/api/v1/logos/proxy/')) {
-      return false;
-    }
-    
-    // Only allow jobdataapi.com and other trusted domains
-    const allowedDomains = ['jobdataapi.com', 'api-test.edwuma.com'];
-    return allowedDomains.some(domain => url.includes(domain));
-  };
-  
-  const finalLogoUrl = (logoUrl && isValidLogoUrl(logoUrl) && !imageError) ? logoUrl : defaultLogo;
-  
-  const handleError = () => {
-    setImageError(true);
-  };
-  
+  const allowed = Boolean(logoUrl && isCompanyLogoUrl(logoUrl) && !imageError);
+  const finalLogoUrl = allowed && logoUrl ? logoUrl : defaultLogo;
+
   return (
     <div className={`relative overflow-hidden rounded-lg ${className}`}>
       <Image
         src={finalLogoUrl}
-        alt={`${companyName} logo`}
+        alt={allowed ? `${companyName} logo` : 'Edwuma'}
         width={size}
         height={size}
         className="object-cover"
-        onError={handleError}
-        // Add loading placeholder with a simple blur effect
+        onError={() => setImageError(true)}
         placeholder="blur"
         blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iOCIgZmlsbD0iI2YzZjRmNiIvPgo8cmVjdCB4PSIxNiIgeT0iMTYiIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgcng9IjQiIGZpbGw9IiNkMWQ1ZGIiLz4KPC9zdmc+"
-        // Force unoptimized for any potentially problematic URLs
-        unoptimized={!isValidLogoUrl(logoUrl || '')}
+        unoptimized={!allowed}
       />
     </div>
   );

@@ -34,6 +34,9 @@ export interface UserProfile {
   first_name?: string;
   last_name?: string;
   phone_number?: string;
+  country?: string | null;
+  kind_of_work?: string | null;
+  years?: number | null;
   date_of_birth?: string;
   gender?: string;
   nationality?: string;
@@ -74,13 +77,25 @@ export interface RegisterRequest {
   password: string;
   password_confirmation: string;
   agree_to_terms_and_policy: boolean;
-  phone?: string;
+  phone: string;
+  country?: string;
+  kind_of_work?: string;
+  years?: number;
   'cf-turnstile-response'?: string;
 }
 
 export interface AuthResponse {
   user: User;
   token: string;
+  created?: boolean;
+}
+
+export interface MorningFactsRequest {
+  country?: string;
+  kind_of_work?: string;
+  years?: number;
+  phone?: string;
+  phone_country?: string;
 }
 
 export interface ForgotPasswordRequest {
