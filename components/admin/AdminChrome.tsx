@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { href: '/admin/invitations', label: 'Invitations' },
   { href: '/admin/blog', label: 'Blog' },
   { href: '/admin/sync', label: 'Job sync' },
+  { href: '/admin/schedules', label: 'Schedules' },
   { href: '/admin/audit-log', label: 'Audit log' },
 ];
 

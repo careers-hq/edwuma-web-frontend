@@ -178,6 +178,28 @@ export interface SyncLog {
   duration: number | null;
 }
 
+export interface AdminScheduledRun {
+  id: string;
+  status: 'running' | 'success' | 'failed' | 'skipped';
+  summary: Record<string, unknown>;
+  error_message: string | null;
+  started_at: string;
+  finished_at: string | null;
+  duration_seconds: number | null;
+}
+
+export interface AdminSchedule {
+  name: string;
+  label: string;
+  description: string;
+  command: string;
+  runs_at: string;
+  timezone: string;
+  attention: 'ran' | 'missed' | 'never';
+  latest: AdminScheduledRun | null;
+  recent: AdminScheduledRun[];
+}
+
 export interface SyncStatistics {
   overview: {
     total_syncs: number;
@@ -561,6 +583,14 @@ class AdminService {
       logs: unwrapList<SyncLog>(response.data?.logs),
       pagination: response.data?.pagination ?? emptyPagination(10),
     };
+  }
+
+  async getSchedules(): Promise<AdminSchedule[]> {
+    const response = await apiClient.get<{ schedules: unknown }>('/admin/schedules');
+    if (!response.success) {
+      throw new Error(response.message || 'Unable to load schedules');
+    }
+    return unwrapList<AdminSchedule>(response.data?.schedules);
   }
 
   async syncAll(): Promise<Record<string, SyncSourceResult>> {

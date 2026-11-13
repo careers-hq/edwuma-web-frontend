@@ -81,4 +81,6 @@ export type {
   AdminAuditLog,
   SyncSource,
   SyncStatistics,
+  AdminSchedule,
+  AdminScheduledRun,
 } from './admin';
