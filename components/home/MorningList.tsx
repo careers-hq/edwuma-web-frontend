@@ -12,6 +12,13 @@ import { cn } from '@/lib/utils';
 
 const COUNTRIES = MORNING_COUNTRIES;
 
+const HERO_IMAGE: Record<MorningCountrySlug, string> = {
+  ghana: '/images/home-ghana.jpg',
+  nigeria: '/images/home-nigeria.jpg',
+  kenya: '/images/home-kenya.jpg',
+  'south-africa': '/images/home-south-africa.jpg',
+};
+
 function countryName(slug: string): string {
   return COUNTRIES.find((country) => country.slug === slug)?.name ?? slug;
 }
@@ -154,6 +161,7 @@ const MorningList: React.FC<{ initialCountry?: string | null }> = ({ initialCoun
   const pending = isLoading || (Boolean(selected) && !isInitialized);
   const today = showPitch ? jobs.slice(0, 5) : jobs;
   const name = selected ? countryName(selected) : null;
+  const hero = selected ? HERO_IMAGE[selected as MorningCountrySlug] : HERO_IMAGE.ghana;
   const summary =
     selected && !pending && !error
       ? openLine(name ?? selected, openCount, today.length, showPitch)
@@ -165,9 +173,10 @@ const MorningList: React.FC<{ initialCountry?: string | null }> = ({ initialCoun
     <>
       <section className="relative overflow-hidden bg-[#244034] lg:min-h-[760px]">
         <img
-          src="/images/home-hero.jpg"
+          key={hero}
+          src={hero}
           alt=""
-          className="absolute inset-x-0 top-0 h-80 w-full object-cover object-[center_28%] sm:h-96 lg:inset-y-0 lg:left-auto lg:right-0 lg:h-full lg:w-[46%] lg:object-[center_18%]"
+          className="absolute inset-x-0 top-0 h-80 w-full object-cover object-[center_22%] sm:h-96 lg:inset-y-0 lg:left-auto lg:right-0 lg:h-full lg:w-[46%] lg:object-[center_24%]"
         />
         <div className="relative mx-auto flex max-w-6xl px-4 pb-12 pt-52 sm:px-6 sm:pt-64 lg:min-h-[760px] lg:items-center lg:py-16">
           <div className="w-full max-w-[560px] rounded-[28px] bg-white px-5 py-6 shadow-[0_24px_80px_rgba(0,0,0,0.22)] sm:px-8 sm:py-8">
