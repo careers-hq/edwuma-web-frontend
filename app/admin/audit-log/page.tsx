@@ -136,7 +136,6 @@ export default function AdminAuditLogPage() {
     <div>
       <AdminPageHeader
         title="Audit log"
-        description="Sign-ins, password resets, role changes, and account status updates."
       />
 
       <Card className="mb-6">

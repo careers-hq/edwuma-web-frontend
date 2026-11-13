@@ -73,7 +73,6 @@ export default function AdminBlogPage() {
     <div>
       <AdminPageHeader
         title="Blog"
-        description="Write drafts, publish posts, and remove anything that should not stay live."
         action={
           <Button onClick={() => router.push('/admin/blog/new')}>New post</Button>
         }

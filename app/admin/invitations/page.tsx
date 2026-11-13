@@ -156,7 +156,6 @@ export default function AdminInvitationsPage() {
     <div>
       <AdminPageHeader
         title="Invitations"
-        description="Invite someone by email. They get a link to create an account with the role you choose."
         action={
           <Button variant={showForm ? 'outline' : 'primary'} onClick={() => setShowForm((open) => !open)}>
             {showForm ? 'Close form' : 'Invite someone'}

@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 import { AdminError, AdminPageHeader } from '@/components/admin/AdminChrome';
 import {
   adminService,
@@ -84,6 +86,7 @@ export default function AdminSchedulesPage() {
   const [schedules, setSchedules] = useState<AdminSchedule[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [acting, setActing] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -101,14 +104,39 @@ export default function AdminSchedulesPage() {
     void load();
   }, [load]);
 
-  const missed = schedules.filter((schedule) => schedule.attention !== 'ran').length;
+  const missed = schedules.filter((schedule) => !schedule.paused && schedule.attention !== 'ran').length;
+
+  const runTask = async (schedule: AdminSchedule) => {
+    try {
+      setActing(`${schedule.name}:run`);
+      await adminService.runSchedule(schedule.name);
+      toast.success(`${schedule.label} started.`);
+      await load();
+    } catch (runError) {
+      toast.error(getApiErrorMessage(runError, `Unable to start ${schedule.label}.`));
+    } finally {
+      setActing(null);
+    }
+  };
+
+  const setPaused = async (schedule: AdminSchedule, paused: boolean) => {
+    try {
+      setActing(`${schedule.name}:pause`);
+      await adminService.setSchedulePaused(schedule.name, paused);
+      toast.success(paused ? `${schedule.label} paused.` : `${schedule.label} resumed.`);
+      await load();
+    } catch (pauseError) {
+      toast.error(getApiErrorMessage(pauseError, `Unable to update ${schedule.label}.`));
+    } finally {
+      setActing(null);
+    }
+  };
   const failed = schedules.filter((schedule) => schedule.attention === 'ran' && schedule.latest?.status === 'failed').length;
 
   return (
     <div>
       <AdminPageHeader
         title="Schedules"
-        description="When each daily task runs, and what the last run reported."
       />
 
       {error ? <AdminError message={error} onRetry={load} /> : null}
@@ -130,18 +158,19 @@ export default function AdminSchedulesPage() {
                   <th className="px-6 py-3 font-medium">When</th>
                   <th className="px-6 py-3 font-medium">Last report</th>
                   <th className="px-6 py-3 font-medium">Status</th>
+                  <th className="px-6 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-10 text-center text-[rgba(0,0,0,0.6)]">
+                    <td colSpan={5} className="px-6 py-10 text-center text-[rgba(0,0,0,0.6)]">
                       Loading schedules…
                     </td>
                   </tr>
                 ) : schedules.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-10 text-center text-[rgba(0,0,0,0.6)]">
+                    <td colSpan={5} className="px-6 py-10 text-center text-[rgba(0,0,0,0.6)]">
                       No schedules are configured.
                     </td>
                   </tr>
@@ -166,7 +195,32 @@ export default function AdminSchedulesPage() {
                           {schedule.recent.length > 1 ? <RecentRuns runs={schedule.recent} /> : null}
                         </td>
                         <td className="px-6 py-4">
-                          <Badge variant={badge.variant} size="sm">{badge.label}</Badge>
+                          <div className="flex flex-wrap gap-2">
+                            {schedule.paused ? <Badge variant="warning" size="sm">Paused</Badge> : null}
+                            <Badge variant={badge.variant} size="sm">{badge.label}</Badge>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-wrap gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={acting !== null || latest?.status === 'running'}
+                              loading={acting === `${schedule.name}:run`}
+                              onClick={() => void runTask(schedule)}
+                            >
+                              Run now
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={acting !== null}
+                              loading={acting === `${schedule.name}:pause`}
+                              onClick={() => void setPaused(schedule, !schedule.paused)}
+                            >
+                              {schedule.paused ? 'Resume' : 'Pause'}
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     );

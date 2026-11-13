@@ -109,7 +109,6 @@ export default function AdminSyncPage() {
     <div>
       <AdminPageHeader
         title="Job sync"
-        description="Pull jobs from connected sources and review what each run created or skipped."
         action={
           <Button onClick={() => void handleSyncAll()} loading={syncingId === 'all'} disabled={syncingId !== null && syncingId !== 'all'}>
             Sync all sources

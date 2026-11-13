@@ -6,10 +6,7 @@ import { AdminPageHeader } from '@/components/admin/AdminChrome';
 export default function NewBlogPostPage() {
   return (
     <div>
-      <AdminPageHeader
-        title="New post"
-        description="Drafts stay off the public blog until you publish them."
-      />
+      <AdminPageHeader title="New post" />
       <BlogPostForm />
     </div>
   );

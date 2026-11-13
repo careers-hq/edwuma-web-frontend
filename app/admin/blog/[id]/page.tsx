@@ -39,7 +39,7 @@ export default function EditBlogPostPage() {
 
   return (
     <div>
-      <AdminPageHeader title={post ? `Edit ${post.title}` : 'Edit post'} description="Update the post and save it as a draft or publish it." />
+      <AdminPageHeader title={post ? `Edit ${post.title}` : 'Edit post'} />
       {error ? <AdminError message={error} /> : null}
       {isLoading ? <p className="text-sm text-[rgba(0,0,0,0.6)]">Loading post…</p> : null}
       {post ? <BlogPostForm key={post.id} post={post} /> : null}

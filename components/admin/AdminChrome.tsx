@@ -2,20 +2,31 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import Header from '@/components/layout/Header';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
-import { ProtectedRoute } from '@/lib/auth';
+import { ProtectedRoute, useAuth } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
   { href: '/admin', label: 'Overview', exact: true },
-  { href: '/admin/users', label: 'Users' },
-  { href: '/admin/access', label: 'Roles' },
-  { href: '/admin/invitations', label: 'Invitations' },
+  {
+    href: '/admin/users',
+    label: 'People',
+    children: [
+      { href: '/admin/users', label: 'Users', exact: true },
+      { href: '/admin/access', label: 'Roles' },
+      { href: '/admin/invitations', label: 'Invitations' },
+    ],
+  },
+  {
+    href: '/admin/sync',
+    label: 'Operations',
+    children: [
+      { href: '/admin/sync', label: 'Job sync' },
+      { href: '/admin/schedules', label: 'Schedules' },
+    ],
+  },
   { href: '/admin/blog', label: 'Blog' },
-  { href: '/admin/sync', label: 'Job sync' },
-  { href: '/admin/schedules', label: 'Schedules' },
   { href: '/admin/audit-log', label: 'Audit log' },
 ];
 
@@ -26,16 +37,48 @@ function isNavActive(pathname: string, href: string, exact?: boolean): boolean {
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { logout, getUserDisplayName } = useAuth();
+  const section = NAV_ITEMS.find((item) =>
+    item.children
+      ? item.children.some((child) => isNavActive(pathname, child.href, child.exact))
+      : isNavActive(pathname, item.href, item.exact)
+  );
+
+  const signOut = async () => {
+    await logout();
+    router.push('/');
+  };
 
   return (
     <ProtectedRoute requiredRole="admin">
       <div className="min-h-screen bg-[#f4f7f5]">
-        <Header />
+        <header className="border-b border-[#244034]/10 bg-white">
+          <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-4 sm:px-6 lg:px-8">
+            <Link href="/admin" className="text-xl font-extrabold tracking-[-0.04em] text-[#244034]">
+              edwuma
+            </Link>
+            <span className="text-sm font-medium text-[rgba(0,0,0,0.45)]">Admin</span>
+            <div className="ml-auto flex items-center gap-4">
+              <Link href="/" className="text-sm text-[#244034]">
+                Site
+              </Link>
+              <span className="hidden max-w-[12rem] truncate text-sm text-[#244034] sm:inline">
+                {getUserDisplayName()}
+              </span>
+              <Button variant="ghost" size="sm" onClick={() => void signOut()}>
+                Sign out
+              </Button>
+            </div>
+          </div>
+        </header>
         <div className="border-b border-[#244034]/10 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <nav className="flex gap-1 overflow-x-auto py-3" aria-label="Admin">
               {NAV_ITEMS.map((item) => {
-                const active = isNavActive(pathname, item.href, item.exact);
+                const active = item.children
+                  ? item.children.some((child) => isNavActive(pathname, child.href, child.exact))
+                  : isNavActive(pathname, item.href, item.exact);
                 return (
                   <Link
                     key={item.href}
@@ -53,6 +96,26 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 );
               })}
             </nav>
+            {section?.children ? (
+              <div className="flex gap-4 overflow-x-auto border-t border-gray-100 py-2">
+                {section.children.map((child) => {
+                  const active = isNavActive(pathname, child.href, child.exact);
+                  return (
+                    <Link
+                      key={child.href}
+                      href={child.href}
+                      className={cn(
+                        'whitespace-nowrap py-1 text-sm',
+                        active ? 'font-semibold text-[#244034]' : 'text-[rgba(0,0,0,0.55)] hover:text-[#244034]'
+                      )}
+                      aria-current={active ? 'page' : undefined}
+                    >
+                      {child.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : null}
           </div>
         </div>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</main>

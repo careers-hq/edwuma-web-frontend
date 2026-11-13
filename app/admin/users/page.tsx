@@ -59,6 +59,7 @@ export default function AdminUsersPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [busyUserId, setBusyUserId] = useState<string | null>(null);
+  const [menuUserId, setMenuUserId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [createForm, setCreateForm] = useState(emptyCreateForm);
@@ -106,6 +107,10 @@ export default function AdminUsersPage() {
       toast.error('You cannot change your own role from this screen.');
       return;
     }
+    const confirmed = window.confirm(
+      `Change ${userDisplayName(user)} from ${roleLabel(userRoleName(user))} to ${roleLabel(nextRole)}?`
+    );
+    if (!confirmed) return;
 
     try {
       setBusyUserId(user.id);
@@ -179,7 +184,6 @@ export default function AdminUsersPage() {
     <div>
       <AdminPageHeader
         title="Users"
-        description="Create accounts, change roles, and turn access on or off."
         action={
           <Button variant="primary" onClick={() => setShowCreate((open) => !open)}>
             {showCreate ? 'Close' : 'Create user'}
@@ -284,11 +288,6 @@ export default function AdminUsersPage() {
                 setPage(1);
               }}
             />
-            <div className="md:col-span-4">
-              <Button type="submit" variant="primary">
-                Search
-              </Button>
-            </div>
           </form>
         </CardContent>
       </Card>
@@ -302,10 +301,10 @@ export default function AdminUsersPage() {
               <thead className="border-b border-gray-100 bg-[#f8fafc] text-xs uppercase tracking-wide text-[rgba(0,0,0,0.55)]">
                 <tr>
                   <th className="px-6 py-3 font-medium">Person</th>
+                  <th className="px-6 py-3 font-medium">Country</th>
                   <th className="px-6 py-3 font-medium">Role</th>
                   <th className="px-6 py-3 font-medium">Status</th>
                   <th className="px-6 py-3 font-medium">Joined</th>
-                  <th className="px-6 py-3 font-medium">Access</th>
                 </tr>
               </thead>
               <tbody>
@@ -332,14 +331,52 @@ export default function AdminUsersPage() {
                           <p className="text-[rgba(0,0,0,0.6)]">{user.email}</p>
                           {user.phone ? <p className="text-xs text-[rgba(0,0,0,0.45)]">{user.phone}</p> : null}
                         </td>
+                        <td className="px-6 py-4 text-[rgba(0,0,0,0.7)]">{user.profile?.country || '—'}</td>
                         <td className="px-6 py-4">
-                          <Select
-                            aria-label={`Role for ${userDisplayName(user)}`}
-                            value={userRoleName(user)}
-                            options={roleOptions}
-                            disabled={busy || isSelf}
-                            onChange={(event) => void handleRoleChange(user, event.target.value)}
-                          />
+                          {isSelf ? (
+                            <span className="text-sm text-[#244034]">{roleLabel(userRoleName(user))}</span>
+                          ) : (
+                            <div className="relative">
+                              <button
+                                type="button"
+                                className="text-sm font-medium text-[#244034] disabled:opacity-50"
+                                disabled={busy}
+                                aria-expanded={menuUserId === user.id}
+                                onClick={() => setMenuUserId((current) => (current === user.id ? null : user.id))}
+                              >
+                                {busy ? 'Saving…' : roleLabel(userRoleName(user))}
+                              </button>
+                              {menuUserId === user.id ? (
+                                <div className="absolute left-0 z-10 mt-1 w-44 rounded-md border border-gray-100 bg-white py-1 shadow-lg">
+                                  {roleOptions
+                                    .filter((option) => option.value !== userRoleName(user))
+                                    .map((option) => (
+                                      <button
+                                        key={option.value}
+                                        type="button"
+                                        className="block w-full px-3 py-2 text-left text-sm text-[#244034] hover:bg-[#f4f7f5]"
+                                        onClick={() => {
+                                          setMenuUserId(null);
+                                          void handleRoleChange(user, option.value);
+                                        }}
+                                      >
+                                        {option.label}
+                                      </button>
+                                    ))}
+                                  <button
+                                    type="button"
+                                    className="block w-full px-3 py-2 text-left text-sm text-[#244034] hover:bg-[#f4f7f5]"
+                                    onClick={() => {
+                                      setMenuUserId(null);
+                                      void handleStatusChange(user);
+                                    }}
+                                  >
+                                    {user.is_active ? 'Deactivate' : 'Activate'}
+                                  </button>
+                                </div>
+                              ) : null}
+                            </div>
+                          )}
                         </td>
                         <td className="px-6 py-4">
                           <Badge variant={user.is_active ? 'success' : 'destructive'} size="sm">
@@ -348,17 +385,6 @@ export default function AdminUsersPage() {
                         </td>
                         <td className="px-6 py-4 text-[rgba(0,0,0,0.7)]">
                           {user.created_at ? formatDate(user.created_at) : '—'}
-                        </td>
-                        <td className="px-6 py-4">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={busy || isSelf}
-                            loading={busy}
-                            onClick={() => void handleStatusChange(user)}
-                          >
-                            {user.is_active ? 'Deactivate' : 'Activate'}
-                          </Button>
                         </td>
                       </tr>
                     );

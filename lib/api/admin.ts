@@ -26,16 +26,34 @@ export interface AdminActivityPoint {
   views: number;
   apply_clicks: number;
   signups: number;
+  searches: number;
 }
 
 export interface AdminTopJob {
   id: string;
   title: string;
+  company: string | null;
   views: number;
   apply_clicks: number;
+  apply_rate: number | null;
+}
+
+export interface AdminAttention {
+  target: 'schedules' | 'sync' | 'logos' | 'reports';
+  label: string;
+  detail: string;
+}
+
+export interface AdminAuditItem {
+  id: string;
+  event: string;
+  label: string;
+  actor_email: string | null;
+  created_at: string;
 }
 
 export interface AdminDashboardStats {
+  window_days: number;
   total_users: number;
   active_users: number;
   new_users_7d: number;
@@ -54,8 +72,11 @@ export interface AdminDashboardStats {
     active: number;
     posted_7d: number;
     posted_30d: number;
+    by_status: AdminBreakdown[];
     by_work_mode: AdminBreakdown[];
     by_country: AdminBreakdown[];
+    logos: { with_logo: number; missing: number };
+    on_morning_list: number;
   };
   content: {
     companies: number;
@@ -72,6 +93,24 @@ export interface AdminDashboardStats {
   };
   activity_series: AdminActivityPoint[];
   top_jobs: AdminTopJob[];
+  top_searches: AdminBreakdown[];
+  attention: AdminAttention[];
+  pulse: {
+    jobs: { active: number; posted: number; posted_previous: number; expired: number };
+    people: { joined: number; joined_previous: number; still_active: number };
+    apply: {
+      views: number;
+      views_previous: number;
+      clicks: number;
+      clicks_previous: number;
+      rate: number | null;
+      rate_previous: number | null;
+    };
+    mornings: { country_list: number; paid: number; on_list: number; invites: number };
+  };
+  sync: { created: number; updated: number; skipped: number; failed: number };
+  reports: { total: number; by_reason: AdminBreakdown[] };
+  recent_audit: AdminAuditItem[];
 }
 
 export interface AdminUserProfile {
@@ -196,6 +235,7 @@ export interface AdminSchedule {
   runs_at: string;
   timezone: string;
   attention: 'ran' | 'missed' | 'never';
+  paused: boolean;
   latest: AdminScheduledRun | null;
   recent: AdminScheduledRun[];
 }
@@ -383,8 +423,8 @@ export function invitationStatus(invitation: Pick<AdminInvitation, 'is_accepted'
 }
 
 class AdminService {
-  async getDashboard(): Promise<AdminDashboardStats> {
-    const response = await apiClient.get<{ stats: AdminDashboardStats }>('/admin/dashboard');
+  async getDashboard(days: 7 | 30 = 7): Promise<AdminDashboardStats> {
+    const response = await apiClient.get<{ stats: AdminDashboardStats }>('/admin/dashboard', { days });
     if (!response.success || !response.data?.stats) {
       throw new Error(response.message || 'Unable to load the admin dashboard');
     }
@@ -591,6 +631,20 @@ class AdminService {
       throw new Error(response.message || 'Unable to load schedules');
     }
     return unwrapList<AdminSchedule>(response.data?.schedules);
+  }
+
+  async runSchedule(name: string): Promise<void> {
+    const response = await apiClient.post<{ name: string }>(`/admin/schedules/${name}/runs`);
+    if (!response.success) {
+      throw new Error(response.message || 'Unable to start this task');
+    }
+  }
+
+  async setSchedulePaused(name: string, paused: boolean): Promise<void> {
+    const response = await apiClient.patch<{ name: string; paused: boolean }>(`/admin/schedules/${name}`, { paused });
+    if (!response.success) {
+      throw new Error(response.message || 'Unable to update this schedule');
+    }
   }
 
   async syncAll(): Promise<Record<string, SyncSourceResult>> {

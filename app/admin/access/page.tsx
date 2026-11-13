@@ -112,7 +112,6 @@ export default function AdminAccessPage() {
     <div>
       <AdminPageHeader
         title="Roles and permissions"
-        description="Create roles and permissions, then choose what each role is allowed to do."
       />
 
       <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
