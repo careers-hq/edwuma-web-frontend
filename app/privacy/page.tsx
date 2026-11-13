@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     'How Edwuma collects and uses personal data, under Ghana’s Data Protection Act, 2012 (Act 843) and the GDPR.',
 };
 
-const UPDATED = '12 November 2026';
+const UPDATED = '13 November 2026';
 
 export default function PrivacyPage() {
   return (
@@ -37,9 +37,8 @@ export default function PrivacyPage() {
 
       <ContentSection title="Data we collect">
         <p>We collect only what the current product uses.</p>
-        <p><strong className="text-[#244034]">Account.</strong> If you create an account, we store your email address and send a one-time code to it. We do not ask you to choose a password. After the code, we store the name you give us, the country, the kind of work, and the years you have worked. Continuing agrees to these terms and this policy. Optional profile fields exist in our systems, including address, city, gender, date of birth, and a WhatsApp number, but this flow does not ask for them. We do not ask you to upload a CV. We do not take a payment when you create the account.</p>
+        <p><strong className="text-[#244034]">Account.</strong> If you create an account, we store your email address and send a one-time code to it. We do not ask you to choose a password. After the code, we store the name you give us, the country, the kind of work, and the years you have worked. Continuing agrees to these terms and this policy. Optional profile fields exist in our systems, including address, city, gender, date of birth, and a WhatsApp number, but this flow does not ask for them. We do not ask you to upload a CV. We do not take payment.</p>
         <p><strong className="text-[#244034]">Sign-in.</strong> A session token and a copy of your account details are stored in your browser so you stay signed in. Password reset emails contain a link tied to your email address.</p>
-        <p><strong className="text-[#244034]">Morning message.</strong> If you pay for a week, we store your WhatsApp number, email address, country, kind of work, years of experience, an optional first name, the week you have paid for, and whether each channel is still on. Payment is handled by Paystack. WhatsApp messages are sent through Meta. The email includes a link that stops further emails.</p>
         <p><strong className="text-[#244034]">Activity.</strong> When you are signed in, we record views, saves, apply clicks, searches, and profile updates. A record can include the job, the time, your IP address, your browser type, and a short note of what you did. This is what the dashboard activity view is built from.</p>
         <p><strong className="text-[#244034]">Location hint.</strong> To pre-select a country filter, we read your browser timezone. If that is not enough, the site may ask our server, or a location service such as ipinfo, ipapi, or ip-api, for a coarse country from your IP address. We cache that country in your browser for about a day. We do not ask for GPS permission.</p>
         <p><strong className="text-[#244034]">Messages.</strong> Email sent to hello@edwuma.com is stored so we can reply. The contact form asks for your name, email, subject, and message for the same purpose.</p>
@@ -50,7 +49,7 @@ export default function PrivacyPage() {
       <ContentSection title="Why we use it">
         <p>Under the GDPR, we rely on the following reasons. The same uses meet the lawfulness and purpose principles in Act 843.</p>
         <ul className="list-disc pl-5 space-y-2">
-          <li><strong className="text-[#244034]">Contract.</strong> Sending the morning message you paid for, on WhatsApp and by email, and keeping the week paid through Paystack.</li>
+          <li><strong className="text-[#244034]">Contract.</strong> Running the account you create and showing the job list you came for.</li>
           <li><strong className="text-[#244034]">Legitimate interests.</strong> Keeping the site secure, preventing abuse, and showing a relevant country filter. You can object to processing based on legitimate interests.</li>
           <li><strong className="text-[#244034]">Consent.</strong> Analytics and error reports from Google Analytics and PostHog, which run only after you accept them in the cookie banner. You can withdraw that consent at any time. Withdrawal does not affect use that was already lawful.</li>
           <li><strong className="text-[#244034]">Legal obligation.</strong> Where Ghanaian law, or another law that applies to us, requires us to keep or disclose a record.</li>
@@ -73,9 +72,7 @@ export default function PrivacyPage() {
         <p>We use service providers who process data on our instructions:</p>
         <ul className="list-disc pl-5 space-y-2">
           <li>hosting and infrastructure for the website and API;</li>
-          <li>email delivery for the morning message;</li>
-          <li>Paystack, to take the weekly payment;</li>
-          <li>Meta, to deliver the morning WhatsApp;</li>
+          <li>email delivery for sign-in codes and messages you send us;</li>
           <li>Cloudflare, for the Turnstile security check;</li>
           <li>Google, for Google Analytics;</li>
           <li>PostHog, for product analytics and error reports;</li>
@@ -97,7 +94,7 @@ export default function PrivacyPage() {
 
       <ContentSection title="How long we keep it">
         <p>
-          A morning message is kept while the week is paid and while either channel is still on. After you stop both, or ask us to delete it, we delete or anonymise that record unless we have to keep a limited payment record to meet a legal duty. Contact messages are kept long enough to handle your request and any follow-up.
+          Contact messages are kept long enough to handle your request and any follow-up.
         </p>
         <p>
           After you ask us to delete your account, we delete or anonymise your personal data unless we have to keep a limited record to meet a legal duty, resolve a dispute, or prevent abuse. Analytics providers keep their own copies for the period set in their tools. The country hint in your browser expires after about 24 hours, or sooner if you clear site data.

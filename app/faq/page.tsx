@@ -3,28 +3,28 @@ import ContentPage, { ContentSection } from '@/components/layout/ContentPage';
 
 export const metadata: Metadata = {
   title: 'FAQ',
-  description: 'What the Edwuma morning message costs, what it sends, and how to stop it.',
+  description: 'Edwuma does not charge. Today’s list is free.',
 };
 
 export default function FAQPage() {
   return (
     <ContentPage
       title="FAQ"
-      description="The morning message is a paid week. Today's list on the site stays free."
+      description="Edwuma does not charge. Today’s list is free."
     >
-      <ContentSection title="What does a week cost?">
+      <ContentSection title="Does Edwuma charge?">
         <p>
-          GHS 15 in Ghana, NGN 2,000 in Nigeria, KES 200 in Kenya, or ZAR 25 in South Africa. The charge covers WhatsApp and email for that week.
+          No. The list is free to read. Creating an account does not take a payment.
         </p>
       </ContentSection>
-      <ContentSection title="What arrives?">
+      <ContentSection title="What is on the list?">
         <p>
-          The same short list on both channels. It uses your country, the kind of work you chose, and the years you have worked. Five roles is the most. If nothing fits, the morning says so.
+          Open roles in Ghana, Nigeria, Kenya, and South Africa. Each one is still open, someone in that country can apply, and none of them ask for a fee. One link opens the employer&apos;s application.
         </p>
       </ContentSection>
-      <ContentSection title="How do I stop it?">
+      <ContentSection title="Where does apply go?">
         <p>
-          Reply STOP to end WhatsApp. The email has its own stop link. Stopping one leaves the other for the week you already paid. Stopping both ends the next charge.
+          To the employer&apos;s own page. Edwuma does not receive your application.
         </p>
       </ContentSection>
     </ContentPage>

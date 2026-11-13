@@ -6,7 +6,7 @@ import MorningStart from '@/components/home/MorningStart';
 
 export const metadata: Metadata = {
   title: 'Continue',
-  description: 'The morning on WhatsApp and by email. Kind of work, years, and the week.',
+  description: 'Today’s list of open jobs in Ghana, Nigeria, Kenya, and South Africa.',
 };
 
 export default function MorningPage() {

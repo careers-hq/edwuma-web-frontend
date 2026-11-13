@@ -29,9 +29,9 @@ export default function AboutPage() {
         </p>
       </ContentSection>
 
-      <ContentSection title="The morning message">
+      <ContentSection title="What it costs">
         <p>
-          You can pay for a week and receive the morning on WhatsApp and by email. The week is GHS 15 in Ghana, NGN 2,000 in Nigeria, KES 200 in Kenya, or ZAR 25 in South Africa. The message uses your country, the kind of work you choose, and the years you have worked. Reply STOP to end WhatsApp. The email has its own stop link.
+          Nothing. The list is free to read. Creating an account does not take a payment. Applying opens the employer&apos;s page.
         </p>
       </ContentSection>
 

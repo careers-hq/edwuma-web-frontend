@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     'Terms for using Edwuma, the African job search site.',
 };
 
-const UPDATED = '11 November 2026';
+const UPDATED = '13 November 2026';
 
 export default function TermsPage() {
   return (
@@ -28,19 +28,19 @@ export default function TermsPage() {
 
       <ContentSection title="The service">
         <p>
-          Edwuma is a search site for job seekers in Ghana, Nigeria, Kenya, and South Africa. You can read today&apos;s list for your country. A paid week sends the same kind of morning, matched to your kind of work and your years, on WhatsApp and by email. Employers cannot post jobs on Edwuma.
+          Edwuma is a search site for job seekers in Ghana, Nigeria, Kenya, and South Africa. You can read today&apos;s list for your country. Employers cannot post jobs on Edwuma. We do not charge you to use the site.
         </p>
         <p>
           Listings are collected from third-party sources, including JobData, Greenhouse, and ReliefWeb, and from employer career pages those sources expose. We do not guarantee that a listing is complete, current, or still open. A role may have been filled or withdrawn by the time you apply.
         </p>
         <p>
-          The morning list on the site is free. A week of the morning message is GHS 15 in Ghana, NGN 2,000 in Nigeria, KES 200 in Kenya, or ZAR 25 in South Africa. Payment is taken before the week starts. We may change, pause, or remove features as the product develops.
+          The list is free. We do not take payment. We may change, pause, or remove features as the product develops.
         </p>
       </ContentSection>
 
       <ContentSection title="Accounts">
         <p>
-          You may browse without an account. The morning message uses your WhatsApp number and email. It does not ask for a password. You must be at least 16 years old. We do not knowingly offer the service to children. Tell us at <a href="mailto:hello@edwuma.com" className="text-[#244034] underline">hello@edwuma.com</a> if you believe someone else is using your number.
+          You may browse without an account. An account uses your email and a one-time code. It does not ask for a password, and it does not take a payment. You must be at least 16 years old. We do not knowingly offer the service to children. Tell us at <a href="mailto:hello@edwuma.com" className="text-[#244034] underline">hello@edwuma.com</a> if you believe someone else is using your email.
         </p>
       </ContentSection>
 
@@ -50,7 +50,7 @@ export default function TermsPage() {
           <li>use the site to break the law, including Ghanaian law and the law where you are located;</li>
           <li>scrape, copy, or republish listings in bulk, or attempt to bypass rate limits or access controls;</li>
           <li>probe, disrupt, or overload the site, or try to access another person&apos;s account;</li>
-          <li>upload malware or submit false information in a morning message;</li>
+          <li>upload malware or submit false information;</li>
           <li>use the site to send unsolicited messages or to misrepresent who you are.</li>
         </ul>
         <p>
@@ -64,21 +64,12 @@ export default function TermsPage() {
         </p>
       </ContentSection>
 
-      <ContentSection title="The morning message">
-        <p>
-          A morning message is a week of the same short list, sent on WhatsApp and by email. It uses the country, the kind of work, and the years you give. Five roles is the most in one morning. A morning with nothing that fits still arrives. Reply STOP to end WhatsApp. Use the link in the email to stop the email. Stopping one leaves the other in place for the week already paid. Stopping both ends the next charge. The same number can start again by paying another week.
-        </p>
-        <p>
-          The message is not a guarantee that every matching role will be included, or that a listed role is still open.
-        </p>
-      </ContentSection>
-
       <ContentSection title="Our content and yours">
         <p>
           The Edwuma name, logo, and the design of the site belong to us or our licensors. Job descriptions, company names, and logos belong to the employers or sources that published them. You may use the site for your own job search. You may not copy the site or its collection of listings to build a competing service.
         </p>
         <p>
-          Information you submit for a morning message, such as your first name, email, WhatsApp number, kind of work, and years, stays yours. You give us permission to use it only to run the service, as described in the Privacy Policy.
+          Information you submit, such as your name, email, country, kind of work, and years, stays yours. You give us permission to use it only to run the service, as described in the Privacy Policy.
         </p>
       </ContentSection>
 
