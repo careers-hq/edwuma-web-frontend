@@ -1,13 +1,29 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { Badge } from '@/components/ui/Badge';
-import { AdminError, AdminPageHeader, AdminPagination } from '@/components/admin/AdminChrome';
+import { AdminError } from '@/components/admin/AdminChrome';
+import {
+  DotLabel,
+  downloadCsv,
+  RowMenu,
+  RowMenuItem,
+  StatusPill,
+  Table,
+  TableAction,
+  TableCard,
+  TableMessage,
+  TablePager,
+  TableToolbar,
+  Td,
+  Th,
+  Tr,
+} from '@/components/ui/DataTable';
 import { useAuth } from '@/lib/auth';
 import { formatDate } from '@/lib/utils';
 import {
@@ -40,6 +56,12 @@ const emptyCreateForm = {
   role: 'user',
 };
 
+const ROLE_DOT: Record<string, string> = {
+  admin: '#244034',
+  recruiter: '#3d6b56',
+  user: '#7fa37a',
+};
+
 const STATUS_OPTIONS = [
   { value: '', label: 'Any status' },
   { value: 'active', label: 'Active' },
@@ -48,18 +70,20 @@ const STATUS_OPTIONS = [
 
 export default function AdminUsersPage() {
   const { user: currentUser } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryFromUrl = searchParams.get('q') ?? '';
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const [appliedSearch, setAppliedSearch] = useState('');
+  const [pageSize, setPageSize] = useState(10);
+  const [appliedSearch, setAppliedSearch] = useState(queryFromUrl);
   const [role, setRole] = useState('');
   const [status, setStatus] = useState('');
   const [roles, setRoles] = useState<AdminRole[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [busyUserId, setBusyUserId] = useState<string | null>(null);
-  const [menuUserId, setMenuUserId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [createForm, setCreateForm] = useState(emptyCreateForm);
@@ -78,7 +102,7 @@ export default function AdminUsersPage() {
         role: role || undefined,
         is_active: status === '' ? undefined : status === 'active',
         page,
-        per_page: 15,
+        per_page: pageSize,
       });
       setUsers(result.users);
       setPagination(result.pagination);
@@ -87,11 +111,16 @@ export default function AdminUsersPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [appliedSearch, page, role, status]);
+  }, [appliedSearch, page, pageSize, role, status]);
 
   useEffect(() => {
     void loadUsers();
   }, [loadUsers]);
+
+  useEffect(() => {
+    setAppliedSearch(queryFromUrl);
+    setPage(1);
+  }, [queryFromUrl]);
 
   useEffect(() => {
     void adminService.listRoles().then(setRoles).catch(() => setRoles([]));
@@ -180,17 +209,23 @@ export default function AdminUsersPage() {
     }
   };
 
+  const exportUsers = () => {
+    downloadCsv('users.csv', [
+      ['Name', 'Email', 'Phone', 'Country', 'Role', 'Status', 'Joined'],
+      ...users.map((user) => [
+        userDisplayName(user),
+        user.email,
+        user.phone,
+        user.profile?.country,
+        roleLabel(userRoleName(user)),
+        user.is_active ? 'Active' : 'Inactive',
+        user.created_at ? formatDate(user.created_at) : '',
+      ]),
+    ]);
+  };
+
   return (
     <div>
-      <AdminPageHeader
-        title="Users"
-        action={
-          <Button variant="primary" onClick={() => setShowCreate((open) => !open)}>
-            {showCreate ? 'Close' : 'Create user'}
-          </Button>
-        }
-      />
-
       {showCreate ? (
         <Card className="mb-6">
           <CardContent className="p-6">
@@ -252,159 +287,111 @@ export default function AdminUsersPage() {
         </Card>
       ) : null}
 
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          <form
-            className="grid grid-cols-1 gap-4 md:grid-cols-4"
-            onSubmit={(event) => {
-              event.preventDefault();
-              setPage(1);
-              setAppliedSearch(search.trim());
-            }}
-          >
-            <div className="md:col-span-2">
-              <Input
-                label="Search"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Name, email, or phone"
-              />
-            </div>
-            <Select
-              label="Role"
-              value={role}
-              options={filterRoleOptions}
-              onChange={(event) => {
-                setRole(event.target.value);
-                setPage(1);
-              }}
-            />
-            <Select
-              label="Status"
-              value={status}
-              options={STATUS_OPTIONS}
-              onChange={(event) => {
-                setStatus(event.target.value);
-                setPage(1);
-              }}
-            />
-          </form>
-        </CardContent>
-      </Card>
-
       {error ? <AdminError message={error} onRetry={loadUsers} /> : null}
 
-      <Card>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
-              <thead className="border-b border-gray-100 bg-[#f8fafc] text-xs uppercase tracking-wide text-[rgba(0,0,0,0.55)]">
-                <tr>
-                  <th className="px-6 py-3 font-medium">Person</th>
-                  <th className="px-6 py-3 font-medium">Country</th>
-                  <th className="px-6 py-3 font-medium">Role</th>
-                  <th className="px-6 py-3 font-medium">Status</th>
-                  <th className="px-6 py-3 font-medium">Joined</th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-10 text-center text-[rgba(0,0,0,0.6)]">
-                      Loading users…
-                    </td>
-                  </tr>
-                ) : users.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-10 text-center text-[rgba(0,0,0,0.6)]">
-                      No users match these filters.
-                    </td>
-                  </tr>
-                ) : (
-                  users.map((user) => {
-                    const isSelf = String(currentUser?.id) === String(user.id);
-                    const busy = busyUserId === user.id;
-                    return (
-                      <tr key={user.id} className="border-b border-gray-100 last:border-0">
-                        <td className="px-6 py-4">
-                          <p className="font-medium text-[#244034]">{userDisplayName(user)}</p>
-                          <p className="text-[rgba(0,0,0,0.6)]">{user.email}</p>
-                          {user.phone ? <p className="text-xs text-[rgba(0,0,0,0.45)]">{user.phone}</p> : null}
-                        </td>
-                        <td className="px-6 py-4 text-[rgba(0,0,0,0.7)]">{user.profile?.country || '—'}</td>
-                        <td className="px-6 py-4">
-                          {isSelf ? (
-                            <span className="text-sm text-[#244034]">{roleLabel(userRoleName(user))}</span>
-                          ) : (
-                            <div className="relative">
-                              <button
-                                type="button"
-                                className="text-sm font-medium text-[#244034] disabled:opacity-50"
-                                disabled={busy}
-                                aria-expanded={menuUserId === user.id}
-                                onClick={() => setMenuUserId((current) => (current === user.id ? null : user.id))}
-                              >
-                                {busy ? 'Saving…' : roleLabel(userRoleName(user))}
-                              </button>
-                              {menuUserId === user.id ? (
-                                <div className="absolute left-0 z-10 mt-1 w-44 rounded-md border border-gray-100 bg-white py-1 shadow-lg">
-                                  {roleOptions
-                                    .filter((option) => option.value !== userRoleName(user))
-                                    .map((option) => (
-                                      <button
-                                        key={option.value}
-                                        type="button"
-                                        className="block w-full px-3 py-2 text-left text-sm text-[#244034] hover:bg-[#f4f7f5]"
-                                        onClick={() => {
-                                          setMenuUserId(null);
-                                          void handleRoleChange(user, option.value);
-                                        }}
-                                      >
-                                        {option.label}
-                                      </button>
-                                    ))}
-                                  <button
-                                    type="button"
-                                    className="block w-full px-3 py-2 text-left text-sm text-[#244034] hover:bg-[#f4f7f5]"
-                                    onClick={() => {
-                                      setMenuUserId(null);
-                                      void handleStatusChange(user);
-                                    }}
-                                  >
-                                    {user.is_active ? 'Deactivate' : 'Activate'}
-                                  </button>
-                                </div>
-                              ) : null}
-                            </div>
-                          )}
-                        </td>
-                        <td className="px-6 py-4">
-                          <Badge variant={user.is_active ? 'success' : 'destructive'} size="sm">
-                            {user.is_active ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </td>
-                        <td className="px-6 py-4 text-[rgba(0,0,0,0.7)]">
-                          {user.created_at ? formatDate(user.created_at) : '—'}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-          {pagination ? (
-            <div className="px-6 pb-6">
-              <AdminPagination
-                page={pagination.current_page}
-                lastPage={pagination.last_page}
-                total={pagination.total}
-                onPageChange={setPage}
+      <TableCard>
+        <TableToolbar
+          search={queryFromUrl}
+          onSearch={(value) => router.replace(value ? `/admin/users?q=${encodeURIComponent(value)}` : '/admin/users')}
+          searchPlaceholder="Name, email, or phone"
+          onExport={exportUsers}
+          action={<TableAction onClick={() => setShowCreate((open) => !open)}>{showCreate ? 'Close' : 'Add user'}</TableAction>}
+          filter={
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Select
+                label="Role"
+                value={role}
+                options={filterRoleOptions}
+                onChange={(event) => {
+                  setRole(event.target.value);
+                  setPage(1);
+                }}
+              />
+              <Select
+                label="Status"
+                value={status}
+                options={STATUS_OPTIONS}
+                onChange={(event) => {
+                  setStatus(event.target.value);
+                  setPage(1);
+                }}
               />
             </div>
-          ) : null}
-        </CardContent>
-      </Card>
+          }
+        />
+        <Table>
+          <thead>
+            <tr>
+              <Th>Person</Th>
+              <Th>Country</Th>
+              <Th>Role</Th>
+              <Th>Status</Th>
+              <Th>Joined</Th>
+              <Th className="text-right">Action</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {isLoading ? (
+              <TableMessage colSpan={6}>Loading users…</TableMessage>
+            ) : users.length === 0 ? (
+              <TableMessage colSpan={6}>No users match these filters.</TableMessage>
+            ) : (
+              users.map((user) => {
+                const isSelf = String(currentUser?.id) === String(user.id);
+                const busy = busyUserId === user.id;
+                const roleName = userRoleName(user);
+                return (
+                  <Tr key={user.id}>
+                    <Td>
+                      <p className="font-medium text-[#141414]">{userDisplayName(user)}</p>
+                      <p className="text-xs text-[#8b919a]">{user.email}</p>
+                    </Td>
+                    <Td>{user.profile?.country || '—'}</Td>
+                    <Td>
+                      <DotLabel color={ROLE_DOT[roleName] || '#9aa1ab'}>{busy ? 'Saving…' : roleLabel(roleName)}</DotLabel>
+                    </Td>
+                    <Td>
+                      <StatusPill tone={user.is_active ? 'success' : 'neutral'}>{user.is_active ? 'Active' : 'Inactive'}</StatusPill>
+                    </Td>
+                    <Td className="whitespace-nowrap text-[#6b7280]">{user.created_at ? formatDate(user.created_at) : '—'}</Td>
+                    <Td className="text-right">
+                      {isSelf ? null : (
+                        <div className="flex justify-end">
+                          <RowMenu label={`Actions for ${userDisplayName(user)}`}>
+                            {roleOptions
+                              .filter((option) => option.value !== roleName)
+                              .map((option) => (
+                                <RowMenuItem key={option.value} onClick={() => void handleRoleChange(user, option.value)}>
+                                  Make {option.label}
+                                </RowMenuItem>
+                              ))}
+                            <RowMenuItem onClick={() => void handleStatusChange(user)}>
+                              {user.is_active ? 'Deactivate' : 'Activate'}
+                            </RowMenuItem>
+                          </RowMenu>
+                        </div>
+                      )}
+                    </Td>
+                  </Tr>
+                );
+              })
+            )}
+          </tbody>
+        </Table>
+        {pagination ? (
+          <TablePager
+            page={pagination.current_page}
+            lastPage={pagination.last_page}
+            total={pagination.total}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
+        ) : null}
+      </TableCard>
     </div>
   );
 }

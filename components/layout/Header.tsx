@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
-import { useAuth, useIsAdmin } from '@/lib/auth';
+import { useAuth, useIsAdmin, useIsRecruiter } from '@/lib/auth';
 
 interface HeaderProps {
   className?: string;
@@ -24,6 +24,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { isAuthenticated, user, logout, getUserDisplayName } = useAuth();
   const isAdmin = useIsAdmin();
+  const isRecruiter = useIsRecruiter();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -72,6 +73,11 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
           {isAdmin ? (
             <Link href="/admin" className="block px-4 py-2 text-sm text-[#141414] hover:bg-[#F4F2EE]" onClick={() => setIsUserMenuOpen(false)}>
               Admin
+            </Link>
+          ) : null}
+          {isRecruiter ? (
+            <Link href="/recruiter" className="block px-4 py-2 text-sm text-[#141414] hover:bg-[#F4F2EE]" onClick={() => setIsUserMenuOpen(false)}>
+              Recruitment
             </Link>
           ) : null}
           <Link href="/dashboard" className="block px-4 py-2 text-sm text-[#141414] hover:bg-[#F4F2EE]" onClick={() => setIsUserMenuOpen(false)}>
@@ -167,6 +173,11 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                   {isAdmin ? (
                     <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button variant="outline" size="sm" className="w-full justify-start rounded-full">Admin</Button>
+                    </Link>
+                  ) : null}
+                  {isRecruiter ? (
+                    <Link href="/recruiter" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="outline" size="sm" className="w-full justify-start rounded-full">Recruitment</Button>
                     </Link>
                   ) : null}
                   <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>

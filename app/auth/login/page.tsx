@@ -53,7 +53,7 @@ function LoginForm() {
     }
 
     let cancelled = false;
-    const fallback = authService.hasRole('admin') ? '/admin' : '/dashboard';
+    const fallback = authService.hasRole('admin') ? '/admin' : authService.hasRole('recruiter') ? '/recruiter' : '/dashboard';
 
     completePendingJobAction(fallback, safeReturnPath(searchParams.get('returnTo'))).then((path) => {
       if (!cancelled) {
