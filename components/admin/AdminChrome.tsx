@@ -30,6 +30,7 @@ const NAV: WorkspaceNavGroup[] = [
     label: 'Content',
     items: [
       { href: '/admin/blog', label: 'Blog', icon: 'pen' },
+      { href: '/admin/letter', label: 'Letter', icon: 'mail' },
       { href: '/admin/audit-log', label: 'Audit log', icon: 'list' },
     ],
   },

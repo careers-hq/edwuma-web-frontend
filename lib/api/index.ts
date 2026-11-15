@@ -10,6 +10,7 @@ export { userActivitiesService } from './activities';
 export { jobAlertsService } from './jobAlerts';
 export { blogService } from './blog';
 export { contactService } from './contact';
+export { newsletterService } from './newsletter';
 export { adminService } from './admin';
 export { API_CONFIG, API_ENDPOINTS, STORAGE_KEYS, HTTP_STATUS } from './config';
 export type {

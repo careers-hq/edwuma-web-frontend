@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     'Terms for using Edwuma, the African job search site.',
 };
 
-const UPDATED = '13 November 2026';
+const UPDATED = '14 November 2026';
 
 export default function TermsPage() {
   return (
@@ -34,7 +34,7 @@ export default function TermsPage() {
           Listings are collected from third-party sources, including JobData, Greenhouse, and ReliefWeb, and from employer career pages those sources expose. We do not guarantee that a listing is complete, current, or still open. A role may have been filled or withdrawn by the time you apply.
         </p>
         <p>
-          The list is free. We do not take payment. We may change, pause, or remove features as the product develops.
+          The list is free. We do not take payment. A job seeker account receives a Saturday letter with the week&apos;s roles and new posts. You can leave from any letter. We may change, pause, or remove features as the product develops.
         </p>
       </ContentSection>
 

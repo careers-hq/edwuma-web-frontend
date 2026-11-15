@@ -44,6 +44,15 @@ export interface AdminAttention {
   detail: string;
 }
 
+export interface NewsletterSubscriber {
+  id: string;
+  email: string;
+  status: 'receiving' | 'left';
+  stopped_at: string | null;
+  last_sent_at: string | null;
+  created_at: string | null;
+}
+
 export interface AdminAuditItem {
   id: string;
   event: string;
@@ -588,6 +597,17 @@ class AdminService {
     if (!response.success) {
       throw new Error(response.message || 'Unable to delete blog post');
     }
+  }
+
+  async listNewsletterSubscriptions(params: { search?: string; status?: string; page?: number; per_page?: number } = {}): Promise<{ subscriptions: NewsletterSubscriber[]; pagination: AdminPagination }> {
+    const response = await apiClient.get<{ readers: unknown; pagination: AdminPagination }>(
+      '/admin/newsletter-subscriptions',
+      compactParams(params)
+    );
+    return {
+      subscriptions: unwrapList<NewsletterSubscriber>(response.data?.readers),
+      pagination: response.data?.pagination ?? emptyPagination(params.per_page),
+    };
   }
 
   async listAuditLogs(params: AuditLogListParams = {}): Promise<{ auditLogs: AdminAuditLog[]; pagination: AdminPagination }> {

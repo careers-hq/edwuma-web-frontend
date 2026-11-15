@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     'How Edwuma collects and uses personal data, under Ghana’s Data Protection Act, 2012 (Act 843) and the GDPR.',
 };
 
-const UPDATED = '13 November 2026';
+const UPDATED = '14 November 2026';
 
 export default function PrivacyPage() {
   return (
@@ -42,6 +42,7 @@ export default function PrivacyPage() {
         <p><strong className="text-[#244034]">Activity.</strong> When you are signed in, we record views, saves, apply clicks, searches, and profile updates. A record can include the job, the time, your IP address, your browser type, and a short note of what you did. This is what the dashboard activity view is built from.</p>
         <p><strong className="text-[#244034]">Location hint.</strong> To pre-select a country filter, we read your browser timezone. If that is not enough, the site may ask our server, or a location service such as ipinfo, ipapi, or ip-api, for a coarse country from your IP address. We cache that country in your browser for about a day. We do not ask for GPS permission.</p>
         <p><strong className="text-[#244034]">Messages.</strong> Email sent to hello@edwuma.com is stored so we can reply. The contact form asks for your name, email, subject, and message for the same purpose.</p>
+        <p><strong className="text-[#244034]">The letter.</strong> A job seeker account receives a Saturday letter at the email on the account: the week&apos;s roles, the counts, and new posts. We store whether you have left, and when the last letter was sent. Each letter includes a link to leave. An account with no country is shown the counts by country and a link to choose one on the profile.</p>
         <p><strong className="text-[#244034]">Security check.</strong> Registration, sign-in, password reset, and the contact form can use Cloudflare Turnstile. Cloudflare processes technical data, which may include your IP address, to tell us the request is from a person rather than a script.</p>
         <p><strong className="text-[#244034]">Usage analytics.</strong> We use Google Analytics and PostHog to understand how the site is used and to record errors. These tools receive technical data such as pages viewed, a rough location, device and browser details, and an identifier stored in a cookie or similar storage. PostHog is configured to send data through Edwuma and then to PostHog in the United States.</p>
       </ContentSection>
@@ -49,7 +50,7 @@ export default function PrivacyPage() {
       <ContentSection title="Why we use it">
         <p>Under the GDPR, we rely on the following reasons. The same uses meet the lawfulness and purpose principles in Act 843.</p>
         <ul className="list-disc pl-5 space-y-2">
-          <li><strong className="text-[#244034]">Contract.</strong> Running the account you create and showing the job list you came for.</li>
+          <li><strong className="text-[#244034]">Contract.</strong> Running the account you create, showing the job list you came for, and sending the Saturday letter to a job seeker account until you leave.</li>
           <li><strong className="text-[#244034]">Legitimate interests.</strong> Keeping the site secure, preventing abuse, and showing a relevant country filter. You can object to processing based on legitimate interests.</li>
           <li><strong className="text-[#244034]">Consent.</strong> Analytics and error reports from Google Analytics and PostHog, which run only after you accept them in the cookie banner. You can withdraw that consent at any time. Withdrawal does not affect use that was already lawful.</li>
           <li><strong className="text-[#244034]">Legal obligation.</strong> Where Ghanaian law, or another law that applies to us, requires us to keep or disclose a record.</li>
@@ -72,7 +73,7 @@ export default function PrivacyPage() {
         <p>We use service providers who process data on our instructions:</p>
         <ul className="list-disc pl-5 space-y-2">
           <li>hosting and infrastructure for the website and API;</li>
-          <li>email delivery for sign-in codes and messages you send us;</li>
+          <li>email delivery for sign-in codes, the letter, and messages you send us;</li>
           <li>Cloudflare, for the Turnstile security check;</li>
           <li>Google, for Google Analytics;</li>
           <li>PostHog, for product analytics and error reports;</li>
@@ -94,7 +95,7 @@ export default function PrivacyPage() {
 
       <ContentSection title="How long we keep it">
         <p>
-          Contact messages are kept long enough to handle your request and any follow-up.
+          Contact messages are kept long enough to handle your request and any follow-up. On an account, we keep whether you left the letter and when the last one was sent.
         </p>
         <p>
           After you ask us to delete your account, we delete or anonymise your personal data unless we have to keep a limited record to meet a legal duty, resolve a dispute, or prevent abuse. Analytics providers keep their own copies for the period set in their tools. The country hint in your browser expires after about 24 hours, or sooner if you clear site data.
