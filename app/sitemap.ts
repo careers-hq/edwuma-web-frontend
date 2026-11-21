@@ -24,16 +24,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://edwuma.com';
 
   const staticPages: MetadataRoute.Sitemap = [
-    { url: baseUrl, changeFrequency: 'daily', priority: 1 },
-    { url: `${baseUrl}/blog`, changeFrequency: 'weekly', priority: 0.7 },
-    { url: `${baseUrl}/about`, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${baseUrl}/help`, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${baseUrl}/faq`, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${baseUrl}/contact`, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${baseUrl}/terms`, changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${baseUrl}/privacy`, changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${baseUrl}/cookies`, changeFrequency: 'yearly', priority: 0.3 },
-  ].map((page) => ({ ...page, lastModified: new Date() }));
+    { url: baseUrl, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
+    { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${baseUrl}/help`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${baseUrl}/faq`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${baseUrl}/terms`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${baseUrl}/cookies`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+  ];
 
   const countryPages: MetadataRoute.Sitemap = MORNING_COUNTRIES.map((country) => ({
     url: `${baseUrl}/${country.slug}`,
