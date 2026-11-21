@@ -170,7 +170,7 @@ function SaveButton({ jobId, country }: { jobId: string; country: string }) {
       requireAccount({
         action: 'save',
         jobId,
-        returnTo: `/read/${jobId}?country=${encodeURIComponent(country)}`,
+        returnTo: `/jobs/${jobId}?country=${encodeURIComponent(country)}`,
         country,
       });
       return;
@@ -273,7 +273,7 @@ const MorningJobCard: React.FC<MorningJobCardProps> = ({ job, country, note }) =
             <div className="flex shrink-0 items-center gap-1 sm:gap-2">
               <SaveButton jobId={job.id} country={country} />
               <Link
-                href={`/read/${job.id}?country=${encodeURIComponent(country)}`}
+                href={`/jobs/${job.id}?country=${encodeURIComponent(country)}`}
                 className="relative z-10 inline-flex h-11 items-center rounded-xl border border-[#141414] bg-white px-4 text-sm font-semibold text-[#141414]"
               >
                 View job
@@ -300,7 +300,7 @@ const MorningJobCard: React.FC<MorningJobCardProps> = ({ job, country, note }) =
           {note ? <p className="mt-2 text-sm leading-6 text-[#141414]">{note}</p> : null}
         </div>
       </div>
-      <Link href={`/read/${job.id}?country=${country}`} className="after:absolute after:inset-0">
+      <Link href={`/jobs/${job.id}?country=${country}`} className="after:absolute after:inset-0">
         <span className="sr-only">View {title}</span>
       </Link>
     </article>

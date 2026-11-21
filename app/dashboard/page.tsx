@@ -8,8 +8,8 @@ import { authService, savedJobsService, userActivitiesService } from '@/lib/api'
 import type { ActivitySummary, SavedJob } from '@/lib/api';
 import { morningCountry } from '@/lib/morning/countries';
 import { kindLabelList, stageLabel } from '@/lib/morning/work';
-function readHref(id: string, country?: string): string {
-  return country ? `/read/${id}?country=${country}` : `/read/${id}`;
+function jobHref(id: string, country?: string): string {
+  return country ? `/jobs/${id}?country=${country}` : `/jobs/${id}`;
 }
 
 function roleTitle(title: string): string {
@@ -99,7 +99,7 @@ function DashboardContent() {
                   return (
                     <li key={saved.id} className="rounded-2xl bg-white px-4 py-3">
                       <div className="flex items-start justify-between gap-4">
-                        <Link href={readHref(saved.job.id, country?.slug)} className="min-w-0">
+                        <Link href={jobHref(saved.job.id, country?.slug)} className="min-w-0">
                           <p className="font-semibold">{roleTitle(saved.job.title)}</p>
                           <p className="text-sm text-[#1d3c34]/60">{[company, place].filter(Boolean).join(' · ')}</p>
                         </Link>
@@ -125,7 +125,7 @@ function DashboardContent() {
               <ul className="mt-4 space-y-3">
                 {activity.slice(0, 5).map((item) => (
                   <li key={item.id}>
-                    <Link href={readHref(item.job_slug, country?.slug)} className="block rounded-2xl bg-white px-4 py-3">
+                    <Link href={jobHref(item.job_slug, country?.slug)} className="block rounded-2xl bg-white px-4 py-3">
                       <p className="text-sm text-[#1d3c34]/60">{item.type === 'save' ? 'Saved' : 'Applied'}</p>
                       <p className="font-semibold">{roleTitle(item.job_title)}</p>
                       <p className="text-sm text-[#1d3c34]/60">{[item.company, item.location].filter(Boolean).join(' · ')}</p>

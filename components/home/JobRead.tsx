@@ -462,7 +462,7 @@ const JobRead: React.FC<{ id: string; country?: string | null }> = ({ id, countr
       .morningList(country, 8)
       .then((response) => {
         if (!cancelled) {
-          setRelated((response.data.jobs ?? []).filter((item) => item.id !== id).slice(0, 3));
+          setRelated((response.data.jobs ?? []).filter((item) => item.id !== id).slice(0, 4));
         }
       })
       .catch(() => {
@@ -488,6 +488,7 @@ const JobRead: React.FC<{ id: string; country?: string | null }> = ({ id, countr
   const posted = job?.timing?.posted_at_formatted || shortDate(job?.timing?.posted_at);
   const listHref = country ? `/?country=${country}` : '/';
   const countryLabel = country ? COUNTRY_NAMES[country] : null;
+  const more = related.filter((item) => item.id !== job?.id).slice(0, 3);
   const aboutRows = [
     ['Location', place],
     ['Company', company],
@@ -672,7 +673,7 @@ const JobRead: React.FC<{ id: string; country?: string | null }> = ({ id, countr
             </aside>
           </div>
 
-          {related.length > 0 ? (
+          {more.length > 0 ? (
             <div className="mx-auto mt-16 max-w-6xl sm:mt-24">
               <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
                 <h2 className="text-3xl font-extrabold tracking-[-0.04em] text-[#141414] sm:text-4xl">
@@ -683,10 +684,10 @@ const JobRead: React.FC<{ id: string; country?: string | null }> = ({ id, countr
                 </Link>
               </div>
               <ul className="grid gap-4 lg:grid-cols-3 lg:gap-6">
-                {related.map((item) => (
+                {more.map((item) => (
                   <li key={item.id}>
                     <Link
-                      href={`/read/${item.id}?country=${country}`}
+                      href={`/jobs/${item.id}?country=${country}`}
                       className="group flex h-full flex-col gap-4 rounded-[28px] border border-black/10 bg-white p-6 transition duration-200 hover:-translate-y-0.5 hover:border-[#244034] hover:shadow-[0_16px_40px_rgba(36,64,52,0.12)]"
                     >
                       {item.badges[0] ? (
